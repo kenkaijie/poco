@@ -1,0 +1,2 @@
+add_executable(sample_multiple_coroutines sample_multiple_coroutines.c)
+target_link_libraries(sample_multiple_coroutines PRIVATE poco::poco)
