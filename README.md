@@ -12,12 +12,13 @@ order to support general purpose applications on a bare metal device.
 - Static task creation.
 - Message queue.
 - Self Managed Scheduling (roll your own scheduler)
+- Basic Scheduling (Round Robin)
 
 ## WIP
 
-- Basic Schedulers (Round Robin, Priority, Priority Round Robin)
+- Basic Schedulers (Priority, Priority Round Robin)
 - More Thread Primitives (Events, Mutexes, Sempahores)
-- ISR Support (Queueing from ISR, Waking a yield from ISR)
+- ISR Support (Primitive support for ISR usage, scheduler support for ISR)
 
 ### Extensions
 

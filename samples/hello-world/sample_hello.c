@@ -1,0 +1,56 @@
+/*!
+ * @file
+ * @brief Hello world example, performs the classic hello world example using coroutines.
+ * 
+ * Each task sends either Hello, or World!, and alternates between the two tasks.
+ * 
+ * The result should be 5 instances of the string "Hello world" printed to stdout.
+ * 
+ * This example uses the basic scheduler.
+ */
+#include <poco/coro.h>
+#include <poco/scheduler/basic_scheduler.h>
+#include <stdio.h>
+
+CORO_STATIC_DEFINE(hello, 1024);
+CORO_STATIC_DEFINE(world, 1024);
+
+void hello_task(coro_t *coro, void* context)
+{
+    for (int i=0; i < 5; ++i)
+    {
+        printf("Hello ");
+        coro_yield(coro);
+    }
+    return;
+}
+
+void world_task(coro_t *coro, void* context)
+{
+    for (int i=0; i < 5; ++i)
+    {
+        printf("World!\n");
+        coro_yield(coro);
+    }
+    return;
+}
+
+int main() {
+
+    coro_t* tasks[2] = {0};
+
+    tasks[0] = coro_create_static(&hello_coro, hello_task, NULL, hello_stack, sizeof(hello_stack));
+    tasks[1] = coro_create_static(&world_coro, world_task, NULL, world_stack, sizeof(world_stack));
+
+    basic_scheduler_t * scheduler = basic_scheduler_create(tasks, 2);
+
+    if (scheduler == NULL)
+    {
+        printf("Failed to create scheduler\n");
+        return -1;
+    }
+
+    basic_scheduler_run(scheduler);
+
+    return 0;
+}
