@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 
+// FIXME: this doesn't work
 __attribute__ ((optimize ("omit-frame-pointer")))
 static void trampoline(void)
 {
@@ -30,7 +31,7 @@ static void trampoline(void)
  * We skip (R0-R3) as these are the registers used for function arguments and return
  * values of this function (getcontext), and thus do not need to be saved.
  */
-int getcontext(ucontext_t * ucp)
+int platform_get_context(ucontext_t * ucp)
 {
   asm volatile (
     "add r1, %0, #0x1C\n" // offset to the machine context, skipping first 4 registers (12 + 16)
@@ -43,7 +44,7 @@ int getcontext(ucontext_t * ucp)
   return 0;
 }
 
-int setcontext(const ucontext_t * ucp)
+int platform_set_context(const ucontext_t * ucp)
 {
   asm volatile (
     "add r14, %0, #0xC\n" // setup as address (r14 = &context->uc_mcontext)
@@ -58,7 +59,7 @@ int setcontext(const ucontext_t * ucp)
   return 0;
 }
 
-int swapcontext(ucontext_t * ocp, const ucontext_t * ucp)
+int platform_swap_context(ucontext_t * ocp, const ucontext_t * ucp)
 {
   // This is basically a get and set context in 1 big call.
   asm volatile (
@@ -84,7 +85,7 @@ int swapcontext(ucontext_t * ocp, const ucontext_t * ucp)
   return 0;
 }
 
-void makecontext(ucontext_t *ucp, void (*func)(void), void * context1, void * context2)
+void platform_make_context(ucontext_t *ucp, void (*func)(void*, void*), void * context1, void * context2)
 {
   // Prepopulate first 4 args with corotuine args needed.
   // Deviating from standard as I couldn't get va_args to work.

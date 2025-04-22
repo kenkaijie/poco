@@ -15,7 +15,7 @@
 static void coro_yield_done(coro_t *coro)
 {
     coro->yield_signal.type = CORO_SIG_DONE;
-    swapcontext(&coro->resume_context, &coro->suspend_context);
+    platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
 static void _coro_entry_point(coro_t *coro, void* context)
@@ -39,8 +39,8 @@ coro_t *coro_create_static(coro_t *coro, coro_function_t function, void * contex
     coro->resume_context.uc_stack.ss_size = stack_size - (2 * sizeof(uint32_t));
     coro->resume_context.uc_link = 0;
 
-    getcontext(&coro->resume_context);
-    makecontext(&coro->resume_context, (void (*)())_coro_entry_point, 2, coro, context);
+    platform_get_context(&coro->resume_context);
+    platform_make_context(&coro->resume_context, _coro_entry_point, coro, context);
     return coro;
 }
 
@@ -48,7 +48,7 @@ coro_signal_type_t coro_resume(coro_t *coro)
 {
     if (coro->coro_state == CORO_STATE_FINISHED) return CORO_SIG_DONE;
 
-    swapcontext(&coro->suspend_context, &coro->resume_context);
+    platform_swap_context(&coro->suspend_context, &coro->resume_context);
     return coro->yield_signal.type;
 }
 
@@ -56,29 +56,29 @@ void coro_yield(coro_t *coro)
 {
     coro->event_source.type = CORO_EVTSRC_NOOP;
     coro->yield_signal.type = CORO_SIG_NOTIFY;
-    swapcontext(&coro->resume_context, &coro->suspend_context);
+    platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
 void coro_yield_delay(coro_t *coro, int64_t duration_ms)
 {
     coro->event_sinks[0].type = CORO_EVTSINK_DELAY;
-    coro->event_sinks[0].params.ticks_remaining = duration_ms * (CLOCKS_PER_SEC / 1000);
+    coro->event_sinks[0].params.ticks_remaining = duration_ms * platform_get_ticks_per_ms();
     coro->event_sinks[1].type = CORO_EVTSINK_NONE;
     coro->yield_signal.type = CORO_SIG_WAIT;
-    swapcontext(&coro->resume_context, &coro->suspend_context);
+    platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
 void coro_yield_with_event(coro_t *coro, coro_event_source_t const *event)
 {
     coro->event_source = *event;
     coro->yield_signal.type = CORO_SIG_NOTIFY;
-    swapcontext(&coro->resume_context, &coro->suspend_context);
+    platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
 void coro_yield_with_signal(coro_t *coro, coro_signal_type_t signal)
 {
     coro->yield_signal.type = signal;
-    swapcontext(&coro->resume_context, &coro->suspend_context);
+    platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
 void coro_reset_sinks(coro_t *coro)

@@ -17,9 +17,8 @@ extern "C" {
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <time.h>
-#include <ucontext.h>
 #include <poco/intercoro.h>
+#include <poco/platform.h>
 
 typedef enum {
     /* Coro is waiting to be scheduled. */
@@ -41,8 +40,8 @@ struct coro {
     coro_function_t entrypoint;
 
     // Ping pong contexts
-    ucontext_t suspend_context;
-    ucontext_t resume_context;
+    platform_context_t suspend_context;
+    platform_context_t resume_context;
 
     /** For a non running coroutine, this is the signal it last yielded with. */
     coro_signal_t yield_signal; 

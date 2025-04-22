@@ -1,7 +1,8 @@
 #include <poco/scheduler/basic_scheduler.h>
 #include <poco/intercoro.h>
+#include <poco/platform.h>
 #include <string.h>
-#include <time.h>
+
 
 size_t increment_task_index(basic_scheduler_t * scheduler)
 {
@@ -129,7 +130,7 @@ void basic_scheduler_run(basic_scheduler_t * scheduler)
 {
     scheduler->finished_tasks = get_finished_task_count(scheduler);
 
-    clock_t previous_ticks = clock();
+    platform_ticks_t previous_ticks = platform_get_monotonic_ticks();
 
     while(scheduler->finished_tasks < scheduler->task_count)
     {
@@ -166,11 +167,12 @@ void basic_scheduler_run(basic_scheduler_t * scheduler)
             }
         }
 
-        clock_t current_ticks = clock();
+        platform_ticks_t current_ticks = platform_get_monotonic_ticks();
 
         // Process a time signal, which is synthesized within the scheduler.
         if (current_ticks == previous_ticks)
         {
+            // No time has passed, so we can just skip this.
             continue;
         }
         coro_event_source_t time_event = {

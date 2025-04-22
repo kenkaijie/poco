@@ -56,7 +56,7 @@ typedef struct ucontext {
  * @param[in] context Context structure to save state in.
  * @return 0 on success, -1 otherwise.
  */
-int getcontext(ucontext_t * context);
+int platform_get_context(ucontext_t * context);
 
 /*!
  * @brief Restore the use context defined in context.
@@ -66,17 +66,17 @@ int getcontext(ucontext_t * context);
  * @param[in] context Context to restore.
  * @return will not return on success, -1 on failure.
  */
-int setcontext(const ucontext_t * context);
+int platform_set_context(const ucontext_t * context);
 
 
-int swapcontext(ucontext_t * current_context, const ucontext_t * new_context);
+int platform_swap_context(ucontext_t * current_context, const ucontext_t * new_context);
 
 /*!
  * @brief Create a new context and set the entry point to the function func.
  *
  * @note This implementation uses a hardcoded 3 arguments.
  */
-void makecontext(ucontext_t * context, void (*func)(void), void * context1, void * context2, void * context3);
+void platform_make_context(ucontext_t * context, void (*func)(void *, void *), void * context1, void * context2);
 
 #ifdef __cplusplus
 }

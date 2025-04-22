@@ -10,7 +10,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <time.h>
+#include <poco/platform.h>
 
 /*!
  * @brief Types of signals that can be sent to the scheduler.
@@ -72,7 +72,7 @@ typedef struct
 {
     coro_event_sink_type_t type;
     union {
-        clock_t ticks_remaining;
+        platform_ticks_t ticks_remaining;
         void * queue;
     } params;
 } coro_event_sink_t;
@@ -97,7 +97,7 @@ typedef struct
 {
     coro_event_source_type_t type;
     union {
-        clock_t elasped_ticks;
+        platform_ticks_t elasped_ticks;
         void * queue;
     } params;
 } coro_event_source_t;
