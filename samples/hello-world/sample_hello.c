@@ -9,7 +9,8 @@
  * This example uses the basic scheduler.
  */
 #include <poco/coro.h>
-#include <poco/scheduler/basic_scheduler.h>
+#include <poco/scheduler.h>
+#include <poco/schedulers/round_robin.h>
 #include <stdio.h>
 
 CORO_STATIC_DEFINE(hello, 1024);
@@ -42,7 +43,7 @@ int main() {
     tasks[0] = coro_create_static(&hello_coro, hello_task, NULL, hello_stack, sizeof(hello_stack));
     tasks[1] = coro_create_static(&world_coro, world_task, NULL, world_stack, sizeof(world_stack));
 
-    basic_scheduler_t * scheduler = basic_scheduler_create(tasks, 2);
+    round_robin_scheduler_t * scheduler = round_robin_scheduler_create(tasks, 2);
 
     if (scheduler == NULL)
     {
@@ -50,7 +51,7 @@ int main() {
         return -1;
     }
 
-    basic_scheduler_run(scheduler);
+    scheduler_run((scheduler_t *)scheduler);
 
     return 0;
 }

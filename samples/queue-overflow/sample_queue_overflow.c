@@ -9,7 +9,8 @@
  */
 #include <poco/coro.h>
 #include <poco/queue.h>
-#include <poco/scheduler/basic_scheduler.h>
+#include <poco/scheduler.h>
+#include <poco/schedulers/round_robin.h>
 #include <stdio.h>
 
 #define CONSUMER_STOP (0xFFFFFFFF)
@@ -62,7 +63,7 @@ int main() {
     tasks[0] = coro_create_static(&producer_coro, producer_task, (void *)queue, producer_stack, sizeof(producer_stack));
     tasks[1] = coro_create_static(&consumer_coro, consumer_task, (void *)queue, consumer_stack, sizeof(consumer_stack));
 
-    basic_scheduler_t * scheduler = basic_scheduler_create(tasks, 2);
+    round_robin_scheduler_t * scheduler = round_robin_scheduler_create(tasks, 2);
 
     if (scheduler == NULL)
     {
@@ -70,7 +71,7 @@ int main() {
         return -1;
     }
 
-    basic_scheduler_run(scheduler);
+    scheduler_run((scheduler_t *)scheduler);
 
     return 0;
 }

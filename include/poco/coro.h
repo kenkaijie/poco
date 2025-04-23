@@ -20,6 +20,20 @@ extern "C" {
 #include <poco/intercoro.h>
 #include <poco/platform.h>
 
+/*!
+ * Maximum number of sinks a coroutine can wait on.
+ *
+ * There shouldn't be a need for any more than what is defined.
+ * 
+ * 1. Primary slot for a communication primitive event.
+ * 2. Optional time slot for timeouts.
+ */
+enum event_sink_slot {
+    EVENT_SINK_SLOT_PRIMARY = 0,
+    EVENT_SINK_SLOT_TIMEOUT,
+    EVENT_SINK_SLOT_COUNT,
+};
+
 typedef enum {
     /* Coro is waiting to be scheduled. */
     CORO_STATE_READY = 0,
@@ -35,7 +49,7 @@ typedef struct coro coro_t;
 typedef void (*coro_function_t)(coro_t *coro, void* context);
 
 struct coro {
-    /** The current corotuine state, note that is actually managed by the scheduler. */
+    /** The current corotuine state. Schedulers should only has read-access to this. */
     coro_state_t coro_state;
     coro_function_t entrypoint;
 
@@ -48,7 +62,7 @@ struct coro {
 
     /** Managed event sinks, used for waking up blocked coroutines. */
     coro_event_source_t event_source;
-    coro_event_sink_t event_sinks[2];
+    coro_event_sink_t event_sinks[EVENT_SINK_SLOT_COUNT];
 };
 
 /*!
@@ -109,7 +123,19 @@ void coro_yield_delay(coro_t *coro, int64_t delay);
 
 void coro_yield_with_event(coro_t *coro, coro_event_source_t const *event);
 void coro_yield_with_signal(coro_t *coro, coro_signal_type_t signal);
-void coro_reset_sinks(coro_t *coro);
+
+/*!
+ * @brief Notify a coroutine of an event that may affect it's internal state.
+ *
+ * @note If a coroutine is not blocked, the events are ignored.
+ * 
+ * @param coro Coroutine to notify.
+ * @param event Notification event.
+ * 
+ * @return True if the coroutine's state has changed.
+ */
+bool coro_notify(coro_t *coro, coro_event_source_t const * event);
+
 coro_signal_type_t coro_resume(coro_t *coro);
 
 #ifdef __cplusplus

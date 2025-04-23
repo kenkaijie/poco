@@ -33,7 +33,7 @@ enum module_space {
     MODULE_GENERAL = 0, /**< General space for common error codes. */
     MODULE_CORE = 1,
     MODULE_QUEUE = 2,
-    MODULE_MUTEX = 3,
+    MODULE_EVENT = 3,
 };
 
 #define RET_OK MODULE_ERROR(MODULE_GENERAL, 0) /**< No error. */

@@ -7,7 +7,8 @@
  * numbers 0-2047.   
  */
 #include <poco/coro.h>
-#include <poco/scheduler/basic_scheduler.h>
+#include <poco/scheduler.h>
+#include <poco/schedulers/round_robin.h>
 #include <stdio.h>
 
 #define CORO_COUNT (1024) // number of coroutines to spawn
@@ -38,7 +39,7 @@ int main() {
         tasks[i] = coro_create_static(&coroutines[i], producer_task, (void *)(uintptr_t)i, &(coroutine_stacks[i][0]), sizeof(coroutine_stacks[i]));
     }
 
-    basic_scheduler_t * scheduler = basic_scheduler_create(tasks, CORO_COUNT);
+    round_robin_scheduler_t * scheduler = round_robin_scheduler_create(tasks, CORO_COUNT);
 
     if (scheduler == NULL)
     {
@@ -46,7 +47,7 @@ int main() {
         return -1;
     }
 
-    basic_scheduler_run(scheduler);
+    scheduler_run((scheduler_t *)scheduler);
 
     return 0;
 }

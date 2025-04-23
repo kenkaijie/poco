@@ -12,7 +12,7 @@
  * This is private as no user yields should abort the coroutine. If this is needed,
  * simply return from the coroutine.
  */
-static void coro_yield_done(coro_t *coro)
+static void _coro_yield_done(coro_t *coro)
 {
     coro->yield_signal.type = CORO_SIG_DONE;
     platform_swap_context(&coro->resume_context, &coro->suspend_context);
@@ -21,8 +21,46 @@ static void coro_yield_done(coro_t *coro)
 static void _coro_entry_point(coro_t *coro, void* context)
 {
     coro->entrypoint(coro, context);
-    coro_yield_done(coro);
+    _coro_yield_done(coro);
 }
+
+static bool _update_event_sink(coro_event_sink_t * sink, coro_event_source_t const * event)
+{
+    bool unblock_task = false;
+
+    switch (event->type)
+    {
+        case CORO_EVTSRC_ELAPSED:
+            if (sink->type == CORO_EVTSINK_DELAY)
+            {
+                sink->params.ticks_remaining -= event->params.elasped_ticks;
+                unblock_task = (sink->params.ticks_remaining <= 0);
+            }
+            break;
+        case CORO_EVTSRC_QUEUE_GET:
+            if (sink->type == CORO_EVTSINK_QUEUE_NOT_FULL)
+            {
+                unblock_task = (sink->params.queue == event->params.queue);
+            }
+            break;
+        case CORO_EVTSRC_QUEUE_PUT:
+            if (sink->type == CORO_EVTSINK_QUEUE_NOT_EMPTY)
+            {
+                unblock_task = (sink->params.queue == event->params.queue);
+            }
+            break;
+        case CORO_EVTSRC_EVENT_SET:
+            if (sink->type == CORO_EVTSINK_EVENT_GET)
+            {
+                unblock_task = (sink->params.event == event->params.event);
+            }
+            break;
+        default:
+            unblock_task = false;
+    }
+    return unblock_task;
+}
+
 
 coro_t *coro_create_static(coro_t *coro, coro_function_t function, void * context, uint32_t *stack, size_t stack_size)
 {
@@ -48,7 +86,23 @@ coro_signal_type_t coro_resume(coro_t *coro)
 {
     if (coro->coro_state == CORO_STATE_FINISHED) return CORO_SIG_DONE;
 
+    coro->coro_state = CORO_STATE_RUNNING;
     platform_swap_context(&coro->suspend_context, &coro->resume_context);
+
+    switch (coro->yield_signal.type)
+    {
+        case CORO_SIG_NOTIFY:
+            coro->coro_state = CORO_STATE_READY;
+            break;
+        case CORO_SIG_DONE:
+            coro->coro_state = CORO_STATE_FINISHED;
+            break;
+        case CORO_SIG_WAIT: /* Intentional Fall-through */
+        case CORO_SIG_NOTIFY_AND_WAIT:
+            coro->coro_state = CORO_STATE_BLOCKED;
+            break;
+    }
+
     return coro->yield_signal.type;
 }
 
@@ -61,9 +115,10 @@ void coro_yield(coro_t *coro)
 
 void coro_yield_delay(coro_t *coro, int64_t duration_ms)
 {
-    coro->event_sinks[0].type = CORO_EVTSINK_DELAY;
-    coro->event_sinks[0].params.ticks_remaining = duration_ms * platform_get_ticks_per_ms();
-    coro->event_sinks[1].type = CORO_EVTSINK_NONE;
+    coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_NONE;
+    coro->event_sinks[EVENT_SINK_SLOT_TIMEOUT].type = CORO_EVTSINK_DELAY;
+    coro->event_sinks[EVENT_SINK_SLOT_TIMEOUT].params.ticks_remaining = duration_ms * platform_get_ticks_per_ms();
+
     coro->yield_signal.type = CORO_SIG_WAIT;
     platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
@@ -81,11 +136,28 @@ void coro_yield_with_signal(coro_t *coro, coro_signal_type_t signal)
     platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
-void coro_reset_sinks(coro_t *coro)
+bool coro_notify(coro_t *coro, coro_event_source_t const * event)
 {
-    for (size_t i=0; i < 2; ++i)
+    if (coro->coro_state != CORO_STATE_BLOCKED)
     {
-        coro->event_sinks[i].type = CORO_EVTSINK_NONE;
+        /* Only blocked coroutines actually look for events. */
+        return false;
     }
-}
 
+    bool unblock_task = false;
+
+    for (size_t event_sink_idx=0; (event_sink_idx < EVENT_SINK_SLOT_COUNT) && !unblock_task; ++event_sink_idx)
+    {
+        unblock_task = _update_event_sink(&coro->event_sinks[event_sink_idx], event);
+    }
+    /* Reset sinks, we are unblocked. */
+    if (unblock_task)
+    {
+        for (size_t i=0; i < EVENT_SINK_SLOT_COUNT; ++i)
+        {
+            coro->event_sinks[i].type = CORO_EVTSINK_NONE;
+        }
+        coro->coro_state = CORO_STATE_READY;
+    }
+    return unblock_task;
+}

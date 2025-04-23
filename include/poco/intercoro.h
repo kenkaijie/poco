@@ -9,6 +9,7 @@
  */
 #pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <poco/platform.h>
 
@@ -66,6 +67,9 @@ typedef enum {
 
     /** Coroutine is waiting on a queue to have space. Uses the queue parameter.*/
     CORO_EVTSINK_QUEUE_NOT_EMPTY,
+
+    /** Coroutine is waiting on an event. Uses the event parameter. */
+    CORO_EVTSINK_EVENT_GET,
 } coro_event_sink_type_t;
 
 typedef struct 
@@ -74,6 +78,7 @@ typedef struct
     union {
         platform_ticks_t ticks_remaining;
         void * queue;
+        void * event;
     } params;
 } coro_event_sink_t;
 
@@ -89,6 +94,9 @@ typedef enum {
 
     /* Indicates a queue has had an item removed from it, coroutines waiting should unblock. Uses the queue parameter. */
     CORO_EVTSRC_QUEUE_GET,
+
+    /* An event has one of its field set. */
+    CORO_EVTSRC_EVENT_SET,
     
 } coro_event_source_type_t;
 
@@ -99,5 +107,18 @@ typedef struct
     union {
         platform_ticks_t elasped_ticks;
         void * queue;
+        void * event;
     } params;
 } coro_event_source_t;
+
+/*!
+ * @brief Update the sink with the provided event source.
+ *
+ * @note Some events may take multiple events to trigger, such as the time based events.
+ * 
+ * @param sink Sink to update.
+ * @param event Event to apply.
+ * 
+ * @return True if the event has triggered.
+ */
+bool intercoro_update_event_sink(coro_event_sink_t * sink, coro_event_source_t const * event);

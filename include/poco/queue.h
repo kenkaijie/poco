@@ -56,7 +56,7 @@ bool queue_empty(queue_t * queue);
  * 
  * @retval RET_OK on success.
  */
-error_t queue_put(coro_t * coro, queue_t * queue, void * item);
+error_t queue_put(coro_t * coro, queue_t * queue, void const * item);
 
 /*!
  * @brief Gets an item from the queue from a coroutine.
@@ -71,6 +71,20 @@ error_t queue_put(coro_t * coro, queue_t * queue, void * item);
  * @retval RET_OK on success.
  */
 error_t queue_get(coro_t * coro, queue_t * queue, void * item);
+
+error_t queue_put_no_wait(coro_t * coro, queue_t * queue, void const * item);
+error_t queue_get_no_wait(coro_t * coro, queue_t * queue, void * item);
+
+/*!
+ * @name Advanced Queue Operations
+ * 
+ * These functions are for advanced or niche uses, they expose the queue without any
+ * coroutine notifications. Improper use may not properly unblock a waiting coroutine.
+ */
+/**@{*/
+error_t queue_raw_put(queue_t * queue, void const * item);
+error_t queue_raw_get(queue_t * queue, void * item);
+/**@}*/
 
 #ifdef __cplusplus
 }
