@@ -2,8 +2,6 @@
  * @file
  * @brief Communication primitives between the coroutine and the scheduler.
  * 
- * Every scheduler implementation must uphold this interface.
- * 
  * Event sinks and sources are connected , that is, event sources can update one
  * or more event sinks.
  */
@@ -110,15 +108,3 @@ typedef struct
         void * event;
     } params;
 } coro_event_source_t;
-
-/*!
- * @brief Update the sink with the provided event source.
- *
- * @note Some events may take multiple events to trigger, such as the time based events.
- * 
- * @param sink Sink to update.
- * @param event Event to apply.
- * 
- * @return True if the event has triggered.
- */
-bool intercoro_update_event_sink(coro_event_sink_t * sink, coro_event_source_t const * event);

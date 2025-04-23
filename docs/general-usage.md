@@ -8,7 +8,7 @@ corotuines can share memory space. The primitives help better express concepts, 
 allows expression of tasks that are "waiting" for some input.
 
 - `queue.h` for homogenous multi-byte elements.
-- `event.h` for bit fields.
+- `event.h` for higher performance flag style communication.
 
 ### ISR Calling Conventions
 

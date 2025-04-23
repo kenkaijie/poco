@@ -4,6 +4,11 @@
  * 
  * In order to utilise this interface, the first member of any scheduler should be
  * the vtable.
+ * 
+ * Every scheduler has 2 primary functions:
+ * 
+ * 1. Run each coroutine to completion (via resumes).
+ * 2. Route intercoro signals to other coroutines.
  */
 
 #pragma once

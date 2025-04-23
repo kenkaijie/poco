@@ -1,7 +1,6 @@
 /*!
  * @file
- * @brief A basic round robin scheduler, just loops throught round robin. Used primarily for
- *        demos.
+ * @brief A basic round robin scheduler.
  */
 
 #pragma once
