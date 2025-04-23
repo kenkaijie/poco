@@ -1,15 +1,15 @@
 /*!
  * @file
  * @brief Communication primitives between the coroutine and the scheduler.
- * 
+ *
  * Event sinks and sources are connected , that is, event sources can update one
  * or more event sinks.
  */
 #pragma once
 
+#include <poco/platform.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <poco/platform.h>
 
 /*!
  * @brief Types of signals that can be sent to the scheduler.
@@ -40,17 +40,16 @@ typedef enum {
      * Special indicator indicating the corotuine is done and should no longer be
      * scheduled.
      */
-    CORO_SIG_DONE = 4,   // Coroutine is done.
+    CORO_SIG_DONE = 4, // Coroutine is done.
 } coro_signal_type_t;
 
 /*!
  * @brief Properties the coroutine communicates back to the scheduler.
- * 
+ *
  * This applies to signals that have further information to communicate.
  */
-typedef struct
-{
-    coro_signal_type_t  type;   // Type of signal.
+typedef struct {
+    coro_signal_type_t type; // Type of signal.
 } coro_signal_t;
 
 typedef enum {
@@ -70,13 +69,12 @@ typedef enum {
     CORO_EVTSINK_EVENT_GET,
 } coro_event_sink_type_t;
 
-typedef struct 
-{
+typedef struct {
     coro_event_sink_type_t type;
     union {
         platform_ticks_t ticks_remaining;
-        void * queue;
-        void * event;
+        void *queue;
+        void *event;
     } params;
 } coro_event_sink_t;
 
@@ -87,24 +85,24 @@ typedef enum {
     /* Indicates that an elasped period of time has passed. */
     CORO_EVTSRC_ELAPSED,
 
-    /* Indicates a queue has had an item put in it, coroutines waiting should unblock. Uses the queue parameter. */
+    /* Indicates a queue has had an item put in it, coroutines waiting should unblock.
+       Uses the queue parameter. */
     CORO_EVTSRC_QUEUE_PUT,
 
-    /* Indicates a queue has had an item removed from it, coroutines waiting should unblock. Uses the queue parameter. */
+    /* Indicates a queue has had an item removed from it, coroutines waiting should
+       unblock. Uses the queue parameter. */
     CORO_EVTSRC_QUEUE_GET,
 
     /* An event has one of its field set. */
     CORO_EVTSRC_EVENT_SET,
-    
+
 } coro_event_source_type_t;
 
-
-typedef struct 
-{
+typedef struct {
     coro_event_source_type_t type;
     union {
         platform_ticks_t elasped_ticks;
-        void * queue;
-        void * event;
+        void *queue;
+        void *event;
     } params;
 } coro_event_source_t;

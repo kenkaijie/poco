@@ -1,9 +1,9 @@
 /*!
  * @file
  * @brief Coroutines.
- * 
+ *
  * Implements coroutines that can be suspended and resumed.
- * 
+ *
  * This file provides 2 yielding modes:
  * - Yielding without delay (immediate).
  * - Yielding with delay (at least).
@@ -14,17 +14,17 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdbool.h>
 #include <poco/intracoro.h>
 #include <poco/platform.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 /*!
  * Maximum number of sinks a coroutine can wait on.
  *
  * There shouldn't be a need for any more than what is defined.
- * 
+ *
  * 1. Primary slot for a communication primitive event.
  * 2. Optional time slot for timeouts.
  */
@@ -46,7 +46,7 @@ typedef enum {
 } coro_state_t;
 
 typedef struct coro coro_t;
-typedef void (*coro_function_t)(coro_t *coro, void* context);
+typedef void (*coro_function_t)(coro_t *coro, void *context);
 
 struct coro {
     /** The current corotuine state. Schedulers should only has read-access to this. */
@@ -58,7 +58,7 @@ struct coro {
     platform_context_t resume_context;
 
     /** For a non running coroutine, this is the signal it last yielded with. */
-    coro_signal_t yield_signal; 
+    coro_signal_t yield_signal;
 
     /** Managed event sinks, used for waking up blocked coroutines. */
     coro_event_source_t event_source;
@@ -71,12 +71,12 @@ struct coro {
  * Ensures proper alignment of the structures. Normal use should avoid using
  * the variables directly, instead should use the pointer returned from
  * coro_create_static().
- * 
+ *
  * @param name Name of the coroutine.
  * @param stack_size_words Size of the stack, in words.
  */
-#define CORO_STATIC_DEFINE(name, stack_size) \
-    static uint32_t name##_stack[stack_size] __attribute__((__aligned__(8))); \
+#define CORO_STATIC_DEFINE(name, stack_size)                                           \
+    static uint32_t name##_stack[stack_size] __attribute__((__aligned__(8)));          \
     static coro_t name##_coro;
 
 /*!
@@ -88,18 +88,19 @@ struct coro {
  * @param stack Pointer to a predefined stack space (must be word aligned).
  * @param stack_size Size of the stack, in bytes.
  */
-coro_t *coro_create_static(coro_t *coro, coro_function_t function, void * context, uint32_t *stack, size_t stack_size);
+coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context,
+                           uint32_t *stack, size_t stack_size);
 
 /*!
  * @brief Called by the coroutine to yield control back to the scheduler.
  *
  * The coroutine will be placed immediately back into the scheduler. Depending on the
  * scheduler, this may cause it to be scheduled again immediately.
- * 
+ *
  * This yields with the NONE event source.
  *
  * @note This function will block until the coroutine is resumed again.
- * 
+ *
  * @param coro Coroutine to yield.
  * @param reason Value to return to the scheduler.
  */
@@ -111,7 +112,7 @@ void coro_yield(coro_t *coro);
  * Delay times are "at least" values, the guarantee is that the coroutine will not
  * resume until at least the specified time has passed. The scheduler may resume the
  * coroutine later if required.
- * 
+ *
  * @param coro Coroutine to yield.
  * @param delay Minimum duration in milliseconds the coroutine should wait.
  */
@@ -128,13 +129,13 @@ void coro_yield_with_signal(coro_t *coro, coro_signal_type_t signal);
  * @brief Notify a coroutine of an event that may affect it's internal state.
  *
  * @note If a coroutine is not blocked, the events are ignored.
- * 
+ *
  * @param coro Coroutine to notify.
  * @param event Notification event.
- * 
+ *
  * @return True if the coroutine's state has changed.
  */
-bool coro_notify(coro_t *coro, coro_event_source_t const * event);
+bool coro_notify(coro_t *coro, coro_event_source_t const *event);
 
 coro_signal_type_t coro_resume(coro_t *coro);
 

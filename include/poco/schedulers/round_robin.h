@@ -9,23 +9,23 @@
 extern "C" {
 #endif
 
-#include <stddef.h>
 #include <poco/coro.h>
 #include <poco/intracoro.h>
 #include <poco/queue.h>
 #include <poco/scheduler.h>
+#include <stddef.h>
 
 /** Maximum number of external events a scheduler can handle between each yield. */
 #define SCHEDULER_MAX_EXTERNAL_EVENT_COUNT (16)
 
 typedef struct {
     scheduler_t scheduler;
-    coro_t * const * tasks;
+    coro_t *const *tasks;
     size_t task_count;
     size_t finished_tasks;
     size_t current_task_index; /**< index of the currently running task */
     queue_t event_queue;
-    coro_event_source_t external_events[SCHEDULER_MAX_EXTERNAL_EVENT_COUNT]; 
+    coro_event_source_t external_events[SCHEDULER_MAX_EXTERNAL_EVENT_COUNT];
 } round_robin_scheduler_t;
 
 /*!
@@ -33,12 +33,15 @@ typedef struct {
  *
  * @param coro_list List of coroutines to schedule.
  * @param num_coros Number of coroutines in the list.
- * 
+ *
  * @return Pointer to the scheduler, or NULL on error.
  */
-round_robin_scheduler_t * round_robin_scheduler_create(coro_t * const* coro_list, size_t num_coros);
+round_robin_scheduler_t *round_robin_scheduler_create(coro_t *const *coro_list,
+                                                      size_t num_coros);
 
-round_robin_scheduler_t * round_robin_scheduler_create_static(round_robin_scheduler_t * scheduler, coro_t * const* coro_list, size_t num_coros);
+round_robin_scheduler_t *
+round_robin_scheduler_create_static(round_robin_scheduler_t *scheduler,
+                                    coro_t *const *coro_list, size_t num_coros);
 
 #ifdef __cplusplus
 }
