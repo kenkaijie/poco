@@ -9,12 +9,11 @@
 extern "C" {
 #endif
 
-#include <poco/coro.h>
-#include <poco/error.h>
 #include <stddef.h>
-#include <poco/scheduler.h>
+#include <poco/coro.h>
+#include <poco/intracoro.h>
 #include <poco/queue.h>
-#include <poco/intercoro.h>
+#include <poco/scheduler.h>
 
 /** Maximum number of external events a scheduler can handle between each yield. */
 #define SCHEDULER_MAX_EXTERNAL_EVENT_COUNT (16)

@@ -1,5 +1,4 @@
 #include <poco/coro.h>
-#include <poco/platform.h>
 #include <string.h>
 
 // These are reversed so they appear cute when debugging.

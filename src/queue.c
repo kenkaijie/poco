@@ -1,5 +1,5 @@
 #include <poco/queue.h>
-#include <poco/intercoro.h>
+#include <poco/intracoro.h>
 #include <string.h>
 
 /*!

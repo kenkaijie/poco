@@ -1,7 +1,6 @@
 #include <poco/event.h>
-#include <poco/intercoro.h>
+#include <poco/intracoro.h>
 #include <poco/platform.h>
-#include <poco/scheduler.h>
 
 static bool _event_triggered(event_t * event, flags_t mask, bool wait_for_all)
 {

@@ -17,7 +17,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <poco/intercoro.h>
+#include <poco/intracoro.h>
 #include <poco/platform.h>
 
 /*!

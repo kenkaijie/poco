@@ -8,13 +8,13 @@
  * Every scheduler has 2 primary functions:
  * 
  * 1. Run each coroutine to completion (via resumes).
- * 2. Route intercoro signals to other coroutines.
+ * 2. Route intracoro signals to other coroutines.
  */
 
 #pragma once
 
 #include <poco/error.h>
-#include <poco/intercoro.h>
+#include <poco/intracoro.h>
 
 typedef struct scheduler scheduler_t;
 
