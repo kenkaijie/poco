@@ -28,7 +28,7 @@ extern "C" {
 
 typedef uint32_t flags_t;
 
-typedef struct {
+typedef struct event {
     flags_t flags;
 } event_t;
 
@@ -53,6 +53,7 @@ flags_t event_get(coro_t *coro, event_t *event, flags_t mask, flags_t clear_mask
 /*!
  * @brief Sets the event flags.
  *
+ * @param coro The currently running coroutine.
  * @param event Event to set.
  * @param mask Mask to set.
  */

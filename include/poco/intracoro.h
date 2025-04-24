@@ -16,7 +16,7 @@
  *
  * Each one encoders an expected behaviour.
  */
-typedef enum {
+typedef enum coro_signal_type {
     /**
      * Coroutine is waiting for a signal, this implies the sinks have been configured.
      * Corotuine should not be resumed until any of the signals are triggered.
@@ -48,11 +48,11 @@ typedef enum {
  *
  * This applies to signals that have further information to communicate.
  */
-typedef struct {
+typedef struct coro_signal {
     coro_signal_type_t type; // Type of signal.
 } coro_signal_t;
 
-typedef enum {
+typedef enum coro_event_sink_type {
     /** Disabled event. */
     CORO_EVTSINK_NONE = 0,
 
@@ -69,7 +69,7 @@ typedef enum {
     CORO_EVTSINK_EVENT_GET,
 } coro_event_sink_type_t;
 
-typedef struct {
+typedef struct coro_event_sink {
     coro_event_sink_type_t type;
     union {
         platform_ticks_t ticks_remaining;
@@ -78,7 +78,7 @@ typedef struct {
     } params;
 } coro_event_sink_t;
 
-typedef enum {
+typedef enum coro_event_source_type {
     /* No special event. */
     CORO_EVTSRC_NOOP = 0,
 
@@ -98,7 +98,7 @@ typedef enum {
 
 } coro_event_source_type_t;
 
-typedef struct {
+typedef struct coro_event_source {
     coro_event_source_type_t type;
     union {
         platform_ticks_t elasped_ticks;

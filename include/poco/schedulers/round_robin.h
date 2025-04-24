@@ -18,7 +18,7 @@ extern "C" {
 /** Maximum number of external events a scheduler can handle between each yield. */
 #define SCHEDULER_MAX_EXTERNAL_EVENT_COUNT (16)
 
-typedef struct {
+typedef struct round_robin_scheduler {
     scheduler_t scheduler;
     coro_t *const *tasks;
     size_t task_count;

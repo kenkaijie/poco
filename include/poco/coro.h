@@ -34,7 +34,7 @@ enum event_sink_slot {
     EVENT_SINK_SLOT_COUNT,
 };
 
-typedef enum {
+typedef enum coro_state {
     /* Coro is waiting to be scheduled. */
     CORO_STATE_READY = 0,
     /* Coro is the currently running one. */
@@ -75,8 +75,8 @@ struct coro {
  * @param name Name of the coroutine.
  * @param stack_size_words Size of the stack, in words.
  */
-#define CORO_STATIC_DEFINE(name, stack_size)                                           \
-    static uint32_t name##_stack[stack_size] __attribute__((__aligned__(8)));          \
+#define CORO_STATIC_DEFINE(name, stack_size_words)                                     \
+    static uint32_t name##_stack[stack_size_words] __attribute__((__aligned__(8)));    \
     static coro_t name##_coro;
 
 /*!
@@ -102,7 +102,6 @@ coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context
  * @note This function will block until the coroutine is resumed again.
  *
  * @param coro Coroutine to yield.
- * @param reason Value to return to the scheduler.
  */
 void coro_yield(coro_t *coro);
 

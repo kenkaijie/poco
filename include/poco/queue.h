@@ -28,7 +28,7 @@ extern "C" {
         __attribute__((__aligned__(sizeof(type))));                                    \
     static queue_t name##_queue;
 
-typedef struct {
+typedef struct queue {
     size_t count;
     size_t read_idx;
     size_t write_idx;
