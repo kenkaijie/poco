@@ -28,7 +28,7 @@ function(add_golden_test TEST_NAME TEST_TARGET)
     )
 endfunction()
 
-
+add_golden_test(test_sample_aggregate_wait sample_aggregate_wait)
 add_golden_test(test_sample_hello_world sample_hello_world)
 add_golden_test(test_sample_multiple_coroutines sample_multiple_coroutines)
 add_golden_test(test_sample_queue sample_queue)

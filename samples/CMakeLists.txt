@@ -1,3 +1,4 @@
+add_subdirectory(aggregate-wait)
 add_subdirectory(hello-world)
 add_subdirectory(multiple-coroutines)
 add_subdirectory(queue)

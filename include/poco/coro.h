@@ -21,7 +21,7 @@ extern "C" {
 #include <stdlib.h>
 
 /*!
- * Maximum number of sinks a coroutine can wait on.
+ * Event slot declaration.
  *
  * There shouldn't be a need for any more than what is defined.
  *
@@ -29,9 +29,11 @@ extern "C" {
  * 2. Optional time slot for timeouts.
  */
 enum event_sink_slot {
+    /** Primary slot reserved for the main (non-timeout) event of this yield. */
     EVENT_SINK_SLOT_PRIMARY = 0,
+    /** Secondary slot reserved for timeout. */
     EVENT_SINK_SLOT_TIMEOUT,
-    EVENT_SINK_SLOT_COUNT,
+    EVENT_SINK_SLOT_COUNT, // Must always be last.
 };
 
 typedef enum coro_state {
@@ -48,9 +50,14 @@ typedef enum coro_state {
 typedef struct coro coro_t;
 typedef void (*coro_function_t)(coro_t *coro, void *context);
 
+/*!
+ * @brief Represents a coroutine that can be scheduled and executed.
+ */
 struct coro {
     /** The current corotuine state. Schedulers should only has read-access to this. */
     coro_state_t coro_state;
+
+    /** Coroutine's main entrypoint function. */
     coro_function_t entrypoint;
 
     // Ping pong contexts
@@ -60,8 +67,10 @@ struct coro {
     /** For a non running coroutine, this is the signal it last yielded with. */
     coro_signal_t yield_signal;
 
-    /** Managed event sinks, used for waking up blocked coroutines. */
+    /** Managed event source, only valid if the coroutine has notified the scheduler. */
     coro_event_source_t event_source;
+
+    /** Managed event sinks, only valid if the coroutine is blocked. */
     coro_event_sink_t event_sinks[EVENT_SINK_SLOT_COUNT];
 };
 
