@@ -35,16 +35,16 @@ typedef struct consumer {
     queue_t command_queue;
 } consumer_t;
 
-error_t consumer_init(consumer_t *consumer);
+result_t consumer_init(consumer_t *consumer);
 
 /*!
  * @brief Sends a message via the consumer.
  */
-error_t consumer_send_message(coro_t *curr_coro, consumer_t *consumer,
-                              message_t const *message);
+result_t consumer_send_message(coro_t *curr_coro, consumer_t *consumer,
+                               message_t const *message);
 
 /*!
  * @brief Sends a command via the consumer.
  */
-error_t consumer_send_command(coro_t *curr_coro, consumer_t *consumer,
-                              command_t const *message);
+result_t consumer_send_command(coro_t *curr_coro, consumer_t *consumer,
+                               command_t const *message);

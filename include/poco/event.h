@@ -22,7 +22,6 @@ extern "C" {
 #endif
 
 #include <poco/coro.h>
-#include <poco/error.h>
 #include <poco/scheduler.h>
 #include <stdint.h>
 
@@ -35,7 +34,7 @@ typedef struct event {
 event_t *event_create_static(event_t *event, flags_t initial);
 
 /*!
- * @brief Waits on the specific event flags.a64l
+ * @brief Waits on the specific event flags.
  *
  * @param coro Coroutine that is waiting on the event.
  * @param event Event to wait on.
@@ -45,7 +44,7 @@ event_t *event_create_static(event_t *event, flags_t initial);
  *                     This effective sets if the mask uses OR or AND for its wait
  *                     logic.
  *
- * @returns The flags that ended the wait.
+ * @returns The flags that ended the wait. If flags are all 0, an error has occured.
  */
 flags_t event_get(coro_t *coro, event_t *event, flags_t mask, flags_t clear_mask,
                   bool wait_for_all);
@@ -65,7 +64,7 @@ void event_set(coro_t *coro, event_t *event, flags_t mask);
  * The responsiveness of the waking coroutine will depend on the scheduler
  * implementation.
  *
- * @param scheduler Scheduler running the corotuines.
+ * @param scheduler Scheduler running the coroutines.
  * @param event Event to set.
  * @param mask Mask to set.
  */

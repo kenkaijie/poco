@@ -81,7 +81,7 @@ int platform_swap_context(platform_context_t *ocp, const platform_context_t *ucp
 
 void platform_make_context(platform_context_t *ucp, void (*func)(void *, void *),
                            void *context1, void *context2) {
-    // Prepopulate first 4 args with corotuine args needed.
+    // Prepopulate first 4 args with coroutine args needed.
     // Deviating from standard as I couldn't get va_args to work.
     ucp->uc_mcontext.r0 = (uintptr_t)context1;
     ucp->uc_mcontext.r1 = (uintptr_t)context2;

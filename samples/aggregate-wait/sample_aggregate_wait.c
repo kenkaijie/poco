@@ -3,7 +3,7 @@
  * @brief Example showcasing the recipe of a single coroutine waiting on multiple
  *        communication primitives.
  *
- * This example shows how use of events can allow a corotuine to perform a
+ * This example shows how use of events can allow a coroutine to perform a
  * "wait for any" style of blocking for multiple communication primitives at a
  * time.abort
  *
@@ -71,9 +71,9 @@ int main() {
 
     coro_t *tasks[3] = {0};
 
-    error_t init_success = consumer_init(&consumer);
+    result_t init_success = consumer_init(&consumer);
 
-    if (init_success != RET_OK) {
+    if (init_success != RES_OK) {
         printf("Failed to initialise consumer.");
         return -1;
     }

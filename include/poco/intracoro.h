@@ -16,15 +16,15 @@
  *
  * Each one encoders an expected behaviour.
  */
-typedef enum coro_signal_type {
+typedef enum coro_signal {
     /**
      * Coroutine is waiting for a signal, this implies the sinks have been configured.
-     * Corotuine should not be resumed until any of the signals are triggered.
+     * coroutine should not be resumed until any of the signals are triggered.
      */
     CORO_SIG_WAIT = 1,
 
     /**
-     * This is a basic yield. Scheduler should place this corotuine back into the list
+     * This is a basic yield. Scheduler should place this coroutine back into the list
      * of coroutines to be scheduled, but update any blocked coroutines with the
      * provided event. Implies the event_source is active.
      */
@@ -37,19 +37,10 @@ typedef enum coro_signal_type {
     CORO_SIG_NOTIFY_AND_WAIT = 3,
 
     /**
-     * Special indicator indicating the corotuine is done and should no longer be
+     * Special indicator indicating the coroutine is done and should no longer be
      * scheduled.
      */
     CORO_SIG_DONE = 4, // Coroutine is done.
-} coro_signal_type_t;
-
-/*!
- * @brief Properties the coroutine communicates back to the scheduler.
- *
- * This applies to signals that have further information to communicate.
- */
-typedef struct coro_signal {
-    coro_signal_type_t type; // Type of signal.
 } coro_signal_t;
 
 typedef enum coro_event_sink_type {
@@ -59,7 +50,7 @@ typedef enum coro_event_sink_type {
     /** Coroutine is waiting for a time delay before it can resume. */
     CORO_EVTSINK_DELAY,
 
-    /** Corotuine is waiting on a queue to have an item. Uses the queue parameter. */
+    /** coroutine is waiting on a queue to have an item. Uses the queue parameter. */
     CORO_EVTSINK_QUEUE_NOT_FULL,
 
     /** Coroutine is waiting on a queue to have space. Uses the queue parameter.*/

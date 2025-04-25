@@ -12,12 +12,13 @@
  * simply return from the coroutine.
  */
 static void _coro_yield_done(coro_t *coro) {
-    coro->yield_signal.type = CORO_SIG_DONE;
+    coro->yield_signal = CORO_SIG_DONE;
     platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
 static void _coro_entry_point(coro_t *coro, void *context) {
     coro->entrypoint(coro, context);
+    coro->coro_state = CORO_STATE_FINISHED;
     _coro_yield_done(coro);
 }
 
@@ -73,14 +74,14 @@ coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context
     return coro;
 }
 
-coro_signal_type_t coro_resume(coro_t *coro) {
+coro_signal_t coro_resume(coro_t *coro) {
     if (coro->coro_state == CORO_STATE_FINISHED)
         return CORO_SIG_DONE;
 
     coro->coro_state = CORO_STATE_RUNNING;
     platform_swap_context(&coro->suspend_context, &coro->resume_context);
 
-    switch (coro->yield_signal.type) {
+    switch (coro->yield_signal) {
     case CORO_SIG_NOTIFY:
         coro->coro_state = CORO_STATE_READY;
         break;
@@ -93,12 +94,12 @@ coro_signal_type_t coro_resume(coro_t *coro) {
         break;
     }
 
-    return coro->yield_signal.type;
+    return coro->yield_signal;
 }
 
 void coro_yield(coro_t *coro) {
     coro->event_source.type = CORO_EVTSRC_NOOP;
-    coro->yield_signal.type = CORO_SIG_NOTIFY;
+    coro->yield_signal = CORO_SIG_NOTIFY;
     platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
@@ -108,18 +109,18 @@ void coro_yield_delay(coro_t *coro, int64_t duration_ms) {
     coro->event_sinks[EVENT_SINK_SLOT_TIMEOUT].params.ticks_remaining =
         duration_ms * platform_get_ticks_per_ms();
 
-    coro->yield_signal.type = CORO_SIG_WAIT;
+    coro->yield_signal = CORO_SIG_WAIT;
     platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
 void coro_yield_with_event(coro_t *coro, coro_event_source_t const *event) {
     coro->event_source = *event;
-    coro->yield_signal.type = CORO_SIG_NOTIFY;
+    coro->yield_signal = CORO_SIG_NOTIFY;
     platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
-void coro_yield_with_signal(coro_t *coro, coro_signal_type_t signal) {
-    coro->yield_signal.type = signal;
+void coro_yield_with_signal(coro_t *coro, coro_signal_t signal) {
+    coro->yield_signal = signal;
     platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 

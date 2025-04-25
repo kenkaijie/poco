@@ -6,14 +6,14 @@ static size_t _increment_task_index(round_robin_scheduler_t *scheduler) {
     return (scheduler->current_task_index + 1) % scheduler->task_count;
 }
 
-static error_t _notify_from_isr(round_robin_scheduler_t *scheduler,
-                                coro_event_source_t const *event) {
+static result_t _notify_from_isr(round_robin_scheduler_t *scheduler,
+                                 coro_event_source_t const *event) {
     return queue_raw_put(&scheduler->event_queue, (void *)event);
 }
 
-static error_t _notify(round_robin_scheduler_t *scheduler,
-                       coro_event_source_t const *event) {
-    error_t queue_result;
+static result_t _notify(round_robin_scheduler_t *scheduler,
+                        coro_event_source_t const *event) {
+    result_t queue_result;
 
     platform_enter_critical_section();
     queue_raw_put(&scheduler->event_queue, (void *)event);
@@ -64,7 +64,7 @@ static void _scheduler_loop(round_robin_scheduler_t *scheduler) {
         coro_t *next_coro = _get_next_ready_task(scheduler);
         // If there are no tasks to run, we can just wait for the next event.
         if (next_coro != NULL) {
-            coro_signal_type_t signal = coro_resume(next_coro);
+            coro_signal_t signal = coro_resume(next_coro);
 
             coro_event_source_t *coroutine_event = NULL;
 
@@ -98,10 +98,10 @@ static void _scheduler_loop(round_robin_scheduler_t *scheduler) {
         }
 
         // dequeue all items in the external event queue
-        size_t external_event_count = queue_count(&scheduler->event_queue);
+        size_t external_event_count = queue_item_count(&scheduler->event_queue);
         for (size_t i = 0; i < external_event_count; ++i) {
             coro_event_source_t event;
-            if (queue_raw_get(&scheduler->event_queue, (void *)&event) == RET_OK) {
+            if (queue_raw_get(&scheduler->event_queue, (void *)&event) == RES_OK) {
                 _update_waiting_tasks(scheduler, &event);
             }
         }

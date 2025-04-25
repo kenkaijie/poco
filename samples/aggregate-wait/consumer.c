@@ -16,7 +16,7 @@ static void consumer_loop(coro_t *coro, consumer_t *consumer) {
                 break;
             }
 
-            if (queue_count(&consumer->command_queue) > 0) {
+            if (queue_item_count(&consumer->command_queue) > 0) {
                 event_set(coro, &consumer->event, CONSUMER_SIG_COMMAND);
             }
         }
@@ -25,14 +25,14 @@ static void consumer_loop(coro_t *coro, consumer_t *consumer) {
             message_t message = {0};
             queue_get_no_wait(coro, &consumer->message_queue, (void *)&message);
             printf("Received a message, a=%d, b=%d.\n", message.a, message.b);
-            if (queue_count(&consumer->message_queue) > 0) {
+            if (queue_item_count(&consumer->message_queue) > 0) {
                 event_set(coro, &consumer->event, CONSUMER_SIG_MESSAGE);
             }
         }
     }
 }
 
-error_t consumer_init(consumer_t *consumer) {
+result_t consumer_init(consumer_t *consumer) {
     coro_create_static(&consumer->coro, (coro_function_t)consumer_loop, consumer,
                        consumer->stack, sizeof(consumer->stack));
 
@@ -47,24 +47,24 @@ error_t consumer_init(consumer_t *consumer) {
 
     event_create_static(&consumer->event, 0);
 
-    return RET_OK;
+    return RES_OK;
 }
 
-error_t consumer_send_message(coro_t *curr_coro, consumer_t *consumer,
-                              message_t const *message) {
-    error_t put_success =
+result_t consumer_send_message(coro_t *curr_coro, consumer_t *consumer,
+                               message_t const *message) {
+    result_t put_success =
         queue_put_no_wait(curr_coro, &consumer->message_queue, (void *)message);
-    if (put_success == RET_OK) {
+    if (put_success == RES_OK) {
         event_set(curr_coro, &consumer->event, CONSUMER_SIG_MESSAGE);
     }
     return put_success;
 }
 
-error_t consumer_send_command(coro_t *curr_coro, consumer_t *consumer,
-                              command_t const *message) {
-    error_t put_success =
+result_t consumer_send_command(coro_t *curr_coro, consumer_t *consumer,
+                               command_t const *message) {
+    result_t put_success =
         queue_put_no_wait(curr_coro, &consumer->command_queue, (void *)message);
-    if (put_success == RET_OK) {
+    if (put_success == RES_OK) {
         event_set(curr_coro, &consumer->event, CONSUMER_SIG_COMMAND);
     }
     return put_success;

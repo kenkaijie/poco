@@ -1,12 +1,8 @@
 /*!
  * @file
- * @brief Coroutines.
+ * @brief Declarations for coroutines in poco.
  *
  * Implements coroutines that can be suspended and resumed.
- *
- * This file provides 2 yielding modes:
- * - Yielding without delay (immediate).
- * - Yielding with delay (at least).
  */
 #pragma once
 
@@ -21,12 +17,14 @@ extern "C" {
 #include <stdlib.h>
 
 /*!
- * Event slot declaration.
+ * @brief Preset event slot indicies.
  *
- * There shouldn't be a need for any more than what is defined.
+ * A 2 slot system is likely all we need here:
  *
  * 1. Primary slot for a communication primitive event.
  * 2. Optional time slot for timeouts.
+ *
+ * @note There shouldn't be a need for any more than what is defined.
  */
 enum event_sink_slot {
     /** Primary slot reserved for the main (non-timeout) event of this yield. */
@@ -36,6 +34,9 @@ enum event_sink_slot {
     EVENT_SINK_SLOT_COUNT, // Must always be last.
 };
 
+/*!
+ * @brief Defines the states a coroutine can be at any given time.
+ */
 typedef enum coro_state {
     /* Coro is waiting to be scheduled. */
     CORO_STATE_READY = 0,
@@ -48,13 +49,21 @@ typedef enum coro_state {
 } coro_state_t;
 
 typedef struct coro coro_t;
+
+/*!
+ * @brief Function declaration for the coroutine entrypoint.
+ *
+ * @param coro Coroutine calling this function.
+ * @param context Provided user context when creating the coroutine.
+ */
 typedef void (*coro_function_t)(coro_t *coro, void *context);
 
 /*!
  * @brief Represents a coroutine that can be scheduled and executed.
  */
 struct coro {
-    /** The current corotuine state. Schedulers should only has read-access to this. */
+
+    /** The current coroutine state. Schedulers should only has read-access to this. */
     coro_state_t coro_state;
 
     /** Coroutine's main entrypoint function. */
@@ -79,13 +88,13 @@ struct coro {
  *
  * Ensures proper alignment of the structures. Normal use should avoid using
  * the variables directly, instead should use the pointer returned from
- * coro_create_static().
+ * @ref coro_create_static.
  *
  * @param name Name of the coroutine.
- * @param stack_size_words Size of the stack, in words.
+ * @param stack_size Size of the stack, in words.
  */
-#define CORO_STATIC_DEFINE(name, stack_size_words)                                     \
-    static platform_stack_t name##_stack[stack_size_words];  \
+#define CORO_STATIC_DEFINE(name, stack_size)                                           \
+    static platform_stack_t name##_stack[stack_size];                                  \
     static coro_t name##_coro;
 
 /*!
@@ -96,9 +105,11 @@ struct coro {
  * @param context User context passed into the entrypoint function.
  * @param stack Pointer to a predefined stack space (must be word aligned).
  * @param stack_size Size of the stack, in bytes.
+ *
+ * @return pointer to the coroutine, or NULL if parameters are invalid.
  */
 coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context,
-                           uint32_t *stack, size_t stack_size);
+                           platform_stack_t *stack, size_t stack_size);
 
 /*!
  * @brief Called by the coroutine to yield control back to the scheduler.
@@ -126,17 +137,38 @@ void coro_yield(coro_t *coro);
  */
 void coro_yield_delay(coro_t *coro, int64_t delay);
 
-/* These are special operations used internally in awaitable primitives. These
- * should not be required, unless you are creating a custom scheduler.
+/*!
+ * @brief Yield a coroutine with the provided signal source.
+ *
+ * This yields the coroutine with #CORO_SIG_NOTIFY.
+ *
+ * @warning This is a special operation typically used for scheduler or communication
+ *          primitive development. User application constructs should stick with regular
+ *          yields.
+ *
+ * @param coro Coroutine to yield.
+ * @param event Event to yield.
  */
-
 void coro_yield_with_event(coro_t *coro, coro_event_source_t const *event);
-void coro_yield_with_signal(coro_t *coro, coro_signal_type_t signal);
+
+/*!
+ * @brief Yield a coroutine with the provided signal type.
+ *
+ * @warning This is a low-level yield, the caller is expected to correctly set up the
+ *          coroutine's internal state before calling this to ensure correct operation.
+ *
+ * @param coro Coroutine to yield.
+ * @param signal Signal to yield.
+ */
+void coro_yield_with_signal(coro_t *coro, coro_signal_t signal);
 
 /*!
  * @brief Notify a coroutine of an event that may affect it's internal state.
  *
  * @note If a coroutine is not blocked, the events are ignored.
+ *
+ * @warning This is a special operation typically used for scheduler or communication
+ *          primitive development.
  *
  * @param coro Coroutine to notify.
  * @param event Notification event.
@@ -145,7 +177,17 @@ void coro_yield_with_signal(coro_t *coro, coro_signal_type_t signal);
  */
 bool coro_notify(coro_t *coro, coro_event_source_t const *event);
 
-coro_signal_type_t coro_resume(coro_t *coro);
+/*!
+ * @brief Resumes the coroutine from the point it last yielded.
+ *
+ * @warning This is a special operation typically used for scheduler or communication
+ *          primitive development.
+ *
+ * @param coro Coroutine to resume.
+ *
+ * @return Signal to the scheduler to action.
+ */
+coro_signal_t coro_resume(coro_t *coro);
 
 #ifdef __cplusplus
 }

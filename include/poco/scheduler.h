@@ -8,18 +8,20 @@
  * Every scheduler has 2 primary functions:
  *
  * 1. Run each coroutine to completion (via resumes).
- * 2. Route intracoro signals to other coroutines.
+ * 2. Route coroutine signals to other coroutines.
  */
 
 #pragma once
 
-#include <poco/error.h>
 #include <poco/intracoro.h>
+#include <poco/result.h>
 
 typedef struct scheduler scheduler_t;
 
 /*!
  * @brief Function pointer implementing the run function for a scheduler.
+ *
+ * @param scheduler Scheduler to run.
  */
 typedef void (*scheduler_run_t)(scheduler_t *scheduler);
 
@@ -32,11 +34,11 @@ typedef void (*scheduler_run_t)(scheduler_t *scheduler);
  * @param scheduler Scheduler to notify.
  * @param event Event to notify.
  *
- * @retval RET_OK No error.
- * @retval RET_NO_MEM No space available in the scheduler to queue this event.
+ * @retval RES_OK No error.
+ * @retval RES_NO_MEM No space available in the scheduler to queue this event.
  */
-typedef error_t (*scheduler_notify_t)(scheduler_t *scheduler,
-                                      coro_event_source_t const *event);
+typedef result_t (*scheduler_notify_t)(scheduler_t *scheduler,
+                                       coro_event_source_t const *event);
 
 /*!
  * @brief Function pointer implementing the notify from ISR function.
@@ -47,12 +49,15 @@ typedef error_t (*scheduler_notify_t)(scheduler_t *scheduler,
  * @param scheduler Scheduler to notify.
  * @param event Event to notify.
  *
- * @retval RET_OK No error.
- * @retval RET_NO_MEM No space available in the scheduler to queue this event.
+ * @retval RES_OK No error.
+ * @retval RES_NO_MEM No space available in the scheduler to queue this event.
  */
-typedef error_t (*scheduler_notify_from_isr_t)(scheduler_t *scheduler,
-                                               coro_event_source_t const *event);
+typedef result_t (*scheduler_notify_from_isr_t)(scheduler_t *scheduler,
+                                                coro_event_source_t const *event);
 
+/*!
+ * @brief Scheduler common interface.
+ */
 typedef struct scheduler {
     scheduler_run_t run;
     scheduler_notify_t notify;
@@ -65,7 +70,7 @@ typedef struct scheduler {
  * A scheduler will be considered complete when all its managed coroutines are run until
  * completion.
  *
- * If there are corotuines that never finish, run will also never finish.
+ * If there are coroutines that never finish, run will also never finish.
  *
  * @param scheduler Scheduler to run.
  */
@@ -74,12 +79,35 @@ scheduler_run(scheduler_t *scheduler) {
     return scheduler->run(scheduler);
 }
 
-__attribute__((always_inline)) static inline error_t
+/*!
+ * @brief Notify the scheduler of an event
+ *
+ * This is not typically used, as the coroutines have an internal mechanism to
+ * raise events with the scheduler.
+ *
+ * @param scheduler Scheduler to notify.
+ * @param event Event to notify.
+ *
+ * @note other result codes are possible, but will depend on the implementation.
+ *
+ * @retval #RES_OK scheduler has been notified.
+ */
+__attribute__((always_inline)) static inline result_t
 scheduler_notify(scheduler_t *scheduler, coro_event_source_t const *event) {
     return scheduler->notify(scheduler, event);
 }
 
-__attribute__((always_inline)) static inline error_t
+/*!
+ * @brief Notify the scheduler of an event from an ISR.
+ *
+ * @param scheduler Scheduler to notify.
+ * @param event Event to notify.
+ *
+ * @note other result codes are possible, but will depend on the implementation.
+ *
+ * @retval #RES_OK scheduler has been notified.
+ */
+__attribute__((always_inline)) static inline result_t
 scheduler_notify_from_isr(scheduler_t *scheduler, coro_event_source_t const *event) {
     return scheduler->notify_from_isr(scheduler, event);
 }

@@ -3,62 +3,67 @@
 #include <string.h>
 
 /*!
- * @brief Unsafe insert, does not perform checking and is for internal use only.
+ * @brief Unsafe push, does not perform checking and is for internal use only.
  */
 __attribute__((always_inline)) static inline void _internal_put(queue_t *queue,
                                                                 void const *item) {
-    memcpy(&queue->buffer[queue->write_idx * queue->element_size], item,
-           queue->element_size);
+    memcpy(&queue->item_buffer[queue->write_idx * queue->item_size], item,
+           queue->item_size);
     queue->write_idx = (queue->write_idx + 1) % queue->max_items;
     queue->count++;
 }
 
+/*!
+ * @brief Unsafe pop, does not perform checking and is for internal use only.
+ */
 __attribute__((always_inline)) static inline void _internal_get(queue_t *queue,
                                                                 void *item) {
-    memcpy(item, &queue->buffer[queue->read_idx * queue->element_size],
-           queue->element_size);
+    memcpy(item, &queue->item_buffer[queue->read_idx * queue->item_size],
+           queue->item_size);
     queue->read_idx = (queue->read_idx + 1) % queue->max_items;
     queue->count--;
 }
 
-queue_t *queue_create_static(queue_t *queue, size_t num_elements, size_t element_size,
-                             uint8_t *buffer) {
-    queue->buffer = buffer;
+queue_t *queue_create_static(queue_t *queue, size_t num_items, size_t item_size,
+                             uint8_t *item_buffer) {
+    queue->item_buffer = item_buffer;
     queue->count = 0;
     queue->read_idx = 0;
     queue->write_idx = 0;
-    queue->element_size = element_size;
-    queue->max_items = num_elements;
+    queue->item_size = item_size;
+    queue->max_items = num_items;
     return queue;
 }
 
-size_t queue_count(queue_t *queue) { return queue->count; }
+size_t queue_item_count(queue_t *queue) { return queue->count; }
 
-bool queue_full(queue_t *queue) { return queue_count(queue) == queue->max_items; }
+bool queue_is_full(queue_t *queue) {
+    return queue_item_count(queue) == queue->max_items;
+}
 
-bool queue_empty(queue_t *queue) { return queue_count(queue) == 0; }
+bool queue_is_empty(queue_t *queue) { return queue_item_count(queue) == 0; }
 
-error_t queue_raw_put(queue_t *queue, void const *item) {
-    if (queue_full(queue)) {
-        return QUEUE_FULL;
+result_t queue_raw_put(queue_t *queue, void const *item) {
+    if (queue_is_full(queue)) {
+        return RES_QUEUE_FULL;
     }
 
     _internal_put(queue, item);
-    return RET_OK;
+    return RES_OK;
 }
 
-error_t queue_raw_get(queue_t *queue, void *item) {
-    if (queue_empty(queue)) {
-        return QUEUE_EMPTY;
+result_t queue_raw_get(queue_t *queue, void *item) {
+    if (queue_is_empty(queue)) {
+        return RES_QUEUE_EMPTY;
     }
 
     _internal_get(queue, item);
 
-    return RET_OK;
+    return RES_OK;
 }
 
-error_t queue_put(coro_t *coro, queue_t *queue, void const *item) {
-    while (queue_full(queue)) {
+result_t queue_put(coro_t *coro, queue_t *queue, void const *item) {
+    while (queue_is_full(queue)) {
         // Wait for space to be available
 
         coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_QUEUE_NOT_FULL;
@@ -74,11 +79,11 @@ error_t queue_put(coro_t *coro, queue_t *queue, void const *item) {
     coro->event_source.params.queue = queue;
     coro_yield_with_signal(coro, CORO_SIG_NOTIFY);
 
-    return RET_OK;
+    return RES_OK;
 }
 
-error_t queue_get(coro_t *coro, queue_t *queue, void *item) {
-    while (queue_empty(queue)) {
+result_t queue_get(coro_t *coro, queue_t *queue, void *item) {
+    while (queue_is_empty(queue)) {
         coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_QUEUE_NOT_EMPTY;
         coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].params.queue = queue;
         coro->event_sinks[EVENT_SINK_SLOT_TIMEOUT].type = CORO_EVTSINK_NONE;
@@ -92,12 +97,12 @@ error_t queue_get(coro_t *coro, queue_t *queue, void *item) {
     coro->event_source.params.queue = queue;
     coro_yield_with_signal(coro, CORO_SIG_NOTIFY);
 
-    return RET_OK;
+    return RES_OK;
 }
 
-error_t queue_put_no_wait(coro_t *coro, queue_t *queue, void const *item) {
-    if (queue_full(queue)) {
-        return QUEUE_FULL;
+result_t queue_put_no_wait(coro_t *coro, queue_t *queue, void const *item) {
+    if (queue_is_full(queue)) {
+        return RES_QUEUE_FULL;
     }
 
     _internal_put(queue, item);
@@ -106,12 +111,12 @@ error_t queue_put_no_wait(coro_t *coro, queue_t *queue, void const *item) {
     coro->event_source.params.queue = queue;
     coro_yield_with_signal(coro, CORO_SIG_NOTIFY);
 
-    return RET_OK;
+    return RES_OK;
 }
 
-error_t queue_get_no_wait(coro_t *coro, queue_t *queue, void *item) {
-    if (queue_empty(queue)) {
-        return QUEUE_EMPTY;
+result_t queue_get_no_wait(coro_t *coro, queue_t *queue, void *item) {
+    if (queue_is_empty(queue)) {
+        return RES_QUEUE_EMPTY;
     }
 
     _internal_get(queue, item);
@@ -120,5 +125,5 @@ error_t queue_get_no_wait(coro_t *coro, queue_t *queue, void *item) {
     coro->event_source.params.queue = queue;
     coro_yield_with_signal(coro, CORO_SIG_NOTIFY);
 
-    return RET_OK;
+    return RES_OK;
 }
