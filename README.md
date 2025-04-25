@@ -2,8 +2,8 @@
 
 <img src="docs/_static/logo-transparent.svg" alt="poco" style="max-height:160px;margin-left: auto;margin-right: auto;display:block;"/>
 
-![](https://github.com/kenkaijie/poco/actions/workflows/ubuntu.yml/badge.svg)
-![](https://readthedocs.org/projects/poco-coro/badge/?version=latest)
+[![](https://github.com/kenkaijie/poco/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/kenkaijie/poco/actions/workflows/ubuntu.yml)
+[![](https://readthedocs.org/projects/poco-coro/badge/?version=latest)](https://poco-coro.readthedocs.io/en/latest/)
 
 This is a small toy project that produces a bare minimum cooperative task framework.
 
