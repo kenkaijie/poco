@@ -4,7 +4,7 @@
 
 poco supports a minimal set of communication primitives. These primitives support
 communication between coroutines. It is worth noting that without interrupts, all
-corotuines can share memory space. The primitives help better express concepts, as it
+coroutines can share memory space. The primitives help better express concepts, as it
 allows expression of tasks that are "waiting" for some input.
 
 - `queue.h` for homogenous multi-byte elements.

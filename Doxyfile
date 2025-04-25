@@ -1,0 +1,31 @@
+# Doxyfile 1.9.4 configuration for configuration values changed from the default.
+#
+# This is primarily used to generate XML output for use with sphinx-breathe.
+#
+# Use:
+# - doxygen -g [configFile] to generate the base file (kitchen sink)
+#
+
+PROJECT_NAME           = "poco"
+PROJECT_BRIEF          = "pocket coroutine library"
+
+# The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
+# into which the generated documentation will be written. If a relative path is
+# entered, it will be relative to the location where doxygen was started. If
+# left blank the current directory will be used.
+
+OUTPUT_DIRECTORY       = $(DOXYGEN_OUTPUT_DIR)
+INPUT                  = include
+FILE_PATTERNS          = *.c \
+                         *.h
+RECURSIVE              = YES
+GENERATE_HTML          = NO
+GENERATE_LATEX         = NO
+GENERATE_XML           = YES
+XML_OUTPUT             = xml
+GENERATE_LEGEND        = NO
+INCLUDE_GRAPH          = NO
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = YES
+PREDEFINED             = __attribute__(x)=
