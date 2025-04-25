@@ -2,6 +2,9 @@
 
 <img src="docs/_static/logo-transparent.svg" alt="poco" style="max-height:160px;margin-left: auto;margin-right: auto;display:block;"/>
 
+![](https://github.com/kenkaijie/poco/actions/workflows/ubuntu.yml/badge.svg)
+![](https://readthedocs.org/projects/poco-coro/badge/?version=latest)
+
 This is a small toy project that produces a bare minimum cooperative task framework.
 
 The objective here is to provide the minimum functionalities needed by a scheduler in
