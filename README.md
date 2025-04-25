@@ -1,6 +1,6 @@
 # poco - Pocket Coroutines
 
-<img src="docs/images/background-transparent.png" alt="poco" style="max-height:160px;margin-left: auto;margin-right: auto;display:block;"/>
+<img src="docs/_static/logo-transparent.svg" alt="poco" style="max-height:160px;margin-left: auto;margin-right: auto;display:block;"/>
 
 This is a small toy project that produces a bare minimum cooperative task framework.
 
@@ -17,8 +17,9 @@ order to support general purpose applications on a bare metal device.
 ## WIP
 
 - Basic Schedulers (Priority, Priority Round Robin)
-- More Thread Primitives (Events, Mutexes, Sempahores)
+- More Thread Primitives? (Events, Mutexes, Sempahores)
 - ISR Support (Primitive support for ISR usage, scheduler support for ISR)
+- Scheduler guidelines (tickless scheduler?)
 
 ### Extensions
 

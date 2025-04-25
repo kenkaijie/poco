@@ -1,1 +1,5 @@
+# Python build dependencies
+.venv/
+
+# General Build folder
 build/

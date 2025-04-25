@@ -1,0 +1,5 @@
+breathe~=4.36.0
+myst-parser
+sphinx~=8.0.2
+sphinx-rtd-theme~=3.0.2
+sphinxcontrib-plantuml ~=0.30
