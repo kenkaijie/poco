@@ -2,7 +2,7 @@
  * @file
  * @brief Communication primitives between the coroutine and the scheduler.
  *
- * Event sinks and sources are connected , that is, event sources can update one
+ * Event sinks and sources are connected that is, event sources can update one
  * or more event sinks.
  */
 #pragma once

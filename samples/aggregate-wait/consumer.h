@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <poco/platform.h>
 #include <poco/coro.h>
 #include <poco/event.h>
 #include <poco/queue.h>
@@ -24,8 +25,8 @@ typedef struct command {
     int c;
 } command_t;
 
-__attribute__((__aligned__(8))) typedef struct consumer {
-    uint32_t stack[1024];
+typedef struct consumer {
+    platform_stack_t stack[1024];
     coro_t coro;
     event_t event;
     message_t message_queue_buffer[16];

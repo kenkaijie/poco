@@ -85,7 +85,7 @@ struct coro {
  * @param stack_size_words Size of the stack, in words.
  */
 #define CORO_STATIC_DEFINE(name, stack_size_words)                                     \
-    static uint32_t name##_stack[stack_size_words] __attribute__((__aligned__(8)));    \
+    static platform_stack_t name##_stack[stack_size_words];  \
     static coro_t name##_coro;
 
 /*!

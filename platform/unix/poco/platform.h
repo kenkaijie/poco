@@ -18,6 +18,8 @@ extern "C" {
 #include <ucontext.h>
 
 // Platform Context implementation
+typedef uint32_t platform_stack_t;
+
 typedef ucontext_t platform_context_t;
 
 #define platform_get_context(context) getcontext(context)

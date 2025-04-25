@@ -7,8 +7,8 @@ __attribute__((optimize("omit-frame-pointer"))) static void trampoline(void) {
     register platform_context_t *uc_link = NULL;
 
     __asm__ volatile("mov %0, r4\n"
-                 :              // No output operands
-                 : "r"(uc_link) // Input operands
+                     :              // No output operands
+                     : "r"(uc_link) // Input operands
     );
 
     if (uc_link == NULL) {
@@ -41,14 +41,15 @@ int platform_get_context(platform_context_t *ucp) {
 }
 
 int platform_set_context(const platform_context_t *ucp) {
-    __asm__ volatile("add r14, %0, #0xC\n" // setup as address (r14 = &context->uc_mcontext)
-                 "ldmia r14, {r0-r12}\n"   // restore all registers
-                 "ldr r13, [r14, #0x34]\n" // restore stack from ctx->r13
+    __asm__ volatile(
+        "add r14, %0, #0xC\n"     // setup as address (r14 = &context->uc_mcontext)
+        "ldmia r14, {r0-r12}\n"   // restore all registers
+        "ldr r13, [r14, #0x34]\n" // restore stack from ctx->r13
 
-                 "ldr r14, [r14, #0x38]\n" // restore link register from ctx->r14
-                 "mov pc, r3\n"            // Branch to the link register (return)
-                 :                         // No output operands
-                 : "r"(ucp));
+        "ldr r14, [r14, #0x38]\n" // restore link register from ctx->r14
+        "mov pc, r3\n"            // Branch to the link register (return)
+        :                         // No output operands
+        : "r"(ucp));
     return 0;
 }
 
