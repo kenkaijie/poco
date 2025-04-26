@@ -15,10 +15,10 @@
 
 #define CONSUMER_STOP (0xFFFFFFFF)
 
-CORO_STATIC_DEFINE(producer, 1024);
-CORO_STATIC_DEFINE(consumer, 1024);
+// The recommended minimum size should always be at least 2x the coroutine size.
+#define STACK_SIZE (2 * sizeof(coro_t))
 
-QUEUE_STATIC_DEFINE(numbers, 10, int);
+#define QUEUE_COUNT (10)
 
 void producer_task(coro_t *coro, void *context) {
     queue_t *queue = (queue_t *)context;
@@ -51,17 +51,28 @@ void consumer_task(coro_t *coro, void *context) {
 
 int main() {
 
-    coro_t *tasks[2] = {0};
+    queue_t *queue_handle = queue_create(QUEUE_COUNT, sizeof(int));
 
-    queue_t *queue =
-        queue_create_static(&numbers_queue, 10, sizeof(int), numbers_queue_buffer);
+    coro_t *producer_handle =
+        coro_create(producer_task, (void *)queue_handle, STACK_SIZE);
 
-    tasks[0] = coro_create_static(&producer_coro, producer_task, (void *)queue,
-                                  producer_stack, sizeof(producer_stack));
-    tasks[1] = coro_create_static(&consumer_coro, consumer_task, (void *)queue,
-                                  consumer_stack, sizeof(consumer_stack));
+    if (producer_handle == NULL) {
+        /* Memory error */
+        return -1;
+    }
 
-    round_robin_scheduler_t *scheduler = round_robin_scheduler_create(tasks, 2);
+    coro_t *consumer_handle =
+        coro_create(consumer_task, (void *)queue_handle, STACK_SIZE);
+
+    if (consumer_handle == NULL) {
+        /* Memory error */
+        return -1;
+    }
+
+    coro_t *tasks[] = {producer_handle, consumer_handle};
+
+    round_robin_scheduler_t *scheduler =
+        round_robin_scheduler_create(tasks, sizeof(tasks) / sizeof(tasks[0]));
 
     if (scheduler == NULL) {
         printf("Failed to create scheduler\n");
@@ -69,6 +80,12 @@ int main() {
     }
 
     scheduler_run((scheduler_t *)scheduler);
+
+    /* Everything finished */
+
+    coro_free(producer_handle);
+    coro_free(consumer_handle);
+    queue_free(queue_handle);
 
     return 0;
 }

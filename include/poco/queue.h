@@ -61,6 +61,25 @@ queue_t *queue_create_static(queue_t *queue, size_t num_items, size_t item_size,
                              uint8_t *item_buffer);
 
 /*!
+ * @brief Creates a queue with a fixed number of elements.
+ *
+ * @param num_items Number of items this queue will manage.
+ * @param item_size Size of an individual item, in bytes.
+ *
+ * @return Pointer to the queue, or NULL if an error has occured.
+ */
+queue_t *queue_create(size_t num_items, size_t item_size);
+
+/*!
+ * @brief Frees a previously created queue.
+ *
+ * @warning Freeing a statically created queue is undefined.
+ *
+ * @param queue Queue to Free.
+ */
+void queue_free(queue_t *queue);
+
+/*!
  * @brief Gets the number of items in a queue.
  *
  * @param queue

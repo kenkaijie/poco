@@ -35,6 +35,40 @@ queue_t *queue_create_static(queue_t *queue, size_t num_items, size_t item_size,
     return queue;
 }
 
+queue_t *queue_create(size_t num_items, size_t item_size) {
+    queue_t *queue = (queue_t *)malloc(sizeof(queue_t));
+    if (queue == NULL) {
+        /* No memory. */
+        return NULL;
+    }
+    uint8_t *item_buffer = (uint8_t *)malloc(num_items * item_size);
+    if (item_buffer == NULL) {
+        /* No memory. */
+        free(queue);
+        return NULL;
+    }
+
+    queue_t *queue_handle =
+        queue_create_static(queue, num_items, item_size, item_buffer);
+    if (queue_handle == NULL) {
+        queue_free(queue);
+    }
+    return queue_handle;
+}
+
+void queue_free(queue_t *queue) {
+    if (queue == NULL) {
+        /* Cannot free null pointer. */
+        return;
+    }
+
+    if (queue->item_buffer != NULL) {
+        free(queue->item_buffer);
+    }
+
+    free(queue);
+}
+
 size_t queue_item_count(queue_t *queue) { return queue->count; }
 
 bool queue_is_full(queue_t *queue) {
