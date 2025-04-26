@@ -55,7 +55,7 @@ static bool _update_event_sink(coro_event_sink_t *sink,
 }
 
 coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context,
-                           uint32_t *stack, size_t stack_size) {
+                           platform_stack_t *stack, size_t stack_size) {
     // fill the stack with a marking value
     // mark the start of the stack with a magic number,
     // and the end with another magic number, we will reduce the stack size by 2 bytes
@@ -65,6 +65,8 @@ coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context
 
     coro->coro_state = CORO_STATE_READY;
     coro->entrypoint = function;
+    coro->stack = stack;
+    coro->stack_size = stack_size;
     coro->resume_context.uc_stack.ss_sp = (void *)(stack + 1);
     coro->resume_context.uc_stack.ss_size = stack_size - (2 * sizeof(uint32_t));
     coro->resume_context.uc_link = 0;
@@ -72,6 +74,46 @@ coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context
     platform_get_context(&coro->resume_context);
     platform_make_context(&coro->resume_context, _coro_entry_point, coro, context);
     return coro;
+}
+
+coro_t *coro_create(coro_function_t function, void *context, size_t stack_size) {
+    coro_t *coro = (coro_t *)malloc(sizeof(coro_t));
+    if (coro == NULL) {
+        /* No memory */
+        return NULL;
+    }
+
+    // we can only create items which are multiples of platform_stack_t.
+    size_t block_count = stack_size / sizeof(platform_stack_t);
+    size_t real_stack_size = sizeof(platform_stack_t) * block_count;
+    platform_stack_t *stack = (platform_stack_t *)malloc(real_stack_size);
+
+    if (stack == NULL) {
+        /* No memory. */
+        free(coro);
+        return NULL;
+    }
+
+    coro_t *coro_handle =
+        coro_create_static(coro, function, context, stack, real_stack_size);
+    if (coro_handle == NULL) {
+        coro_free(coro);
+    }
+
+    return coro_handle;
+}
+
+void coro_free(coro_t *coro) {
+    if (coro == NULL) {
+        /* cannot free null pointer */
+        return;
+    }
+
+    if (coro->stack != NULL) {
+        free(coro->stack);
+    }
+
+    free(coro);
 }
 
 coro_signal_t coro_resume(coro_t *coro) {

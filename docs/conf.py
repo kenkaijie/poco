@@ -18,7 +18,8 @@ author = "Kenneth Ng"
 extensions = [
     "breathe",
     "myst_parser",
-    "sphinxcontrib.plantuml"
+    "sphinxcontrib.plantuml",
+    "sphinx.ext.autosectionlabel"
 ]
 
 templates_path = ["_templates"]
@@ -31,8 +32,13 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 html_logo = "_static/logo-outline.svg"
 
+# -- Options for Auto Section Label -----------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/autosectionlabel.html
+
+autosectionlabel_prefix_document = True
+autosectionlabel_maxdepth = 2
+
 # -- Options for Breathe -----------------------------------------------------
 
 breathe_projects = {"poco": "../build/doxygen/xml"}
-
 breathe_default_project = "poco"

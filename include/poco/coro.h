@@ -69,6 +69,13 @@ struct coro {
     /** Coroutine's main entrypoint function. */
     coro_function_t entrypoint;
 
+    /** Stack Declaration */
+    platform_stack_t *stack;
+
+    /** Stack length, in bytes. Will always be an integer multiple of platform_stack_t.
+     */
+    size_t stack_size;
+
     // Ping pong contexts
     platform_context_t suspend_context;
     platform_context_t resume_context;
@@ -98,7 +105,7 @@ struct coro {
     static coro_t name##_coro;
 
 /*!
- * @brief Creates a coroutine with the specific stack and entrypoint.
+ * @brief Creates a statically defined coroutine with the specific stack and entrypoint.
  *
  * @param coro Coroutine descriptor to initialise.
  * @param function Entrypoint function.
@@ -110,6 +117,26 @@ struct coro {
  */
 coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context,
                            platform_stack_t *stack, size_t stack_size);
+
+/*!
+ * @brief Creates a coroutine with the specific stack and entrypoint.
+ *
+ * @param function Entrypoint function.
+ * @param context User context passed into the entrypoint function.
+ * @param stack_size Size of the stack, in bytes.
+ *
+ * @return pointer to the coroutine, or NULL if a coroutine cannot be created.
+ */
+coro_t *coro_create(coro_function_t function, void *context, size_t stack_size);
+
+/*!
+ * @brief Frees a dynamically created coroutine.
+ *
+ * @warning Using this on a statically created coroutine is undefined.
+ *
+ * @param coro Coroutine to free.
+ */
+void coro_free(coro_t *coro);
 
 /*!
  * @brief Called by the coroutine to yield control back to the scheduler.
