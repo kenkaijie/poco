@@ -10,6 +10,7 @@ extern "C" {
 #endif
 
 #include <poco/coro.h>
+#include <poco/platform.h>
 #include <poco/result.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -117,10 +118,13 @@ bool queue_is_empty(queue_t *queue);
  * @param coro Coroutine that is putting the item into the queue.
  * @param queue Queue to put the item into.
  * @param item Item to put into the queue.
+ * @param timeout Maximum time to wait before giving up.
  *
  * @retval #RES_OK on success.
+ * @retval #RES_TIMEOUT if the maximum time was awaited.
  */
-result_t queue_put(coro_t *coro, queue_t *queue, void const *item);
+result_t queue_put(coro_t *coro, queue_t *queue, void const *item,
+                   platform_ticks_t timeout);
 
 /*!
  * @brief Gets an item from the queue from a coroutine.
@@ -131,10 +135,12 @@ result_t queue_put(coro_t *coro, queue_t *queue, void const *item);
  * @param coro Coroutine that is getting the item from the queue.
  * @param queue Queue to get the item from.
  * @param item Item to get from the queue.
+ * @param timeout Maximum time to wait before giving up.
  *
  * @retval #RES_OK on success.
+ * @retval #RES_TIMEOUT if the maximum time was awaited.
  */
-result_t queue_get(coro_t *coro, queue_t *queue, void *item);
+result_t queue_get(coro_t *coro, queue_t *queue, void *item, platform_ticks_t timeout);
 
 /*!
  * @brief Puts an item without waiting.

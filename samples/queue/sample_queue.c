@@ -23,12 +23,12 @@
 void producer_task(coro_t *coro, void *context) {
     queue_t *queue = (queue_t *)context;
     for (int i = 0; i < 3; ++i) {
-        queue_put(coro, queue, (void *)&i);
+        queue_put(coro, queue, (void *)&i, PLATFORM_TICKS_FOREVER);
         printf("Put %d\n", i);
         coro_yield_delay(coro, 1000);
     }
     int sentinel = CONSUMER_STOP;
-    queue_put(coro, queue, (void *)&sentinel);
+    queue_put(coro, queue, (void *)&sentinel, PLATFORM_TICKS_FOREVER);
     printf("Put %d\n", sentinel);
     return;
 }
@@ -37,7 +37,7 @@ void consumer_task(coro_t *coro, void *context) {
     queue_t *queue = (queue_t *)context;
     while (1) {
         int received_value = 0;
-        queue_get(coro, queue, (void *)&received_value);
+        queue_get(coro, queue, (void *)&received_value, PLATFORM_TICKS_FOREVER);
         printf("Got: %d\n", received_value);
 
         if (received_value == CONSUMER_STOP) {

@@ -5,7 +5,7 @@ static void consumer_loop(coro_t *coro, consumer_t *consumer) {
     while (1) {
         printf("Waiting on message or command.\n");
         flags_t events = event_get(coro, &consumer->event, CONSUMER_SIG_ALL,
-                                   CONSUMER_SIG_ALL, false);
+                                   CONSUMER_SIG_ALL, false, PLATFORM_TICKS_FOREVER);
         if (events & CONSUMER_SIG_COMMAND) {
             command_t command = {0};
             queue_get_no_wait(coro, &consumer->command_queue, (void *)&command);

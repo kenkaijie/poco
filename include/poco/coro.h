@@ -88,6 +88,11 @@ struct coro {
 
     /** Managed event sinks, only valid if the coroutine is blocked. */
     coro_event_sink_t event_sinks[EVENT_SINK_SLOT_COUNT];
+
+    /** The event sink item that unblocked this sink, only valid after a blocked
+     * coroutine as been unblocked.
+     */
+    size_t triggered_event_sink_slot;
 };
 
 /*!
