@@ -25,6 +25,7 @@ enum result_category {
     RES_GROUP_CORE = 1,
     RES_GROUP_QUEUE = 2,
     RES_GROUP_EVENT = 3,
+    RES_GROUP_MUTEX = 4,
 };
 
 /*!

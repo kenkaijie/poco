@@ -102,8 +102,10 @@ struct coro {
  * the variables directly, instead should use the pointer returned from
  * @ref coro_create_static.
  *
+ * @note This declaration does not take into account the 2 extra slots for watermarks.
+ * 
  * @param name Name of the coroutine.
- * @param stack_size Size of the stack, in words.
+ * @param stack_size Size of the stack, in platform specific elements.
  */
 #define CORO_STATIC_DEFINE(name, stack_size)                                           \
     static platform_stack_t name##_stack[stack_size];                                  \
@@ -112,11 +114,15 @@ struct coro {
 /*!
  * @brief Creates a statically defined coroutine with the specific stack and entrypoint.
  *
+ * @note For stack diagnostics, we actually consume the first and last element of the
+ *       stack for watermarks. The consequence is that the actual usable stack size will
+ *       be 2 less than the declared value.
+ * 
  * @param coro Coroutine descriptor to initialise.
  * @param function Entrypoint function.
  * @param context User context passed into the entrypoint function.
  * @param stack Pointer to a predefined stack space (must be word aligned).
- * @param stack_size Size of the stack, in bytes.
+ * @param stack_size Size of the stack, in platform specific elements.
  *
  * @return pointer to the coroutine, or NULL if parameters are invalid.
  */
@@ -126,9 +132,13 @@ coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context
 /*!
  * @brief Creates a coroutine with the specific stack and entrypoint.
  *
+ * @note For stack diagnostics, we actually consume the first and last element of the
+ *       stack for watermarks. The consequence is that the actual usable stack size will
+ *       be 2 less than the declared value.
+ * 
  * @param function Entrypoint function.
  * @param context User context passed into the entrypoint function.
- * @param stack_size Size of the stack, in bytes.
+ * @param stack_size Size of the stack, in platform specific elements.
  *
  * @return pointer to the coroutine, or NULL if a coroutine cannot be created.
  */

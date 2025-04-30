@@ -17,8 +17,10 @@
 #include <poco/schedulers/round_robin.h>
 #include <stdio.h>
 
-CORO_STATIC_DEFINE(producer_1, 1024);
-CORO_STATIC_DEFINE(producer_2, 1024);
+#define STACK_SIZE (1024)
+
+CORO_STATIC_DEFINE(producer_1, STACK_SIZE);
+CORO_STATIC_DEFINE(producer_2, STACK_SIZE);
 
 consumer_t consumer;
 
@@ -79,9 +81,9 @@ int main() {
     }
 
     tasks[0] = coro_create_static(&producer_1_coro, producer_1_task, &consumer,
-                                  producer_1_stack, sizeof(producer_1_stack));
+                                  producer_1_stack, STACK_SIZE);
     tasks[1] = coro_create_static(&producer_2_coro, producer_2_task, &consumer,
-                                  producer_2_stack, sizeof(producer_2_stack));
+                                  producer_2_stack, STACK_SIZE);
     tasks[2] = &consumer.coro;
 
     round_robin_scheduler_t *scheduler = round_robin_scheduler_create(tasks, 3);

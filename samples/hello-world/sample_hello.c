@@ -14,8 +14,10 @@
 #include <poco/schedulers/round_robin.h>
 #include <stdio.h>
 
-CORO_STATIC_DEFINE(hello, 1024);
-CORO_STATIC_DEFINE(world, 1024);
+#define STACK_SIZE (1024)
+
+CORO_STATIC_DEFINE(hello, STACK_SIZE);
+CORO_STATIC_DEFINE(world, STACK_SIZE);
 
 void hello_task(coro_t *coro, void *context) {
     for (int i = 0; i < 5; ++i) {
@@ -37,10 +39,8 @@ int main() {
 
     coro_t *tasks[2] = {0};
 
-    tasks[0] = coro_create_static(&hello_coro, hello_task, NULL, hello_stack,
-                                  sizeof(hello_stack));
-    tasks[1] = coro_create_static(&world_coro, world_task, NULL, world_stack,
-                                  sizeof(world_stack));
+    tasks[0] = coro_create_static(&hello_coro, hello_task, NULL, hello_stack, STACK_SIZE);
+    tasks[1] = coro_create_static(&world_coro, world_task, NULL, world_stack, STACK_SIZE);
 
     round_robin_scheduler_t *scheduler = round_robin_scheduler_create(tasks, 2);
 

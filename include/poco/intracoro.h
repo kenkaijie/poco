@@ -60,6 +60,9 @@ typedef enum coro_event_sink_type {
     CORO_EVTSINK_EVENT_GET,
 
     CORO_EVTSINK_SEMAPHORE_ACQUIRE,
+
+    CORO_EVTSINK_MUTEX_ACQUIRE,
+
 } coro_event_sink_type_t;
 
 typedef struct coro_event_sink {
@@ -89,6 +92,8 @@ typedef enum coro_event_source_type {
     CORO_EVTSRC_EVENT_SET,
 
     CORO_EVTSRC_SEMAPHORE_RELEASE,
+
+    CORO_EVTSRC_MUTEX_RELEASE,
 
 } coro_event_source_type_t;
 
