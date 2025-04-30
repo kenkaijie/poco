@@ -5,14 +5,14 @@
  * Enables coroutines to signal each other in a light weight manner, as compared to
  * the queue API.
  *
- * These are designed to be a multi producer and single consumer.
+ * These are designed to be a multi producer and single consumer, where the consumer is
+ * a coroutine.
  *
  * An event comprises of 32 bit flags. Each can be set. It is expected the consumer is
  * responsible for clearing the bits, while the producer is responsible for setting
  * them.
  *
- * If the producer sets and clears a bit before the consumer can read it, the
- * consumer will not detect the event.
+ * A producer can only set bits, it cannot clear them.
  */
 
 #pragma once
@@ -22,6 +22,7 @@ extern "C" {
 #endif
 
 #include <poco/coro.h>
+#include <poco/platform.h>
 #include <poco/scheduler.h>
 #include <stdint.h>
 
@@ -33,6 +34,10 @@ typedef struct event {
 
 event_t *event_create_static(event_t *event, flags_t initial);
 
+event_t *event_create(flags_t initial);
+
+void event_free(event_t *event);
+
 /*!
  * @brief Waits on the specific event flags.
  *
@@ -43,11 +48,12 @@ event_t *event_create_static(event_t *event, flags_t initial);
  * @param wait_for_all If true, all flags must be set before the coroutine will yield.
  *                     This effective sets if the mask uses OR or AND for its wait
  *                     logic.
+ * @param timeout Number of ticks to wait before timing out.
  *
  * @returns The flags that ended the wait. If flags are all 0, an error has occured.
  */
 flags_t event_get(coro_t *coro, event_t *event, flags_t mask, flags_t clear_mask,
-                  bool wait_for_all);
+                  bool wait_for_all, platform_ticks_t timeout);
 
 /*!
  * @brief Sets the event flags.

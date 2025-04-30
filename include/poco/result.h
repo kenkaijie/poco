@@ -42,6 +42,12 @@ enum res_codes_general {
 
     /*! Provided value is outside of the expected range. */
     RES_INVALID_VALUE = RES_CODE(RES_GROUP_GENERAL, 3),
+
+    /*! Operation that would cause an overflow has occured. */
+    RES_OVERFLOW = RES_CODE(RES_GROUP_GENERAL, 4),
+
+    /*! Operation exceeded maximum allowable time. */
+    RES_TIMEOUT = RES_CODE(RES_GROUP_GENERAL, 5),
 };
 
 #ifdef __cplusplus

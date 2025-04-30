@@ -28,24 +28,30 @@ static bool _update_event_sink(coro_event_sink_t *sink,
 
     switch (event->type) {
     case CORO_EVTSRC_ELAPSED:
-        if (sink->type == CORO_EVTSINK_DELAY) {
+        if (sink->type == CORO_EVTSINK_DELAY &&
+            sink->params.ticks_remaining != PLATFORM_TICKS_FOREVER) {
             sink->params.ticks_remaining -= event->params.elasped_ticks;
             unblock_task = (sink->params.ticks_remaining <= 0);
         }
         break;
     case CORO_EVTSRC_QUEUE_GET:
         if (sink->type == CORO_EVTSINK_QUEUE_NOT_FULL) {
-            unblock_task = (sink->params.queue == event->params.queue);
+            unblock_task = (sink->params.subject == event->params.subject);
         }
         break;
     case CORO_EVTSRC_QUEUE_PUT:
         if (sink->type == CORO_EVTSINK_QUEUE_NOT_EMPTY) {
-            unblock_task = (sink->params.queue == event->params.queue);
+            unblock_task = (sink->params.subject == event->params.subject);
         }
         break;
     case CORO_EVTSRC_EVENT_SET:
         if (sink->type == CORO_EVTSINK_EVENT_GET) {
-            unblock_task = (sink->params.event == event->params.event);
+            unblock_task = (sink->params.subject == event->params.subject);
+        }
+        break;
+    case CORO_EVTSRC_SEMAPHORE_RELEASE:
+        if (sink->type == CORO_EVTSINK_SEMAPHORE_ACQUIRE) {
+            unblock_task = (sink->params.subject == event->params.subject);
         }
         break;
     default:
@@ -105,7 +111,7 @@ coro_t *coro_create(coro_function_t function, void *context, size_t stack_size) 
 
 void coro_free(coro_t *coro) {
     if (coro == NULL) {
-        /* cannot free null pointer */
+        /* cannot free null pointer, as we cannot access the stack to free it first. */
         return;
     }
 
@@ -174,16 +180,14 @@ bool coro_notify(coro_t *coro, coro_event_source_t const *event) {
 
     bool unblock_task = false;
 
-    for (size_t event_sink_idx = 0;
-         (event_sink_idx < EVENT_SINK_SLOT_COUNT) && !unblock_task; ++event_sink_idx) {
-        unblock_task = _update_event_sink(&coro->event_sinks[event_sink_idx], event);
+    for (size_t idx = 0; (idx < EVENT_SINK_SLOT_COUNT); ++idx) {
+        unblock_task = _update_event_sink(&coro->event_sinks[idx], event);
+        if (unblock_task) {
+            coro->triggered_event_sink_slot = idx;
+            coro->coro_state = CORO_STATE_READY;
+            break;
+        }
     }
     /* Reset sinks, we are unblocked. */
-    if (unblock_task) {
-        for (size_t i = 0; i < EVENT_SINK_SLOT_COUNT; ++i) {
-            coro->event_sinks[i].type = CORO_EVTSINK_NONE;
-        }
-        coro->coro_state = CORO_STATE_READY;
-    }
     return unblock_task;
 }

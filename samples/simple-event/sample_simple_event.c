@@ -43,7 +43,8 @@ void producer_task(coro_t *coro, void *context) {
 
 void consumer_task(coro_t *coro, void *context) {
     event_t *event = (event_t *)context;
-    flags_t flags = event_get(coro, event, EVT_LONG_PRESS, 0, true);
+    flags_t flags =
+        event_get(coro, event, EVT_LONG_PRESS, 0, true, PLATFORM_TICKS_FOREVER);
     if (flags & EVT_LONG_PRESS) {
         printf("Handling long press\n");
     }

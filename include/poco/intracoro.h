@@ -21,26 +21,26 @@ typedef enum coro_signal {
      * Coroutine is waiting for a signal, this implies the sinks have been configured.
      * coroutine should not be resumed until any of the signals are triggered.
      */
-    CORO_SIG_WAIT = 1,
+    CORO_SIG_WAIT = 0,
 
     /**
      * This is a basic yield. Scheduler should place this coroutine back into the list
      * of coroutines to be scheduled, but update any blocked coroutines with the
      * provided event. Implies the event_source is active.
      */
-    CORO_SIG_NOTIFY = 2,
+    CORO_SIG_NOTIFY,
 
     /**
      * Combination of both notifying and also blocking. Implies both event sources and
      * event sinks are valid.
      */
-    CORO_SIG_NOTIFY_AND_WAIT = 3,
+    CORO_SIG_NOTIFY_AND_WAIT,
 
     /**
      * Special indicator indicating the coroutine is done and should no longer be
      * scheduled.
      */
-    CORO_SIG_DONE = 4, // Coroutine is done.
+    CORO_SIG_DONE, // Coroutine is done.
 } coro_signal_t;
 
 typedef enum coro_event_sink_type {
@@ -58,14 +58,15 @@ typedef enum coro_event_sink_type {
 
     /** Coroutine is waiting on an event. Uses the event parameter. */
     CORO_EVTSINK_EVENT_GET,
+
+    CORO_EVTSINK_SEMAPHORE_ACQUIRE,
 } coro_event_sink_type_t;
 
 typedef struct coro_event_sink {
     coro_event_sink_type_t type;
     union {
         platform_ticks_t ticks_remaining;
-        void *queue;
-        void *event;
+        void *subject;
     } params;
 } coro_event_sink_t;
 
@@ -87,13 +88,14 @@ typedef enum coro_event_source_type {
     /* An event has one of its field set. */
     CORO_EVTSRC_EVENT_SET,
 
+    CORO_EVTSRC_SEMAPHORE_RELEASE,
+
 } coro_event_source_type_t;
 
 typedef struct coro_event_source {
     coro_event_source_type_t type;
     union {
         platform_ticks_t elasped_ticks;
-        void *queue;
-        void *event;
+        void *subject;
     } params;
 } coro_event_source_t;

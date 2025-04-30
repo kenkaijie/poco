@@ -35,6 +35,8 @@ typedef ucontext_t platform_context_t;
 // Platform Timing
 typedef int64_t platform_ticks_t;
 
+#define PLATFORM_TICKS_FOREVER (INT64_MIN)
+
 __attribute__((always_inline)) static inline platform_ticks_t
 platform_get_monotonic_ticks(void) {
     struct timespec ts;
