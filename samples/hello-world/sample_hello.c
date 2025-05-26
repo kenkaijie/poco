@@ -16,40 +16,38 @@
 
 #define STACK_SIZE (DEFAULT_STACK_SIZE)
 
-CORO_STATIC_DEFINE(hello, STACK_SIZE);
-CORO_STATIC_DEFINE(world, STACK_SIZE);
-
-void hello_task(coro_t *coro, void *context) {
+void hello_task(void *context) {
     for (int i = 0; i < 5; ++i) {
         printf("Hello ");
-        coro_yield(coro);
+        coro_yield();
     }
     return;
 }
 
-void world_task(coro_t *coro, void *context) {
+void world_task(void *context) {
     for (int i = 0; i < 5; ++i) {
         printf("World!\n");
-        coro_yield(coro);
+        coro_yield();
     }
     return;
 }
 
 int main() {
 
-    coro_t *tasks[2] = {0};
+    coro_t *tasks[] = {
+        coro_create(hello_task, NULL, STACK_SIZE),
+        coro_create(world_task, NULL, STACK_SIZE),
+    };
 
-    tasks[0] = coro_create_static(&hello_coro, hello_task, NULL, hello_stack, STACK_SIZE);
-    tasks[1] = coro_create_static(&world_coro, world_task, NULL, world_stack, STACK_SIZE);
-
-    round_robin_scheduler_t *scheduler = round_robin_scheduler_create(tasks, 2);
+    scheduler_t *scheduler =
+        round_robin_scheduler_create(tasks, sizeof(tasks) / sizeof(tasks[0]));
 
     if (scheduler == NULL) {
         printf("Failed to create scheduler\n");
         return -1;
     }
 
-    scheduler_run((scheduler_t *)scheduler);
+    scheduler_run(scheduler);
 
     return 0;
 }

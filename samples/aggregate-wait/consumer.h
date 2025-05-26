@@ -40,11 +40,9 @@ result_t consumer_init(consumer_t *consumer);
 /*!
  * @brief Sends a message via the consumer.
  */
-result_t consumer_send_message(coro_t *curr_coro, consumer_t *consumer,
-                               message_t const *message);
+result_t consumer_send_message(consumer_t *consumer, message_t const *message);
 
 /*!
  * @brief Sends a command via the consumer.
  */
-result_t consumer_send_command(coro_t *curr_coro, consumer_t *consumer,
-                               command_t const *message);
+result_t consumer_send_command(consumer_t *consumer, command_t const *message);

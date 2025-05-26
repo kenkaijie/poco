@@ -37,12 +37,11 @@ typedef struct round_robin_scheduler {
  *
  * @return Pointer to the scheduler, or NULL on error.
  */
-round_robin_scheduler_t *round_robin_scheduler_create(coro_t *const *coro_list,
-                                                      size_t num_coros);
+scheduler_t *round_robin_scheduler_create(coro_t *const *coro_list, size_t num_coros);
 
-round_robin_scheduler_t *
-round_robin_scheduler_create_static(round_robin_scheduler_t *scheduler,
-                                    coro_t *const *coro_list, size_t num_coros);
+scheduler_t *round_robin_scheduler_create_static(round_robin_scheduler_t *scheduler,
+                                                 coro_t *const *coro_list,
+                                                 size_t num_coros);
 
 #ifdef __cplusplus
 }

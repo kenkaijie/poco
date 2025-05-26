@@ -16,6 +16,7 @@ order to support general purpose applications on a bare metal device.
 - Message queue.
 - Self Managed Scheduling (roll your own scheduler)
 - Basic Scheduling (Round Robin)
+- C99 support
 
 ## WIP
 

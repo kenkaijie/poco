@@ -24,48 +24,48 @@ CORO_STATIC_DEFINE(producer_2, STACK_SIZE);
 
 consumer_t consumer;
 
-void producer_1_task(coro_t *coro, void *context) {
+void producer_1_task(void *context) {
 
     consumer_t *consumer = (consumer_t *)context;
 
-    coro_yield_delay(coro, 100);
+    coro_yield_delay(100);
     message_t message = {
         .a = 12,
         .b = 11,
     };
     printf("Send message, a=%d, b=%d.\n", message.a, message.b);
-    consumer_send_message(coro, consumer, &message);
-    coro_yield_delay(coro, 100);
+    consumer_send_message(consumer, &message);
+    coro_yield_delay(100);
     message.a = 15;
     printf("Send message, a=%d, b=%d.\n", message.a, message.b);
-    consumer_send_message(coro, consumer, &message);
+    consumer_send_message(consumer, &message);
     message.a = 16;
     printf("Send message, a=%d, b=%d.\n", message.a, message.b);
-    consumer_send_message(coro, consumer, &message);
+    consumer_send_message(consumer, &message);
     return;
 }
 
-void producer_2_task(coro_t *coro, void *context) {
+void producer_2_task(void *context) {
     consumer_t *consumer = (consumer_t *)context;
 
-    coro_yield_delay(coro, 100);
+    coro_yield_delay(100);
     command_t command = {
         .a = 1,
         .b = 2,
         .c = 3,
     };
     printf("Send command, a=%d, b=%d, c=%d.\n", command.a, command.b, command.c);
-    consumer_send_command(coro, consumer, &command);
-    coro_yield_delay(coro, 100);
+    consumer_send_command(consumer, &command);
+    coro_yield_delay(100);
     command.a = 4;
     printf("Send command, a=%d, b=%d, c=%d.\n", command.a, command.b, command.c);
-    consumer_send_command(coro, consumer, &command);
+    consumer_send_command(consumer, &command);
     command.a = 5;
     printf("Send command, a=%d, b=%d, c=%d.\n", command.a, command.b, command.c);
-    consumer_send_command(coro, consumer, &command);
+    consumer_send_command(consumer, &command);
     command.a = -1;
     printf("Send command, a=%d, b=%d, c=%d.\n", command.a, command.b, command.c);
-    consumer_send_command(coro, consumer, &command);
+    consumer_send_command(consumer, &command);
     return;
 }
 
@@ -86,14 +86,15 @@ int main() {
                                   producer_2_stack, STACK_SIZE);
     tasks[2] = &consumer.coro;
 
-    round_robin_scheduler_t *scheduler = round_robin_scheduler_create(tasks, 3);
+    scheduler_t *scheduler =
+        round_robin_scheduler_create(tasks, sizeof(tasks) / sizeof(tasks[0]));
 
     if (scheduler == NULL) {
         printf("Failed to create scheduler\n");
         return -1;
     }
 
-    scheduler_run((scheduler_t *)scheduler);
+    scheduler_run(scheduler);
 
     return 0;
 }

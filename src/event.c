@@ -1,3 +1,5 @@
+#include <poco/context.h>
+#include <poco/coro.h>
 #include <poco/event.h>
 #include <poco/intracoro.h>
 
@@ -18,8 +20,10 @@ event_t *event_create(flags_t initial) {
 
 void event_free(event_t *event) { free(event); }
 
-flags_t event_get(coro_t *coro, event_t *event, flags_t mask, flags_t clear_mask,
-                  bool wait_for_all, platform_ticks_t timeout) {
+flags_t event_get(event_t *event, flags_t mask, flags_t clear_mask, bool wait_for_all,
+                  platform_ticks_t timeout) {
+
+    coro_t *coro = context_get_coro();
 
     flags_t captured_flags = 0;
     bool event_triggered = false;
@@ -38,7 +42,7 @@ flags_t event_get(coro_t *coro, event_t *event, flags_t mask, flags_t clear_mask
 
         if (!event_triggered) {
 
-            coro_yield_with_signal(coro, CORO_SIG_WAIT);
+            coro_yield_with_signal(CORO_SIG_WAIT);
 
             if (coro->triggered_event_sink_slot == EVENT_SINK_SLOT_TIMEOUT) {
                 break;
@@ -57,17 +61,23 @@ flags_t event_get(coro_t *coro, event_t *event, flags_t mask, flags_t clear_mask
     return captured_flags;
 }
 
-void event_set(coro_t *coro, event_t *event, flags_t mask) {
+void event_set(event_t *event, flags_t mask) {
+
+    coro_t *coro = context_get_coro();
+
     platform_enter_critical_section();
     event->flags |= mask;
     platform_exit_critical_section();
 
     coro->event_source.type = CORO_EVTSRC_EVENT_SET;
     coro->event_source.params.subject = event;
-    coro_yield_with_signal(coro, CORO_SIG_NOTIFY);
+    coro_yield_with_signal(CORO_SIG_NOTIFY);
 }
 
-void event_set_from_ISR(scheduler_t *scheduler, event_t *event, flags_t mask) {
+void event_set_from_ISR(event_t *event, flags_t mask) {
+
+    scheduler_t *scheduler = context_get_scheduler();
+
     platform_enter_critical_section();
     event->flags |= mask;
     platform_exit_critical_section();

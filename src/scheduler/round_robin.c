@@ -118,8 +118,7 @@ static void _scheduler_loop(round_robin_scheduler_t *scheduler) {
     }
 }
 
-round_robin_scheduler_t *round_robin_scheduler_create(coro_t *const *coro_list,
-                                                      size_t num_coros) {
+scheduler_t *round_robin_scheduler_create(coro_t *const *coro_list, size_t num_coros) {
     round_robin_scheduler_t *scheduler = malloc(sizeof(round_robin_scheduler_t));
     coro_t **copied_list = (coro_t **)malloc(num_coros * sizeof(coro_t *));
 
@@ -135,9 +134,9 @@ round_robin_scheduler_t *round_robin_scheduler_create(coro_t *const *coro_list,
     return round_robin_scheduler_create_static(scheduler, coro_list, num_coros);
 }
 
-round_robin_scheduler_t *
-round_robin_scheduler_create_static(round_robin_scheduler_t *scheduler,
-                                    coro_t *const *coro_list, size_t num_coros) {
+scheduler_t *round_robin_scheduler_create_static(round_robin_scheduler_t *scheduler,
+                                                 coro_t *const *coro_list,
+                                                 size_t num_coros) {
     scheduler->scheduler.run = (scheduler_run_t)_scheduler_loop;
     scheduler->scheduler.notify_from_isr =
         (scheduler_notify_from_isr_t)_notify_from_isr;
@@ -155,5 +154,5 @@ round_robin_scheduler_create_static(round_robin_scheduler_t *scheduler,
                         sizeof(coro_event_source_t),
                         (uint8_t *)scheduler->external_events);
 
-    return scheduler;
+    return (scheduler_t *)scheduler;
 }

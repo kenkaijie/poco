@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <poco/coro.h>
 #include <poco/intracoro.h>
 #include <poco/result.h>
 
@@ -77,10 +78,7 @@ typedef struct scheduler {
  *
  * @param scheduler Scheduler to run.
  */
-__attribute__((always_inline)) static inline void
-scheduler_run(scheduler_t *scheduler) {
-    return scheduler->run(scheduler);
-}
+void scheduler_run(scheduler_t *scheduler);
 
 /*!
  * @brief Notify the scheduler of an event

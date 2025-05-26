@@ -53,10 +53,9 @@ typedef struct coro coro_t;
 /*!
  * @brief Function declaration for the coroutine entrypoint.
  *
- * @param coro Coroutine calling this function.
  * @param context Provided user context when creating the coroutine.
  */
-typedef void (*coro_function_t)(coro_t *coro, void *context);
+typedef void (*coro_function_t)(void *context);
 
 /*!
  * @brief Represents a coroutine that can be scheduled and executed.
@@ -162,10 +161,8 @@ void coro_free(coro_t *coro);
  * This yields with the NONE event source.
  *
  * @note This function will block until the coroutine is resumed again.
- *
- * @param coro Coroutine to yield.
  */
-void coro_yield(coro_t *coro);
+void coro_yield(void);
 
 /*!
  * @brief Yield the coroutine with a specific delay.
@@ -174,10 +171,9 @@ void coro_yield(coro_t *coro);
  * resume until at least the specified time has passed. The scheduler may resume the
  * coroutine later if required.
  *
- * @param coro Coroutine to yield.
  * @param delay Minimum duration in milliseconds the coroutine should wait.
  */
-void coro_yield_delay(coro_t *coro, int64_t delay);
+void coro_yield_delay(int64_t delay);
 
 /*!
  * @brief Yield a coroutine with the provided signal source.
@@ -188,10 +184,9 @@ void coro_yield_delay(coro_t *coro, int64_t delay);
  *          primitive development. User application constructs should stick with regular
  *          yields.
  *
- * @param coro Coroutine to yield.
  * @param event Event to yield.
  */
-void coro_yield_with_event(coro_t *coro, coro_event_source_t const *event);
+void coro_yield_with_event(coro_event_source_t const *event);
 
 /*!
  * @brief Yield a coroutine with the provided signal type.
@@ -199,10 +194,9 @@ void coro_yield_with_event(coro_t *coro, coro_event_source_t const *event);
  * @warning This is a low-level yield, the caller is expected to correctly set up the
  *          coroutine's internal state before calling this to ensure correct operation.
  *
- * @param coro Coroutine to yield.
  * @param signal Signal to yield.
  */
-void coro_yield_with_signal(coro_t *coro, coro_signal_t signal);
+void coro_yield_with_signal(coro_signal_t signal);
 
 /*!
  * @brief Notify a coroutine of an event that may affect it's internal state.
