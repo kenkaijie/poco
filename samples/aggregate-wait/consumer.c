@@ -34,7 +34,7 @@ static void consumer_loop(coro_t *coro, consumer_t *consumer) {
 
 result_t consumer_init(consumer_t *consumer) {
     coro_create_static(&consumer->coro, (coro_function_t)consumer_loop, consumer,
-                       consumer->stack, sizeof(consumer->stack));
+                       consumer->stack, DEFAULT_STACK_SIZE);
 
     queue_create_static(&consumer->message_queue,
                         sizeof(consumer->message_queue_buffer) /

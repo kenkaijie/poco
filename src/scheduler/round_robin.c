@@ -2,8 +2,12 @@
 #include <poco/schedulers/round_robin.h>
 #include <string.h>
 
-static size_t _increment_task_index(round_robin_scheduler_t *scheduler) {
-    return (scheduler->current_task_index + 1) % scheduler->task_count;
+/*!
+ * @brief Add to the task array's index taking into account the number of tasks.
+ */
+static inline size_t _increment_task_index(round_robin_scheduler_t *scheduler,
+                                           size_t task_index, size_t step) {
+    return (task_index + step) % scheduler->task_count;
 }
 
 static result_t _notify_from_isr(round_robin_scheduler_t *scheduler,
@@ -22,6 +26,10 @@ static result_t _notify(round_robin_scheduler_t *scheduler,
     return queue_result;
 }
 
+static coro_t *_get_current_coro(round_robin_scheduler_t *scheduler) {
+    return scheduler->current_task;
+}
+
 static size_t _get_finished_task_count(round_robin_scheduler_t *scheduler) {
     size_t finished_tasks = 0;
     for (size_t i = 0; i < scheduler->task_count; ++i) {
@@ -35,10 +43,12 @@ static size_t _get_finished_task_count(round_robin_scheduler_t *scheduler) {
 static coro_t *_get_next_ready_task(round_robin_scheduler_t *scheduler) {
     for (size_t offset = 0; offset < scheduler->task_count; ++offset) {
         size_t task_index =
-            (scheduler->current_task_index + offset) % scheduler->task_count;
+            _increment_task_index(scheduler, scheduler->next_task_index, offset);
         if (scheduler->tasks[task_index]->coro_state == CORO_STATE_READY) {
-            scheduler->current_task_index = _increment_task_index(scheduler);
-            return scheduler->tasks[task_index];
+            scheduler->current_task = scheduler->tasks[task_index];
+            scheduler->next_task_index =
+                _increment_task_index(scheduler, task_index, 1);
+            return scheduler->current_task;
         }
     }
     return NULL;
@@ -132,10 +142,13 @@ round_robin_scheduler_create_static(round_robin_scheduler_t *scheduler,
     scheduler->scheduler.notify_from_isr =
         (scheduler_notify_from_isr_t)_notify_from_isr;
     scheduler->scheduler.notify = (scheduler_notify_t)_notify;
+    scheduler->scheduler.get_current_coroutine =
+        (scheduler_get_current_coroutine_t)_get_current_coro;
     scheduler->tasks = coro_list;
     scheduler->task_count = num_coros;
     scheduler->finished_tasks = 0;
-    scheduler->current_task_index = 0;
+    scheduler->current_task = NULL;
+    scheduler->next_task_index = 0;
 
     memset(scheduler->external_events, 0, sizeof(scheduler->external_events));
     queue_create_static(&scheduler->event_queue, SCHEDULER_MAX_EXTERNAL_EVENT_COUNT,

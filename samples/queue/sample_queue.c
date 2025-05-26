@@ -15,7 +15,7 @@
 
 #define CONSUMER_STOP (0xFFFFFFFF)
 
-#define STACK_SIZE (1024)
+#define STACK_SIZE (DEFAULT_STACK_SIZE)
 
 #define QUEUE_COUNT (10)
 

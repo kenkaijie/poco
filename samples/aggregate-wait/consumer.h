@@ -26,7 +26,7 @@ typedef struct command {
 } command_t;
 
 typedef struct consumer {
-    platform_stack_t stack[1024];
+    platform_stack_t stack[DEFAULT_STACK_SIZE];
     coro_t coro;
     event_t event;
     message_t message_queue_buffer[16];

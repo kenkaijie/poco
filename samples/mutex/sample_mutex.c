@@ -11,7 +11,7 @@
 #include <poco/schedulers/round_robin.h>
 #include <stdio.h>
 
-#define STACK_SIZE (1024)
+#define STACK_SIZE (DEFAULT_STACK_SIZE)
 
 void coroutine_a(coro_t *coro, void *context) {
     mutex_t *mutex = (mutex_t *)context;

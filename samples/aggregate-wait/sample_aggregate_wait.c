@@ -17,7 +17,7 @@
 #include <poco/schedulers/round_robin.h>
 #include <stdio.h>
 
-#define STACK_SIZE (1024)
+#define STACK_SIZE (DEFAULT_STACK_SIZE)
 
 CORO_STATIC_DEFINE(producer_1, STACK_SIZE);
 CORO_STATIC_DEFINE(producer_2, STACK_SIZE);

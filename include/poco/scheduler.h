@@ -55,6 +55,8 @@ typedef result_t (*scheduler_notify_t)(scheduler_t *scheduler,
 typedef result_t (*scheduler_notify_from_isr_t)(scheduler_t *scheduler,
                                                 coro_event_source_t const *event);
 
+typedef coro_t *(*scheduler_get_current_coroutine_t)(scheduler_t *scheduler);
+
 /*!
  * @brief Scheduler common interface.
  */
@@ -62,6 +64,7 @@ typedef struct scheduler {
     scheduler_run_t run;
     scheduler_notify_t notify;
     scheduler_notify_from_isr_t notify_from_isr;
+    scheduler_get_current_coroutine_t get_current_coroutine;
 } scheduler_t;
 
 /*!
@@ -110,4 +113,16 @@ scheduler_notify(scheduler_t *scheduler, coro_event_source_t const *event) {
 __attribute__((always_inline)) static inline result_t
 scheduler_notify_from_isr(scheduler_t *scheduler, coro_event_source_t const *event) {
     return scheduler->notify_from_isr(scheduler, event);
+}
+
+/*!
+ * @brief Gets the current running coroutine.
+ *
+ * @param scheduler Scheduler to check.
+ *
+ * @retval pointer to the coroutine, or NULL if the scheduler is not running.
+ */
+__attribute__((always_inline)) static inline coro_t *
+scheduler_get_current_coroutine(scheduler_t *scheduler) {
+    return scheduler->get_current_coroutine(scheduler);
 }

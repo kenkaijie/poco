@@ -14,7 +14,7 @@
 #include <stdio.h>
 
 #define CONSUMER_STOP (0xFFFFFFFF)
-#define STACK_SIZE (1024)
+#define STACK_SIZE (DEFAULT_STACK_SIZE)
 
 CORO_STATIC_DEFINE(producer, STACK_SIZE);
 CORO_STATIC_DEFINE(consumer, STACK_SIZE);

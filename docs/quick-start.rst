@@ -6,9 +6,15 @@ This guide provides small snippets on how to use poco.
 
 The activities generally fall into the following steps.
 
-1. Create tasks.
-2. Pick and initialise a scheduler.
+1. Pick and initialise a scheduler.
+2. Create tasks.
 3. Run the scheduler in the main loop.
+
+Picking a Scheduler
+===================
+
+The scheduler determines which coroutine is run at each context switch. Every coroutine
+is run within the context of a scheduler.
 
 Coroutine/Task Creation
 =======================
