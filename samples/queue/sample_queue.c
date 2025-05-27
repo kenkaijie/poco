@@ -15,8 +15,7 @@
 
 #define CONSUMER_STOP (0xFFFFFFFF)
 
-// The recommended minimum size should always be at least 2x the coroutine size.
-#define STACK_SIZE (2 * sizeof(coro_t))
+#define STACK_SIZE (1024)
 
 #define QUEUE_COUNT (10)
 
@@ -81,11 +80,7 @@ int main() {
 
     scheduler_run((scheduler_t *)scheduler);
 
-    /* Everything finished */
-
-    coro_free(producer_handle);
-    coro_free(consumer_handle);
-    queue_free(queue_handle);
+    /* Everything finished, no need to free as the process will terminate. */
 
     return 0;
 }

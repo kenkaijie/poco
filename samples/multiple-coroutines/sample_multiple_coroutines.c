@@ -18,8 +18,7 @@
 // array.
 
 static coro_t coroutines[CORO_COUNT];
-static uint32_t coroutine_stacks[CORO_COUNT][STACK_SIZE]
-    __attribute__((__aligned__(8)));
+static platform_stack_t coroutine_stacks[CORO_COUNT][STACK_SIZE];
 
 // We are using the same entry for all coroutines.
 void producer_task(coro_t *coro, void *context) {
@@ -38,7 +37,7 @@ int main() {
     for (size_t i = 0; i < CORO_COUNT; ++i) {
         tasks[i] =
             coro_create_static(&coroutines[i], producer_task, (void *)(uintptr_t)i,
-                               &(coroutine_stacks[i][0]), sizeof(coroutine_stacks[i]));
+                               &(coroutine_stacks[i][0]), STACK_SIZE);
     }
 
     round_robin_scheduler_t *scheduler =

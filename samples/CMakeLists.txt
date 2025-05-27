@@ -1,6 +1,7 @@
 add_subdirectory(aggregate-wait)
 add_subdirectory(hello-world)
 add_subdirectory(multiple-coroutines)
+add_subdirectory(mutex)
 add_subdirectory(queue)
 add_subdirectory(queue-overflow)
 add_subdirectory(simple-event)

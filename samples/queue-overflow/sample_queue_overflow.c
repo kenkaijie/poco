@@ -14,9 +14,10 @@
 #include <stdio.h>
 
 #define CONSUMER_STOP (0xFFFFFFFF)
+#define STACK_SIZE (1024)
 
-CORO_STATIC_DEFINE(producer, 1024);
-CORO_STATIC_DEFINE(consumer, 1024);
+CORO_STATIC_DEFINE(producer, STACK_SIZE);
+CORO_STATIC_DEFINE(consumer, STACK_SIZE);
 
 QUEUE_STATIC_DEFINE(numbers, 5, int);
 
@@ -57,9 +58,9 @@ int main() {
         queue_create_static(&numbers_queue, 5, sizeof(int), numbers_queue_buffer);
 
     tasks[0] = coro_create_static(&producer_coro, producer_task, (void *)queue,
-                                  producer_stack, sizeof(producer_stack));
+                                  producer_stack, STACK_SIZE);
     tasks[1] = coro_create_static(&consumer_coro, consumer_task, (void *)queue,
-                                  consumer_stack, sizeof(consumer_stack));
+                                  consumer_stack, STACK_SIZE);
 
     round_robin_scheduler_t *scheduler = round_robin_scheduler_create(tasks, 2);
 

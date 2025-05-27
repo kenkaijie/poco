@@ -3,7 +3,8 @@
 
 // These are reversed so they appear cute when debugging.
 #define STACK_START_MAGIC (0x0DF0FECA) // 0xCAFEF00D
-#define STACK_END_MAGIC (0xEFBEDABA)   // 0xBADABEEF
+#define STACK_END_MAGIC (0xEFBEADBA)   // 0xBAADBEEF
+#define STACK_PAINT_MAGIC (0x55)
 
 /*!
  * @brief Special yield mode to indicate the coroutine is done.
@@ -54,6 +55,10 @@ static bool _update_event_sink(coro_event_sink_t *sink,
             unblock_task = (sink->params.subject == event->params.subject);
         }
         break;
+    case CORO_EVTSRC_MUTEX_RELEASE:
+        if (sink->type == CORO_EVTSINK_MUTEX_ACQUIRE) {
+            unblock_task = (sink->params.subject == event->params.subject);
+        }
     default:
         unblock_task = false;
     }
@@ -62,19 +67,19 @@ static bool _update_event_sink(coro_event_sink_t *sink,
 
 coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context,
                            platform_stack_t *stack, size_t stack_size) {
-    // fill the stack with a marking value
+    // paint the stack with 0x55s
     // mark the start of the stack with a magic number,
     // and the end with another magic number, we will reduce the stack size by 2 bytes
-    memset(stack, 0x55, stack_size);
+    memset(stack, STACK_PAINT_MAGIC, stack_size);
     stack[0] = STACK_START_MAGIC;
-    stack[stack_size / sizeof(uint32_t) - 1] = STACK_END_MAGIC;
+    stack[stack_size - 1] = STACK_END_MAGIC;
 
     coro->coro_state = CORO_STATE_READY;
     coro->entrypoint = function;
     coro->stack = stack;
     coro->stack_size = stack_size;
     coro->resume_context.uc_stack.ss_sp = (void *)(stack + 1);
-    coro->resume_context.uc_stack.ss_size = stack_size - (2 * sizeof(uint32_t));
+    coro->resume_context.uc_stack.ss_size = (stack_size - 2) * sizeof(platform_stack_t);
     coro->resume_context.uc_link = 0;
 
     platform_get_context(&coro->resume_context);
@@ -90,9 +95,8 @@ coro_t *coro_create(coro_function_t function, void *context, size_t stack_size) 
     }
 
     // we can only create items which are multiples of platform_stack_t.
-    size_t block_count = stack_size / sizeof(platform_stack_t);
-    size_t real_stack_size = sizeof(platform_stack_t) * block_count;
-    platform_stack_t *stack = (platform_stack_t *)malloc(real_stack_size);
+    size_t const stack_size_bytes = sizeof(platform_stack_t) * stack_size;
+    platform_stack_t *stack = (platform_stack_t *)malloc(stack_size_bytes);
 
     if (stack == NULL) {
         /* No memory. */
@@ -101,7 +105,7 @@ coro_t *coro_create(coro_function_t function, void *context, size_t stack_size) 
     }
 
     coro_t *coro_handle =
-        coro_create_static(coro, function, context, stack, real_stack_size);
+        coro_create_static(coro, function, context, stack, stack_size_bytes);
     if (coro_handle == NULL) {
         coro_free(coro);
     }
