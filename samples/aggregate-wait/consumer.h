@@ -26,7 +26,7 @@ typedef struct command {
 } command_t;
 
 typedef struct consumer {
-    platform_stack_t stack[1024];
+    platform_stack_t stack[DEFAULT_STACK_SIZE];
     coro_t coro;
     event_t event;
     message_t message_queue_buffer[16];
@@ -40,11 +40,9 @@ result_t consumer_init(consumer_t *consumer);
 /*!
  * @brief Sends a message via the consumer.
  */
-result_t consumer_send_message(coro_t *curr_coro, consumer_t *consumer,
-                               message_t const *message);
+result_t consumer_send_message(consumer_t *consumer, message_t const *message);
 
 /*!
  * @brief Sends a command via the consumer.
  */
-result_t consumer_send_command(coro_t *curr_coro, consumer_t *consumer,
-                               command_t const *message);
+result_t consumer_send_command(consumer_t *consumer, command_t const *message);

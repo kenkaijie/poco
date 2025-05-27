@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include <signal.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <time.h>
@@ -19,6 +20,12 @@ extern "C" {
 
 // Platform Context implementation
 typedef uint32_t platform_stack_t;
+
+/** Default stack size needed to run the coroutine, in platform specific elements. */
+#define DEFAULT_STACK_SIZE (SIGSTKSZ / sizeof(platform_stack_t))
+
+/** Minimum stack size needed to run the coroutine, in platform specific elements. */
+#define MIN_STACK_SIZE (MINSIGSTKSZ / sizeof(platform_stack_t))
 
 typedef ucontext_t platform_context_t;
 

@@ -11,31 +11,30 @@
 #include <poco/schedulers/round_robin.h>
 #include <stdio.h>
 
-#define STACK_SIZE (1024)
+#define STACK_SIZE (DEFAULT_STACK_SIZE)
 
-void coroutine_a(coro_t *coro, void *context) {
+void coroutine_a(void *context) {
     mutex_t *mutex = (mutex_t *)context;
-    
-    mutex_acquire(coro, mutex, PLATFORM_TICKS_FOREVER);
+
+    mutex_acquire(mutex, PLATFORM_TICKS_FOREVER);
 
     for (int i = 0; i < 4; ++i) {
         printf("A%d\n", i);
     }
 
-    mutex_release(coro, mutex);
-
+    mutex_release(mutex);
 }
 
-void coroutine_b(coro_t *coro, void *context) {
+void coroutine_b(void *context) {
     mutex_t *mutex = (mutex_t *)context;
-    
-    mutex_acquire(coro, mutex, PLATFORM_TICKS_FOREVER);
+
+    mutex_acquire(mutex, PLATFORM_TICKS_FOREVER);
 
     for (int i = 0; i < 4; ++i) {
         printf("B%d\n", i);
     }
 
-    mutex_release(coro, mutex);
+    mutex_release(mutex);
 }
 
 int main() {
@@ -65,7 +64,7 @@ int main() {
 
     coro_t *tasks[] = {coro_a, coro_b};
 
-    round_robin_scheduler_t *scheduler =
+    scheduler_t *scheduler =
         round_robin_scheduler_create(tasks, sizeof(tasks) / sizeof(tasks[0]));
 
     if (scheduler == NULL) {
@@ -73,7 +72,7 @@ int main() {
         return -1;
     }
 
-    scheduler_run((scheduler_t *)scheduler);
+    scheduler_run(scheduler);
 
     /* Everything finished, no need to free as the process will terminate. */
     return 0;

@@ -1,3 +1,4 @@
+#include <poco/context.h>
 #include <poco/coro.h>
 #include <string.h>
 
@@ -18,7 +19,7 @@ static void _coro_yield_done(coro_t *coro) {
 }
 
 static void _coro_entry_point(coro_t *coro, void *context) {
-    coro->entrypoint(coro, context);
+    coro->entrypoint(context);
     coro->coro_state = CORO_STATE_FINISHED;
     _coro_yield_done(coro);
 }
@@ -126,36 +127,15 @@ void coro_free(coro_t *coro) {
     free(coro);
 }
 
-coro_signal_t coro_resume(coro_t *coro) {
-    if (coro->coro_state == CORO_STATE_FINISHED)
-        return CORO_SIG_DONE;
-
-    coro->coro_state = CORO_STATE_RUNNING;
-    platform_swap_context(&coro->suspend_context, &coro->resume_context);
-
-    switch (coro->yield_signal) {
-    case CORO_SIG_NOTIFY:
-        coro->coro_state = CORO_STATE_READY;
-        break;
-    case CORO_SIG_DONE:
-        coro->coro_state = CORO_STATE_FINISHED;
-        break;
-    case CORO_SIG_WAIT: /* Intentional Fall-through */
-    case CORO_SIG_NOTIFY_AND_WAIT:
-        coro->coro_state = CORO_STATE_BLOCKED;
-        break;
-    }
-
-    return coro->yield_signal;
-}
-
-void coro_yield(coro_t *coro) {
+void coro_yield(void) {
+    coro_t *coro = context_get_coro();
     coro->event_source.type = CORO_EVTSRC_NOOP;
     coro->yield_signal = CORO_SIG_NOTIFY;
     platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
-void coro_yield_delay(coro_t *coro, int64_t duration_ms) {
+void coro_yield_delay(int64_t duration_ms) {
+    coro_t *coro = context_get_coro();
     coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_NONE;
     coro->event_sinks[EVENT_SINK_SLOT_TIMEOUT].type = CORO_EVTSINK_DELAY;
     coro->event_sinks[EVENT_SINK_SLOT_TIMEOUT].params.ticks_remaining =
@@ -165,13 +145,15 @@ void coro_yield_delay(coro_t *coro, int64_t duration_ms) {
     platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
-void coro_yield_with_event(coro_t *coro, coro_event_source_t const *event) {
+void coro_yield_with_event(coro_event_source_t const *event) {
+    coro_t *coro = context_get_coro();
     coro->event_source = *event;
     coro->yield_signal = CORO_SIG_NOTIFY;
     platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
-void coro_yield_with_signal(coro_t *coro, coro_signal_t signal) {
+void coro_yield_with_signal(coro_signal_t signal) {
+    coro_t *coro = context_get_coro();
     coro->yield_signal = signal;
     platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
@@ -194,4 +176,27 @@ bool coro_notify(coro_t *coro, coro_event_source_t const *event) {
     }
     /* Reset sinks, we are unblocked. */
     return unblock_task;
+}
+
+coro_signal_t coro_resume(coro_t *coro) {
+    if (coro->coro_state == CORO_STATE_FINISHED)
+        return CORO_SIG_DONE;
+
+    coro->coro_state = CORO_STATE_RUNNING;
+    platform_swap_context(&coro->suspend_context, &coro->resume_context);
+
+    switch (coro->yield_signal) {
+    case CORO_SIG_NOTIFY:
+        coro->coro_state = CORO_STATE_READY;
+        break;
+    case CORO_SIG_DONE:
+        coro->coro_state = CORO_STATE_FINISHED;
+        break;
+    case CORO_SIG_WAIT: /* Intentional Fall-through */
+    case CORO_SIG_NOTIFY_AND_WAIT:
+        coro->coro_state = CORO_STATE_BLOCKED;
+        break;
+    }
+
+    return coro->yield_signal;
 }

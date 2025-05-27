@@ -1,10 +1,9 @@
 # Scheduler Choice
 
-poco comes with 2 basic schedulers, round-robin and priority. The user is free to choose
-one to use within their projects depending on the application.
+poco comes with 2 basic schedulers; round-robin and priority. The user is free to choose
+one to use within their projects depending on the application or create their own.
 
-These scheduler types are not unique to this library, and the tradeoffs here are also
-universal with any round-robin/priority scheduling problem.
+A general summary of the tradeoffs between the 2 types is found below.
 
 Round-Robin
 
@@ -15,4 +14,4 @@ Priority
 
 - High responsiveness.
 - Susceptible to resource starvation (if high priority coroutine never blocks)
-- Introduces potential for prioirity inversion.
+- Introduces a class of bugs such as priority inversion.

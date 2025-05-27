@@ -12,7 +12,7 @@
 #include <stdio.h>
 
 #define CORO_COUNT (1024) // number of coroutines to spawn
-#define STACK_SIZE (1024)
+#define STACK_SIZE (DEFAULT_STACK_SIZE)
 
 // As we are creating a large number of homogenous coroutines, we just do it as an
 // array.

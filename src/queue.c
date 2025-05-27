@@ -1,3 +1,5 @@
+#include <poco/context.h>
+#include <poco/coro.h>
 #include <poco/intracoro.h>
 #include <poco/queue.h>
 #include <string.h>
@@ -120,9 +122,9 @@ result_t queue_raw_get(queue_t *queue, void *item) {
     return RES_OK;
 }
 
-result_t queue_put(coro_t *coro, queue_t *queue, void const *item,
-                   platform_ticks_t timeout) {
+result_t queue_put(queue_t *queue, void const *item, platform_ticks_t timeout) {
 
+    coro_t *coro = context_get_coro();
     bool put_success = false;
 
     coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_QUEUE_NOT_FULL;
@@ -141,7 +143,7 @@ result_t queue_put(coro_t *coro, queue_t *queue, void const *item,
 
         if (!put_success) {
 
-            coro_yield_with_signal(coro, CORO_SIG_WAIT);
+            coro_yield_with_signal(CORO_SIG_WAIT);
 
             if (coro->triggered_event_sink_slot == EVENT_SINK_SLOT_TIMEOUT) {
                 /* Timeout. */
@@ -153,14 +155,14 @@ result_t queue_put(coro_t *coro, queue_t *queue, void const *item,
     if (put_success) {
         coro->event_source.type = CORO_EVTSRC_QUEUE_PUT;
         coro->event_source.params.subject = queue;
-        coro_yield_with_signal(coro, CORO_SIG_NOTIFY);
+        coro_yield_with_signal(CORO_SIG_NOTIFY);
     }
 
     return (put_success) ? RES_OK : RES_TIMEOUT;
 }
 
-result_t queue_get(coro_t *coro, queue_t *queue, void *item, platform_ticks_t timeout) {
-
+result_t queue_get(queue_t *queue, void *item, platform_ticks_t timeout) {
+    coro_t *coro = context_get_coro();
     bool get_success = false;
 
     coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_QUEUE_NOT_EMPTY;
@@ -178,7 +180,7 @@ result_t queue_get(coro_t *coro, queue_t *queue, void *item, platform_ticks_t ti
         platform_exit_critical_section();
 
         if (!get_success) {
-            coro_yield_with_signal(coro, CORO_SIG_WAIT);
+            coro_yield_with_signal(CORO_SIG_WAIT);
 
             if (coro->triggered_event_sink_slot == EVENT_SINK_SLOT_TIMEOUT) {
                 /* Timeout. */
@@ -190,14 +192,14 @@ result_t queue_get(coro_t *coro, queue_t *queue, void *item, platform_ticks_t ti
     if (get_success) {
         coro->event_source.type = CORO_EVTSRC_QUEUE_GET;
         coro->event_source.params.subject = queue;
-        coro_yield_with_signal(coro, CORO_SIG_NOTIFY);
+        coro_yield_with_signal(CORO_SIG_NOTIFY);
     }
 
     return (get_success) ? RES_OK : RES_TIMEOUT;
 }
 
-result_t queue_put_no_wait(coro_t *coro, queue_t *queue, void const *item) {
-
+result_t queue_put_no_wait(queue_t *queue, void const *item) {
+    coro_t *coro = context_get_coro();
     bool put_success = false;
 
     platform_enter_critical_section();
@@ -210,13 +212,14 @@ result_t queue_put_no_wait(coro_t *coro, queue_t *queue, void const *item) {
     if (put_success) {
         coro->event_source.type = CORO_EVTSRC_QUEUE_PUT;
         coro->event_source.params.subject = queue;
-        coro_yield_with_signal(coro, CORO_SIG_NOTIFY);
+        coro_yield_with_signal(CORO_SIG_NOTIFY);
     }
 
     return (put_success) ? RES_OK : RES_QUEUE_FULL;
 }
 
-result_t queue_get_no_wait(coro_t *coro, queue_t *queue, void *item) {
+result_t queue_get_no_wait(queue_t *queue, void *item) {
+    coro_t *coro = context_get_coro();
     bool get_success = false;
 
     platform_enter_critical_section();
@@ -229,7 +232,7 @@ result_t queue_get_no_wait(coro_t *coro, queue_t *queue, void *item) {
     if (get_success) {
         coro->event_source.type = CORO_EVTSRC_QUEUE_GET;
         coro->event_source.params.subject = queue;
-        coro_yield_with_signal(coro, CORO_SIG_NOTIFY);
+        coro_yield_with_signal(CORO_SIG_NOTIFY);
     }
 
     return (get_success) ? RES_OK : RES_QUEUE_EMPTY;

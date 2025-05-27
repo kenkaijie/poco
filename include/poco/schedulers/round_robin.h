@@ -23,7 +23,8 @@ typedef struct round_robin_scheduler {
     coro_t *const *tasks;
     size_t task_count;
     size_t finished_tasks;
-    size_t current_task_index; /**< index of the currently running task */
+    coro_t *current_task;
+    size_t next_task_index; /**< index to check next when performing a context switch */
     queue_t event_queue;
     coro_event_source_t external_events[SCHEDULER_MAX_EXTERNAL_EVENT_COUNT];
 } round_robin_scheduler_t;
@@ -36,12 +37,11 @@ typedef struct round_robin_scheduler {
  *
  * @return Pointer to the scheduler, or NULL on error.
  */
-round_robin_scheduler_t *round_robin_scheduler_create(coro_t *const *coro_list,
-                                                      size_t num_coros);
+scheduler_t *round_robin_scheduler_create(coro_t *const *coro_list, size_t num_coros);
 
-round_robin_scheduler_t *
-round_robin_scheduler_create_static(round_robin_scheduler_t *scheduler,
-                                    coro_t *const *coro_list, size_t num_coros);
+scheduler_t *round_robin_scheduler_create_static(round_robin_scheduler_t *scheduler,
+                                                 coro_t *const *coro_list,
+                                                 size_t num_coros);
 
 #ifdef __cplusplus
 }

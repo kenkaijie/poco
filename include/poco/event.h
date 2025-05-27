@@ -21,7 +21,6 @@
 extern "C" {
 #endif
 
-#include <poco/coro.h>
 #include <poco/platform.h>
 #include <poco/scheduler.h>
 #include <stdint.h>
@@ -41,7 +40,6 @@ void event_free(event_t *event);
 /*!
  * @brief Waits on the specific event flags.
  *
- * @param coro Coroutine that is waiting on the event.
  * @param event Event to wait on.
  * @param mask Mask to wait on, can be used to ignore flags.
  * @param clear_mask Flags to clear after the wait has finished.
@@ -52,17 +50,16 @@ void event_free(event_t *event);
  *
  * @returns The flags that ended the wait. If flags are all 0, an error has occured.
  */
-flags_t event_get(coro_t *coro, event_t *event, flags_t mask, flags_t clear_mask,
-                  bool wait_for_all, platform_ticks_t timeout);
+flags_t event_get(event_t *event, flags_t mask, flags_t clear_mask, bool wait_for_all,
+                  platform_ticks_t timeout);
 
 /*!
  * @brief Sets the event flags.
  *
- * @param coro The currently running coroutine.
  * @param event Event to set.
  * @param mask Mask to set.
  */
-void event_set(coro_t *coro, event_t *event, flags_t mask);
+void event_set(event_t *event, flags_t mask);
 
 /*!
  * @brief Sets the event flags from an ISR.
@@ -70,11 +67,10 @@ void event_set(coro_t *coro, event_t *event, flags_t mask);
  * The responsiveness of the waking coroutine will depend on the scheduler
  * implementation.
  *
- * @param scheduler Scheduler running the coroutines.
  * @param event Event to set.
  * @param mask Mask to set.
  */
-void event_set_from_ISR(scheduler_t *scheduler, event_t *event, flags_t mask);
+void event_set_from_ISR(event_t *event, flags_t mask);
 
 #ifdef __cplusplus
 }

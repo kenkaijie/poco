@@ -1,3 +1,5 @@
+#include <poco/context.h>
+#include <poco/coro.h>
 #include <poco/mutex.h>
 
 mutex_t * mutex_create_static(mutex_t * mutex) {
@@ -20,8 +22,8 @@ void mutex_free(mutex_t * mutex) {
     free(mutex);
 }
 
-result_t mutex_acquire(coro_t * coro, mutex_t * mutex, platform_ticks_t timeout) {
-
+result_t mutex_acquire(mutex_t *mutex, platform_ticks_t timeout) {
+    coro_t *coro = context_get_coro();
     bool acquire_success = false;
 
     coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_MUTEX_ACQUIRE;
@@ -37,7 +39,7 @@ result_t mutex_acquire(coro_t * coro, mutex_t * mutex, platform_ticks_t timeout)
         }
 
         if (!acquire_success) {
-            coro_yield_with_signal(coro, CORO_SIG_WAIT);
+            coro_yield_with_signal(CORO_SIG_WAIT);
 
             if (coro->triggered_event_sink_slot == EVENT_SINK_SLOT_TIMEOUT) {
                 /* Timeout. */
@@ -47,11 +49,11 @@ result_t mutex_acquire(coro_t * coro, mutex_t * mutex, platform_ticks_t timeout)
     }
 
     return (acquire_success) ? RES_OK : RES_TIMEOUT;
-
 }
 
-result_t mutex_acquire_no_wait(coro_t * coro, mutex_t * mutex) {
+result_t mutex_acquire_no_wait(mutex_t *mutex) {
     // no need locks, mutex operations should only happen within coroutines.
+    coro_t *coro = context_get_coro();
 
     if (mutex->owner != NULL) {
         return RES_MUTEX_OCCUPIED;
@@ -62,7 +64,8 @@ result_t mutex_acquire_no_wait(coro_t * coro, mutex_t * mutex) {
     return RES_OK;
 }
 
-result_t mutex_release(coro_t * coro, mutex_t * mutex) {
+result_t mutex_release(mutex_t *mutex) {
+    coro_t *coro = context_get_coro();
 
     if ((mutex->owner != NULL) && (mutex->owner != coro)) {
         return RES_MUTEX_NOT_OWNER;
@@ -75,7 +78,7 @@ result_t mutex_release(coro_t * coro, mutex_t * mutex) {
         .params.subject = mutex
     };
 
-    coro_yield_with_event(coro, &event_source);
+    coro_yield_with_event(&event_source);
 
     return RES_OK;
 }

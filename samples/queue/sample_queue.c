@@ -15,35 +15,35 @@
 
 #define CONSUMER_STOP (0xFFFFFFFF)
 
-#define STACK_SIZE (1024)
+#define STACK_SIZE (DEFAULT_STACK_SIZE)
 
 #define QUEUE_COUNT (10)
 
-void producer_task(coro_t *coro, void *context) {
+void producer_task(void *context) {
     queue_t *queue = (queue_t *)context;
     for (int i = 0; i < 3; ++i) {
-        queue_put(coro, queue, (void *)&i, PLATFORM_TICKS_FOREVER);
+        queue_put(queue, (void *)&i, PLATFORM_TICKS_FOREVER);
         printf("Put %d\n", i);
-        coro_yield_delay(coro, 1000);
+        coro_yield_delay(1000);
     }
     int sentinel = CONSUMER_STOP;
-    queue_put(coro, queue, (void *)&sentinel, PLATFORM_TICKS_FOREVER);
+    queue_put(queue, (void *)&sentinel, PLATFORM_TICKS_FOREVER);
     printf("Put %d\n", sentinel);
     return;
 }
 
-void consumer_task(coro_t *coro, void *context) {
+void consumer_task(void *context) {
     queue_t *queue = (queue_t *)context;
     while (1) {
         int received_value = 0;
-        queue_get(coro, queue, (void *)&received_value, PLATFORM_TICKS_FOREVER);
+        queue_get(queue, (void *)&received_value, PLATFORM_TICKS_FOREVER);
         printf("Got: %d\n", received_value);
 
         if (received_value == CONSUMER_STOP) {
             printf("Done\n");
             break;
         }
-        coro_yield(coro);
+        coro_yield();
     }
     return;
 }
@@ -70,7 +70,7 @@ int main() {
 
     coro_t *tasks[] = {producer_handle, consumer_handle};
 
-    round_robin_scheduler_t *scheduler =
+    scheduler_t *scheduler =
         round_robin_scheduler_create(tasks, sizeof(tasks) / sizeof(tasks[0]));
 
     if (scheduler == NULL) {
@@ -78,7 +78,7 @@ int main() {
         return -1;
     }
 
-    scheduler_run((scheduler_t *)scheduler);
+    scheduler_run(scheduler);
 
     /* Everything finished, no need to free as the process will terminate. */
 

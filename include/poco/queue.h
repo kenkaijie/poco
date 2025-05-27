@@ -9,7 +9,6 @@
 extern "C" {
 #endif
 
-#include <poco/coro.h>
 #include <poco/platform.h>
 #include <poco/result.h>
 #include <stdbool.h>
@@ -115,7 +114,6 @@ bool queue_is_empty(queue_t *queue);
  *
  * This operation blocks the calling coroutine until the item can be queued.
  *
- * @param coro Coroutine that is putting the item into the queue.
  * @param queue Queue to put the item into.
  * @param item Item to put into the queue.
  * @param timeout Maximum time to wait before giving up.
@@ -123,8 +121,7 @@ bool queue_is_empty(queue_t *queue);
  * @retval #RES_OK on success.
  * @retval #RES_TIMEOUT if the maximum time was awaited.
  */
-result_t queue_put(coro_t *coro, queue_t *queue, void const *item,
-                   platform_ticks_t timeout);
+result_t queue_put(queue_t *queue, void const *item, platform_ticks_t timeout);
 
 /*!
  * @brief Gets an item from the queue from a coroutine.
@@ -132,7 +129,6 @@ result_t queue_put(coro_t *coro, queue_t *queue, void const *item,
  * Items are copied out of the queue. It is up to the caller to allocate the
  * correct variable size.
  *
- * @param coro Coroutine that is getting the item from the queue.
  * @param queue Queue to get the item from.
  * @param item Item to get from the queue.
  * @param timeout Maximum time to wait before giving up.
@@ -140,31 +136,29 @@ result_t queue_put(coro_t *coro, queue_t *queue, void const *item,
  * @retval #RES_OK on success.
  * @retval #RES_TIMEOUT if the maximum time was awaited.
  */
-result_t queue_get(coro_t *coro, queue_t *queue, void *item, platform_ticks_t timeout);
+result_t queue_get(queue_t *queue, void *item, platform_ticks_t timeout);
 
 /*!
  * @brief Puts an item without waiting.
  *
- * @param coro Coroutine that is putting the item into the queue.
  * @param queue Queue to put the item into.
  * @param item Item to put into the queue.
  *
  * @retval #RES_OK Item has been queued.
  * @retval #RES_QUEUE_FULL Queue is full, no item has been inserted.
  */
-result_t queue_put_no_wait(coro_t *coro, queue_t *queue, void const *item);
+result_t queue_put_no_wait(queue_t *queue, void const *item);
 
 /*!
  * @brief Gets an item without waiting.
  *
- * @param coro Coroutine that is getting the item from the queue.
  * @param queue Queue to get the item from.
  * @param item Item to get from the queue, only valid if result was #RES_OK.
  *
  * @retval #RES_OK An item has been taken.
  * @retval #RES_QUEUE_EMPTY Queue has no items to get.
  */
-result_t queue_get_no_wait(coro_t *coro, queue_t *queue, void *item);
+result_t queue_get_no_wait(queue_t *queue, void *item);
 
 /*!
  * @brief Puts an item into the queue without notifying the scheduler.

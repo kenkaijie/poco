@@ -21,6 +21,9 @@ extern "C" {
 /** M4 requires stacks to be 8 byte aligned. */
 typedef __attribute__((aligned (8))) uint32_t platform_stack_t;
 
+#define DEFAULT_STACK_SIZE (256 / sizeof(platform_stack_t))
+#define MIN_STACK_SIZE (DEFAULT_STACK_SIZE)
+
 typedef struct machine_context {
     uint32_t volatile r0;     // 0x00
     uint32_t volatile r1;     // 0x04

@@ -15,7 +15,7 @@
 #include <stdio.h>
 
 #define CONSUMER_STOP (0xFFFFFFFF)
-#define STACK_SIZE (1024)
+#define STACK_SIZE (DEFAULT_STACK_SIZE)
 
 CORO_STATIC_DEFINE(producer, STACK_SIZE);
 CORO_STATIC_DEFINE(consumer, STACK_SIZE);
@@ -28,24 +28,23 @@ enum button_event_type {
     EVT_DOUBLE_PRESS = (1 << 2),
 };
 
-void producer_task(coro_t *coro, void *context) {
+void producer_task(void *context) {
     event_t *event = (event_t *)context;
-    coro_yield_delay(coro, 100);
+    coro_yield_delay(100);
     printf("Trigger press\n");
-    event_set(coro, event, EVT_PRESS);
-    coro_yield_delay(coro, 100);
+    event_set(event, EVT_PRESS);
+    coro_yield_delay(100);
     printf("Trigger press and double press\n");
-    event_set(coro, event, EVT_PRESS | EVT_DOUBLE_PRESS);
-    coro_yield_delay(coro, 100);
+    event_set(event, EVT_PRESS | EVT_DOUBLE_PRESS);
+    coro_yield_delay(100);
     printf("Trigger press and long press\n");
-    event_set(coro, event, EVT_PRESS | EVT_LONG_PRESS);
+    event_set(event, EVT_PRESS | EVT_LONG_PRESS);
     return;
 }
 
-void consumer_task(coro_t *coro, void *context) {
+void consumer_task(void *context) {
     event_t *event = (event_t *)context;
-    flags_t flags =
-        event_get(coro, event, EVT_LONG_PRESS, 0, true, PLATFORM_TICKS_FOREVER);
+    flags_t flags = event_get(event, EVT_LONG_PRESS, 0, true, PLATFORM_TICKS_FOREVER);
     if (flags & EVT_LONG_PRESS) {
         printf("Handling long press\n");
     }
@@ -63,14 +62,15 @@ int main() {
     tasks[1] = coro_create_static(&consumer_coro, consumer_task, (void *)event,
                                   consumer_stack, STACK_SIZE);
 
-    round_robin_scheduler_t *scheduler = round_robin_scheduler_create(tasks, 2);
+    scheduler_t *scheduler =
+        round_robin_scheduler_create(tasks, sizeof(tasks) / sizeof(tasks[0]));
 
     if (scheduler == NULL) {
         printf("Failed to create scheduler\n");
         return -1;
     }
 
-    scheduler_run((scheduler_t *)scheduler);
+    scheduler_run(scheduler);
 
     return 0;
 }
