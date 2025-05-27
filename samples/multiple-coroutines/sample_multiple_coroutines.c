@@ -21,12 +21,12 @@ static coro_t coroutines[CORO_COUNT];
 static platform_stack_t coroutine_stacks[CORO_COUNT][STACK_SIZE];
 
 // We are using the same entry for all coroutines.
-void producer_task(coro_t *coro, void *context) {
+void producer_task(void *context) {
     intptr_t starting_number = (intptr_t)context;
-    printf("%d\n", starting_number);
-    coro_yield(coro);
-    printf("%d\n", starting_number + CORO_COUNT);
-    coro_yield(coro);
+    printf("%ld\n", starting_number);
+    coro_yield();
+    printf("%ld\n", starting_number + CORO_COUNT);
+    coro_yield();
     return;
 }
 
@@ -40,15 +40,15 @@ int main() {
                                &(coroutine_stacks[i][0]), STACK_SIZE);
     }
 
-    round_robin_scheduler_t *scheduler =
-        round_robin_scheduler_create(tasks, CORO_COUNT);
+    scheduler_t *scheduler =
+        round_robin_scheduler_create(tasks, sizeof(tasks) / sizeof(tasks[0]));
 
     if (scheduler == NULL) {
         printf("Failed to create scheduler\n");
         return -1;
     }
 
-    scheduler_run((scheduler_t *)scheduler);
+    scheduler_run(scheduler);
 
     return 0;
 }
