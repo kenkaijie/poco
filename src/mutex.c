@@ -2,13 +2,13 @@
 #include <poco/coro.h>
 #include <poco/mutex.h>
 
-mutex_t * mutex_create_static(mutex_t * mutex) {
+mutex_t *mutex_create_static(mutex_t *mutex) {
     mutex->owner = NULL;
     return mutex;
 }
 
-mutex_t * mutex_create(void) {
-    mutex_t * mutex = (mutex_t *)malloc(sizeof(mutex_t));
+mutex_t *mutex_create(void) {
+    mutex_t *mutex = (mutex_t *)malloc(sizeof(mutex_t));
 
     if (mutex == NULL) {
         /* No memory. */
@@ -18,9 +18,7 @@ mutex_t * mutex_create(void) {
     return mutex_create_static(mutex);
 }
 
-void mutex_free(mutex_t * mutex) {
-    free(mutex);
-}
+void mutex_free(mutex_t *mutex) { free(mutex); }
 
 result_t mutex_acquire(mutex_t *mutex, platform_ticks_t timeout) {
     coro_t *coro = context_get_coro();
@@ -73,10 +71,8 @@ result_t mutex_release(mutex_t *mutex) {
 
     mutex->owner = NULL;
 
-    coro_event_source_t const event_source = {
-        .type = CORO_EVTSRC_MUTEX_RELEASE,
-        .params.subject = mutex
-    };
+    coro_event_source_t const event_source = {.type = CORO_EVTSRC_MUTEX_RELEASE,
+                                              .params.subject = mutex};
 
     coro_yield_with_event(&event_source);
 

@@ -84,7 +84,7 @@ to support a wider variety of schedulers if needed.
 
 .. literalinclude:: ../../samples/hello-world/sample_hello.c
     :language: c
-    :lines: 36-55
+    :lines: 35-53
 
 We use ``NULL`` for the user context, as they are not needed in this tutorial. More
 complex applications may use this to pass around pointers to queue and other constructs.
@@ -96,16 +96,16 @@ Defining the Tasks
 Thinking about the tasks in isolation, each task will either print the value ``Hello``
 or ``World!\n`` the console, then wait until the next task.
 
-Each task function has 2 arguments, the coroutine itself, and a user provided
-``context``. This context allows programs to pass in references to items the task
-requires to operate. In this tutorial, the additional context is not required.
+Each task function has a user provided ``context``. This context allows programs to pass
+in references to items the task requires to operate. In this tutorial, the additional
+context is not required.
 
 The sample below shows the implementation for the task printing ``Hello``. This can be
 implemented using normal flow control, and does not require any special handling.
 
 .. literalinclude:: ../../samples/hello-world/sample_hello.c
     :language: c
-    :lines: 20-26
+    :lines: 19-25
 
 The key line is where the yield takes place. This instructs the scheduler to pause the
 current execution of the function, and move on to the next task. When the scheduler
