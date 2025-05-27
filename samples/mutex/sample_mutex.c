@@ -1,7 +1,7 @@
 /*!
  * @file
  * @brief Example of coroutine synchronisation using mutexes.
- * 
+ *
  * In this sample, even if the coroutines are using the roun robin scheduler. Due to
  * coroutine A and B sharing a mutex, the output will be all A's, then all B's.
  */
@@ -46,16 +46,14 @@ int main() {
         return -1;
     }
 
-    coro_t *coro_a =
-        coro_create(coroutine_a, (void *)mutex, STACK_SIZE);
+    coro_t *coro_a = coro_create(coroutine_a, (void *)mutex, STACK_SIZE);
 
     if (coro_a == NULL) {
         /* Memory error */
         return -1;
     }
 
-    coro_t *coro_b =
-        coro_create(coroutine_b, (void *)mutex, STACK_SIZE);
+    coro_t *coro_b = coro_create(coroutine_b, (void *)mutex, STACK_SIZE);
 
     if (coro_b == NULL) {
         /* Memory error */

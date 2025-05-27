@@ -102,7 +102,7 @@ struct coro {
  * @ref coro_create_static.
  *
  * @note This declaration does not take into account the 2 extra slots for watermarks.
- * 
+ *
  * @param name Name of the coroutine.
  * @param stack_size Size of the stack, in platform specific elements.
  */
@@ -116,7 +116,7 @@ struct coro {
  * @note For stack diagnostics, we actually consume the first and last element of the
  *       stack for watermarks. The consequence is that the actual usable stack size will
  *       be 2 less than the declared value.
- * 
+ *
  * @param coro Coroutine descriptor to initialise.
  * @param function Entrypoint function.
  * @param context User context passed into the entrypoint function.
@@ -134,7 +134,7 @@ coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context
  * @note For stack diagnostics, we actually consume the first and last element of the
  *       stack for watermarks. The consequence is that the actual usable stack size will
  *       be 2 less than the declared value.
- * 
+ *
  * @param function Entrypoint function.
  * @param context User context passed into the entrypoint function.
  * @param stack_size Size of the stack, in platform specific elements.

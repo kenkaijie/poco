@@ -1,7 +1,7 @@
-/*! 
+/*!
  * @file
  * @brief Mutex for resource ownership on a single coroutine.
- * 
+ *
  * This does not have an ISR API, as mutexes are not no be used within an ISR context
  * (they are purely a coroutine primitive).
  */
@@ -21,43 +21,43 @@ enum res_codes_mutex {
 };
 
 typedef struct mutex {
-    coro_t * owner;
+    coro_t *owner;
 } mutex_t;
 
 /*!
  * @brief Initialise a statically allocated mutex.
  *
  * @param mutex Mutex to initialise.
- * 
+ *
  * @returns Pointer to the mutex.
  */
-mutex_t * mutex_create_static(mutex_t * mutex);
+mutex_t *mutex_create_static(mutex_t *mutex);
 
 /*!
  * @brief Dynamically create and initialise a mutex.
  *
  * @returns Pointer to a mutex, or NULL if it cannot be created.
  */
-mutex_t * mutex_create(void);
+mutex_t *mutex_create(void);
 
 /*!
  * @brief Free a previously created dynamic mutex.
  *
  * @warning Freeing a mutex not created by mutex_create is causes undefined behaviour.
- * 
+ *
  * @param mutex Mutex to free.
  */
-void mutex_free(mutex_t * mutex);
+void mutex_free(mutex_t *mutex);
 
 /*!
  * @brief Acquires a resource exclusively for this coroutine.
  *
  * @note Repeated calls from the same coroutine are allowed.
- * 
+ *
  * @param coro Current running coroutine.
  * @param mutex Mutex to acquire.
  * @param timeout Maximum time to wait before giving up.
- * 
+ *
  * @retval #RES_OK Mutex was acquired.
  * @retval #RES_TIMEOUT Timeout occurred.
  */

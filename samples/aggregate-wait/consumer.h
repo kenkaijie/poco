@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <poco/platform.h>
 #include <poco/coro.h>
 #include <poco/event.h>
+#include <poco/platform.h>
 #include <poco/queue.h>
 
 #define CONSUMER_SIG_MESSAGE (1 << 0) /** Queue 1 has an item. */
