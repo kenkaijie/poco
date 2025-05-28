@@ -225,6 +225,13 @@ bool coro_notify(coro_t *coro, coro_event_source_t const *event);
  */
 coro_signal_t coro_resume(coro_t *coro);
 
+/*!
+ * @brief Join and waits for the target coroutine to finish before resuming.
+ *
+ * @param coro Coroutine to join.
+ */
+void coro_join(coro_t *coro);
+
 #ifdef __cplusplus
 }
 #endif

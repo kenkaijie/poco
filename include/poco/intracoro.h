@@ -38,9 +38,9 @@ typedef enum coro_signal {
 
     /**
      * Special indicator indicating the coroutine is done and should no longer be
-     * scheduled.
+     * scheduled. Implies the event_source is active.
      */
-    CORO_SIG_DONE, // Coroutine is done.
+    CORO_SIG_NOTIFY_AND_DONE,
 } coro_signal_t;
 
 typedef enum coro_event_sink_type {
@@ -59,9 +59,14 @@ typedef enum coro_event_sink_type {
     /** Coroutine is waiting on an event. Uses the event parameter. */
     CORO_EVTSINK_EVENT_GET,
 
+    /** Coroutine is waiting on a sempahore to have space. */
     CORO_EVTSINK_SEMAPHORE_ACQUIRE,
 
+    /** Coroutine is waiting on a mutex to be released. */
     CORO_EVTSINK_MUTEX_ACQUIRE,
+
+    /** Coroutine is waiting on another coroutine to finish. */
+    CORO_EVTSINK_WAIT_FINISH,
 
 } coro_event_sink_type_t;
 
@@ -74,26 +79,31 @@ typedef struct coro_event_sink {
 } coro_event_sink_t;
 
 typedef enum coro_event_source_type {
-    /* No special event. */
+    /** No special event. */
     CORO_EVTSRC_NOOP = 0,
 
-    /* Indicates that an elasped period of time has passed. */
+    /** Indicates that an elasped period of time has passed. */
     CORO_EVTSRC_ELAPSED,
 
-    /* Indicates a queue has had an item put in it, coroutines waiting should unblock.
+    /** Indicates a queue has had an item put in it, coroutines waiting should unblock.
        Uses the queue parameter. */
     CORO_EVTSRC_QUEUE_PUT,
 
-    /* Indicates a queue has had an item removed from it, coroutines waiting should
+    /** Indicates a queue has had an item removed from it, coroutines waiting should
        unblock. Uses the queue parameter. */
     CORO_EVTSRC_QUEUE_GET,
 
-    /* An event has one of its field set. */
+    /** An event has one of its field set. */
     CORO_EVTSRC_EVENT_SET,
 
+    /** A sempahore has been released. */
     CORO_EVTSRC_SEMAPHORE_RELEASE,
 
+    /** A mutex has been released. */
     CORO_EVTSRC_MUTEX_RELEASE,
+
+    /** Coroutine has finished. */
+    CORO_EVTSRC_CORO_FINISHED,
 
 } coro_event_source_type_t;
 
