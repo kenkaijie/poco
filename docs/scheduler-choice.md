@@ -8,10 +8,10 @@ A general summary of the tradeoffs between the 2 types is found below.
 Round-Robin
 
 - Prevents resource starvation.
-- Low responsiveness.
+- Lower responsiveness.
 
 Priority
 
-- High responsiveness.
+- Higher responsiveness.
 - Susceptible to resource starvation (if high priority coroutine never blocks)
 - Introduces a class of bugs such as priority inversion.

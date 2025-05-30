@@ -7,21 +7,13 @@
 #define STACK_END_MAGIC (0xEFBEADBA)   // 0xBAADBEEF
 #define STACK_PAINT_MAGIC (0x55)
 
-/*!
- * @brief Special yield mode to indicate the coroutine is done.
- *
- * This is private as no user yields should abort the coroutine. If this is needed,
- * simply return from the coroutine.
- */
-static void _coro_yield_done(coro_t *coro) {
-    coro->yield_signal = CORO_SIG_DONE;
-    platform_swap_context(&coro->resume_context, &coro->suspend_context);
-}
-
 static void _coro_entry_point(coro_t *coro, void *context) {
     coro->entrypoint(context);
-    coro->coro_state = CORO_STATE_FINISHED;
-    _coro_yield_done(coro);
+
+    /** Coroutine is finished, setup events. */
+    coro->event_source.type = CORO_EVTSRC_CORO_FINISHED;
+    coro->event_source.params.subject = coro;
+    coro_yield_with_signal(CORO_SIG_NOTIFY_AND_DONE);
 }
 
 static bool _update_event_sink(coro_event_sink_t *sink,
@@ -60,6 +52,12 @@ static bool _update_event_sink(coro_event_sink_t *sink,
         if (sink->type == CORO_EVTSINK_MUTEX_ACQUIRE) {
             unblock_task = (sink->params.subject == event->params.subject);
         }
+        break;
+    case CORO_EVTSRC_CORO_FINISHED:
+        if (sink->type == CORO_EVTSINK_WAIT_FINISH) {
+            unblock_task = (sink->params.subject == event->params.subject);
+        }
+        break;
     default:
         unblock_task = false;
     }
@@ -180,7 +178,7 @@ bool coro_notify(coro_t *coro, coro_event_source_t const *event) {
 
 coro_signal_t coro_resume(coro_t *coro) {
     if (coro->coro_state == CORO_STATE_FINISHED)
-        return CORO_SIG_DONE;
+        return CORO_SIG_NOTIFY_AND_DONE;
 
     coro->coro_state = CORO_STATE_RUNNING;
     platform_swap_context(&coro->suspend_context, &coro->resume_context);
@@ -189,7 +187,7 @@ coro_signal_t coro_resume(coro_t *coro) {
     case CORO_SIG_NOTIFY:
         coro->coro_state = CORO_STATE_READY;
         break;
-    case CORO_SIG_DONE:
+    case CORO_SIG_NOTIFY_AND_DONE:
         coro->coro_state = CORO_STATE_FINISHED;
         break;
     case CORO_SIG_WAIT: /* Intentional Fall-through */
@@ -199,4 +197,21 @@ coro_signal_t coro_resume(coro_t *coro) {
     }
 
     return coro->yield_signal;
+}
+
+void coro_join(coro_t *coro) {
+    coro_t *this_coro = context_get_coro();
+    if (coro->coro_state == CORO_STATE_FINISHED) {
+        /* Already done. */
+        coro_yield();
+        return;
+    }
+
+    this_coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_WAIT_FINISH;
+    this_coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].params.subject = coro;
+    this_coro->event_sinks[EVENT_SINK_SLOT_TIMEOUT].type = CORO_EVTSINK_NONE;
+
+    coro_yield_with_signal(CORO_SIG_WAIT);
+
+    return;
 }

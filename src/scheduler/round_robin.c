@@ -79,12 +79,11 @@ static void _scheduler_loop(round_robin_scheduler_t *scheduler) {
             coro_event_source_t *coroutine_event = NULL;
 
             switch (signal) {
+            case CORO_SIG_NOTIFY_AND_DONE: /* Intentional Fall-through */
+                scheduler->finished_tasks++;
             case CORO_SIG_NOTIFY: /* Intentional Fall-through */
             case CORO_SIG_NOTIFY_AND_WAIT:
                 coroutine_event = &next_coro->event_source;
-                break;
-            case CORO_SIG_DONE:
-                scheduler->finished_tasks++;
                 break;
             case CORO_SIG_WAIT:
                 // do nothing, unblock if an event is triggered.
