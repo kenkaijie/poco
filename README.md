@@ -21,7 +21,7 @@ order to support general purpose applications on a bare metal device.
 ## WIP
 
 - Basic Schedulers (Priority, Priority Round Robin)
-- More Thread Primitives? (Events, Mutexes, Sempahores)
+- More Thread Primitives? (Events, Mutexes, semaphores)
 - ISR Support (Primitive support for ISR usage, scheduler support for ISR)
 - Scheduler guidelines (tickless scheduler?)
 
