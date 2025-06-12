@@ -59,7 +59,7 @@ typedef enum coro_event_sink_type {
     /** Coroutine is waiting on an event. Uses the event parameter. */
     CORO_EVTSINK_EVENT_GET,
 
-    /** Coroutine is waiting on a sempahore to have space. */
+    /** Coroutine is waiting on a semaphore to have space. */
     CORO_EVTSINK_SEMAPHORE_ACQUIRE,
 
     /** Coroutine is waiting on a mutex to be released. */
@@ -96,7 +96,7 @@ typedef enum coro_event_source_type {
     /** An event has one of its field set. */
     CORO_EVTSRC_EVENT_SET,
 
-    /** A sempahore has been released. */
+    /** A semaphore has been released. */
     CORO_EVTSRC_SEMAPHORE_RELEASE,
 
     /** A mutex has been released. */

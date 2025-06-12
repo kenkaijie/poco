@@ -1,5 +1,3 @@
-
-
 target_sources(poco PRIVATE
     context.c
     coro.c
@@ -7,6 +5,7 @@ target_sources(poco PRIVATE
     mutex.c
     queue.c
     scheduler.c
+    semaphore.c
 )
 
 add_subdirectory(scheduler)
