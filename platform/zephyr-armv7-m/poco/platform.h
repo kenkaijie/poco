@@ -19,7 +19,7 @@ extern "C" {
 #include <zephyr/kernel.h>
 
 /** M4 requires stacks to be 8 byte aligned. */
-typedef __attribute__((aligned (8))) uint32_t platform_stack_t;
+typedef uint64_t platform_stack_t;
 
 #define DEFAULT_STACK_SIZE (256 / sizeof(platform_stack_t))
 #define MIN_STACK_SIZE (DEFAULT_STACK_SIZE)
@@ -90,6 +90,8 @@ void platform_make_context(platform_context_t *context, void (*func)(void *, voi
                            void *context1, void *context2);
 
 typedef int64_t platform_ticks_t;
+
+#define PLATFORM_TICKS_FOREVER (INT64_MIN)
 
 __attribute__((always_inline)) static inline platform_ticks_t
 platform_get_monotonic_ticks(void) {

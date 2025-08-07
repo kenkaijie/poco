@@ -99,7 +99,7 @@ static void _scheduler_loop(round_robin_scheduler_t *scheduler) {
         // Process a time signal, which is synthesized within the scheduler.
         if (current_ticks != previous_ticks) {
             coro_event_source_t time_event = {
-                .type = CORO_EVTSINK_DELAY,
+                .type = CORO_EVTSRC_ELAPSED,
                 .params.elasped_ticks = (current_ticks - previous_ticks),
             };
             scheduler_notify((scheduler_t *)scheduler, &time_event);

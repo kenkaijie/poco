@@ -57,7 +57,6 @@ result_t semaphore_acquire(semaphore_t *semaphore, platform_ticks_t delay_ticks)
 
 result_t semaphore_release(semaphore_t *semaphore) {
     bool released = false;
-    coro_t *coro = context_get_coro();
 
     platform_enter_critical_section();
     if (semaphore->slots_remaining != semaphore->slot_count) {
@@ -77,7 +76,6 @@ result_t semaphore_release(semaphore_t *semaphore) {
 
 result_t semaphore_acquire_from_isr(semaphore_t *semaphore) {
     bool acquired = false;
-    scheduler_t *scheduler = context_get_scheduler();
 
     if (semaphore->slots_remaining != 0) {
         semaphore->slots_remaining--;
