@@ -58,6 +58,16 @@ semaphore_t *semaphore_create(size_t slot_count);
 semaphore_t *semaphore_create_static(semaphore_t *semaphore, size_t slot_count);
 
 /*!
+ * @brief Frees a semaphore created using the dyanamic allocation functions.
+ *
+ * @warning Freeing a sempahore not created by semaphore_create* is causes undefined
+ * behaviour.
+ *
+ * @param semaphore Semaphore to free (binary or counting).
+ */
+void semaphore_free(semaphore_t *semaphore);
+
+/*!
  * @brief Acquire the semaphore, waiting forever.
  *
  * @param coro Calling coroutine.

@@ -24,6 +24,8 @@ semaphore_t *semaphore_create_static(semaphore_t *semaphore, size_t slot_count) 
     return semaphore;
 }
 
+void semaphore_free(semaphore_t *semaphore) { free(semaphore); }
+
 result_t semaphore_acquire(semaphore_t *semaphore, platform_ticks_t delay_ticks) {
     bool acquired = false;
     coro_t *coro = context_get_coro();
