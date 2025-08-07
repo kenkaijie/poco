@@ -18,6 +18,7 @@ CORO_STATIC_DEFINE(coro1, STACK_SIZE);
 CORO_STATIC_DEFINE(coro2, STACK_SIZE);
 
 void coro1_task(void *context) {
+    (void)context;
     for (int cycle = 0; cycle < 5; ++cycle) {
         printf("A=%d\n", cycle);
         coro_yield();
@@ -35,7 +36,7 @@ void coro2_task(void *context) {
     }
 }
 
-int main() {
+int main(void) {
 
     coro_t *tasks[2] = {0};
 

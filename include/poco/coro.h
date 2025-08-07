@@ -108,7 +108,7 @@ struct coro {
  */
 #define CORO_STATIC_DEFINE(name, stack_size)                                           \
     static platform_stack_t name##_stack[stack_size];                                  \
-    static coro_t name##_coro;
+    static coro_t name##_coro
 
 /*!
  * @brief Creates a statically defined coroutine with the specific stack and entrypoint.

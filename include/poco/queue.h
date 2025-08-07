@@ -36,7 +36,7 @@ enum res_code_queue {
 #define QUEUE_STATIC_DEFINE(name, size, type)                                          \
     static uint8_t name##_queue_buffer[size * sizeof(type)]                            \
         __attribute__((__aligned__(sizeof(type))));                                    \
-    static queue_t name##_queue;
+    static queue_t name##_queue
 
 typedef struct queue {
     size_t count;

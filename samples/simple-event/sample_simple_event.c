@@ -51,7 +51,7 @@ void consumer_task(void *context) {
     return;
 }
 
-int main() {
+int main(void) {
 
     coro_t *tasks[2] = {0};
 

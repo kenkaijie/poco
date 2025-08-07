@@ -30,7 +30,7 @@ void producer_task(void *context) {
     return;
 }
 
-int main() {
+int main(void) {
 
     coro_t *tasks[CORO_COUNT] = {0};
 

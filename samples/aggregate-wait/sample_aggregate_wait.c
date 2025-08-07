@@ -69,7 +69,7 @@ void producer_2_task(void *context) {
     return;
 }
 
-int main() {
+int main(void) {
 
     coro_t *tasks[3] = {0};
 

@@ -37,7 +37,7 @@ void coroutine_b(void *context) {
     mutex_release(mutex);
 }
 
-int main() {
+int main(void) {
 
     mutex_t *mutex = mutex_create();
 
