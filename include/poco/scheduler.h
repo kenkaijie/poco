@@ -20,11 +20,40 @@
 typedef struct scheduler scheduler_t;
 
 /*!
- * @brief Function pointer implementing the run function for a scheduler.
+ * @brief Function prototype for running the scheduler until completion.
+ *
+ * A scheduler will be considered complete when all its managed coroutines are run until
+ * completion.
+ *
+ * If there are coroutines that never finish, run will also never finish.
  *
  * @param scheduler Scheduler to run.
  */
 typedef void (*scheduler_run_t)(scheduler_t *scheduler);
+
+/*!
+ * @brief Function prototype for preparing the scheduler for step-by-step run mode.
+ *
+ * This should only be called once per scheduler. Preferrably just before running.
+ * 
+ * @warning This API is used in particular scenarios and is not recommended. Consider
+ * using @ref scheduler_run instead.
+ *
+ * @param scheduler Scheduler to start.
+ */
+typedef void (*scheduler_start_t)(scheduler_t *scheduler);
+
+/*!
+ * @brief Function prototype for step-by-step run mode.
+ *
+ * @warning This API is used in particular scenarios and is not recommended. Consider
+ * using @ref scheduler_run instead.
+ *
+ * @param scheduler Scheduler to run.
+ * 
+ * @return True if there is more potential work to do, else false.
+ */
+typedef bool (*scheduler_run_once_t)(scheduler_t *scheduler);
 
 /*!
  * @brief Function pointer implementing the notify the scheduler of an event.
@@ -63,6 +92,8 @@ typedef coro_t *(*scheduler_get_current_coroutine_t)(scheduler_t *scheduler);
  */
 typedef struct scheduler {
     scheduler_run_t run;
+    scheduler_start_t start;
+    scheduler_run_once_t run_once;
     scheduler_notify_t notify;
     scheduler_notify_from_isr_t notify_from_isr;
     scheduler_get_current_coroutine_t get_current_coroutine;
@@ -79,6 +110,30 @@ typedef struct scheduler {
  * @param scheduler Scheduler to run.
  */
 void scheduler_run(scheduler_t *scheduler);
+
+/*!
+ * @brief Prepares the scheduler for step-by-step run mode.
+ *
+ * This should only be called once per scheduler. Preferrably just before running.
+ * 
+ * @warning This API is used in particular scenarios and is not recommended. Consider
+ * using @ref scheduler_run instead.
+ *
+ * @param scheduler Scheduler to start.
+ */
+void scheduler_start(scheduler_t *scheduler);
+
+/*!
+ * @brief Runs a single step (as part of step-by-step run mode)
+ *
+ * @warning This API is used in particular scenarios and is not recommended. Consider
+ * using @ref scheduler_run instead.
+ *
+ * @param scheduler Scheduler to run.
+ * 
+ * @return True if there is more potential work to do, else false.
+ */
+bool scheduler_run_once(scheduler_t *scheduler);
 
 /*!
  * @brief Notify the scheduler of an event

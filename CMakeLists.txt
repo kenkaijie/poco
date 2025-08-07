@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19) # 3.19 for preset support
+cmake_minimum_required(VERSION 3.21) # 3.21 for preset support
 
 project(poco LANGUAGES C ASM)
 
