@@ -17,6 +17,7 @@
 #define STACK_SIZE (DEFAULT_STACK_SIZE)
 
 void hello_task(void *context) {
+    (void)context;
     for (int i = 0; i < 5; ++i) {
         printf("Hello ");
         coro_yield();
@@ -25,6 +26,7 @@ void hello_task(void *context) {
 }
 
 void world_task(void *context) {
+    (void)context;
     for (int i = 0; i < 5; ++i) {
         printf("World!\n");
         coro_yield();

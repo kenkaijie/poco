@@ -60,7 +60,7 @@ void accessor_3(void *context) {
     semaphore_release(resource);
 }
 
-int main() {
+int main(void) {
 
     semaphore_t *resource = semaphore_create(2);
 

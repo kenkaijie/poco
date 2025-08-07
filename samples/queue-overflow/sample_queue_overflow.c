@@ -13,7 +13,7 @@
 #include <poco/schedulers/round_robin.h>
 #include <stdio.h>
 
-#define CONSUMER_STOP (0xFFFFFFFF)
+#define CONSUMER_STOP (-1)
 #define STACK_SIZE (DEFAULT_STACK_SIZE)
 
 CORO_STATIC_DEFINE(producer, STACK_SIZE);
@@ -50,7 +50,7 @@ void consumer_task(void *context) {
     return;
 }
 
-int main() {
+int main(void) {
 
     coro_t *tasks[2] = {0};
 

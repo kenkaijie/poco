@@ -4,7 +4,6 @@
  */
 
 #include <poco/context.h>
-#include <threads.h>
 
 static scheduler_t *assigned_scheduler = NULL;
 

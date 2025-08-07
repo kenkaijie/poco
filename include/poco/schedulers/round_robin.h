@@ -11,6 +11,7 @@ extern "C" {
 
 #include <poco/coro.h>
 #include <poco/intracoro.h>
+#include <poco/platform.h>
 #include <poco/queue.h>
 #include <poco/scheduler.h>
 #include <stddef.h>
@@ -27,6 +28,7 @@ typedef struct round_robin_scheduler {
     size_t next_task_index; /**< index to check next when performing a context switch */
     queue_t event_queue;
     coro_event_source_t external_events[SCHEDULER_MAX_EXTERNAL_EVENT_COUNT];
+    platform_ticks_t previous_ticks;
 } round_robin_scheduler_t;
 
 /*!

@@ -24,6 +24,12 @@ static bool _update_event_sink(coro_event_sink_t *sink,
     case CORO_EVTSRC_ELAPSED:
         if (sink->type == CORO_EVTSINK_DELAY &&
             sink->params.ticks_remaining != PLATFORM_TICKS_FOREVER) {
+            /* We need to consider both signed and unsigned cases. */
+            if (event->params.elasped_ticks > sink->params.ticks_remaining) {
+                sink->params.ticks_remaining = 0;
+            } else {
+                sink->params.ticks_remaining -= event->params.elasped_ticks;
+            }
             sink->params.ticks_remaining -= event->params.elasped_ticks;
             unblock_task = (sink->params.ticks_remaining <= 0);
         }
