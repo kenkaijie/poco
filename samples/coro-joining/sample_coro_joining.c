@@ -15,11 +15,14 @@
 #include <poco/schedulers/round_robin.h>
 #include <stdio.h>
 
-#define CONSUMER_STOP (0xFFFFFFFF)
+#define CONSUMER_STOP (-1)
 #define STACK_SIZE (DEFAULT_STACK_SIZE)
 
-CORO_STATIC_DEFINE(coro1, STACK_SIZE);
-CORO_STATIC_DEFINE(coro2, STACK_SIZE);
+coro_t coro1_coro = {0};
+platform_stack_t coro1_stack[STACK_SIZE] = {0};
+
+coro_t coro2_coro = {0};
+platform_stack_t coro2_stack[STACK_SIZE] = {0};
 
 void coro1_task(void *context) {
     (void)context;

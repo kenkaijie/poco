@@ -19,10 +19,14 @@
 #define CONSUMER_STOP (-1)
 #define STACK_SIZE (DEFAULT_STACK_SIZE)
 
-CORO_STATIC_DEFINE(producer, STACK_SIZE);
-CORO_STATIC_DEFINE(consumer, STACK_SIZE);
+coro_t producer_coro = {0};
+platform_stack_t producer_stack[STACK_SIZE] = {0};
 
-QUEUE_STATIC_DEFINE(numbers, 5, int);
+coro_t consumer_coro = {0};
+platform_stack_t consumer_stack[STACK_SIZE] = {0};
+
+queue_t numbers_queue = {0};
+uint8_t numbers_queue_buffer[5 * sizeof(int)] = {0};
 
 void producer_task(void *context) {
     queue_t *queue = (queue_t *)context;

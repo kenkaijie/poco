@@ -13,9 +13,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <poco/coro.h>
-#include <poco/scheduler.h>
-#include <poco/schedulers/round_robin.h>
+#include <poco/poco.h>
 #include <stdio.h>
 
 #define STACK_SIZE (DEFAULT_STACK_SIZE)

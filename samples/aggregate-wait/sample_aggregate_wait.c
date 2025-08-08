@@ -23,8 +23,11 @@
 
 #define STACK_SIZE (DEFAULT_STACK_SIZE)
 
-CORO_STATIC_DEFINE(producer_1, STACK_SIZE);
-CORO_STATIC_DEFINE(producer_2, STACK_SIZE);
+coro_t producer_1_coro = {0};
+platform_stack_t producer_1_stack[STACK_SIZE] = {0};
+
+coro_t producer_2_coro = {0};
+platform_stack_t producer_2_stack[STACK_SIZE] = {0};
 
 consumer_t consumer;
 

@@ -98,22 +98,6 @@ struct coro {
 };
 
 /*!
- * @brief Macro to define a static coroutine with a stack of a specific size.
- *
- * Ensures proper alignment of the structures. Normal use should avoid using
- * the variables directly, instead should use the pointer returned from
- * @ref coro_create_static.
- *
- * @note This declaration does not take into account the 2 extra slots for watermarks.
- *
- * @param name Name of the coroutine.
- * @param stack_size Size of the stack, in platform specific elements.
- */
-#define CORO_STATIC_DEFINE(name, stack_size)                                           \
-    static platform_stack_t name##_stack[stack_size];                                  \
-    static coro_t name##_coro
-
-/*!
  * @brief Creates a statically defined coroutine with the specific stack and entrypoint.
  *
  * @note For stack diagnostics, we actually consume the first and last element of the
