@@ -20,7 +20,7 @@ static result_t _notify(round_robin_scheduler_t *scheduler,
     result_t queue_result;
 
     platform_enter_critical_section();
-    queue_result = queue_raw_put(&scheduler->event_queue, (void const*)event);
+    queue_result = queue_raw_put(&scheduler->event_queue, (void const *)event);
     platform_exit_critical_section();
 
     return queue_result;
@@ -77,7 +77,7 @@ static bool _scheduler_run_once(round_robin_scheduler_t *scheduler) {
     }
 
     coro_t *next_coro = _get_next_ready_task(scheduler);
-        // If there are no tasks to run, we can just wait for the next event.
+    // If there are no tasks to run, we can just wait for the next event.
     if (next_coro != NULL) {
         coro_signal_t signal = coro_resume(next_coro);
 

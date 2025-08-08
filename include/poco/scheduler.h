@@ -35,7 +35,7 @@ typedef void (*scheduler_run_t)(scheduler_t *scheduler);
  * @brief Function prototype for preparing the scheduler for step-by-step run mode.
  *
  * This should only be called once per scheduler. Preferrably just before running.
- * 
+ *
  * @warning This API is used in particular scenarios and is not recommended. Consider
  * using @ref scheduler_run instead.
  *
@@ -50,7 +50,7 @@ typedef void (*scheduler_start_t)(scheduler_t *scheduler);
  * using @ref scheduler_run instead.
  *
  * @param scheduler Scheduler to run.
- * 
+ *
  * @return True if there is more potential work to do, else false.
  */
 typedef bool (*scheduler_run_once_t)(scheduler_t *scheduler);
@@ -115,7 +115,7 @@ void scheduler_run(scheduler_t *scheduler);
  * @brief Prepares the scheduler for step-by-step run mode.
  *
  * This should only be called once per scheduler. Preferrably just before running.
- * 
+ *
  * @warning This API is used in particular scenarios and is not recommended. Consider
  * using @ref scheduler_run instead.
  *
@@ -130,7 +130,7 @@ void scheduler_start(scheduler_t *scheduler);
  * using @ref scheduler_run instead.
  *
  * @param scheduler Scheduler to run.
- * 
+ *
  * @return True if there is more potential work to do, else false.
  */
 bool scheduler_run_once(scheduler_t *scheduler);
