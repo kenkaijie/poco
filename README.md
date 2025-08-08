@@ -25,7 +25,7 @@ Define a coroutine.
 
 ```c
 // Prints "hello world!" every 1 second.
-static void my_coroutine(void * context) {
+static void my_coroutine(void *context) {
     for (;;) {
         printf("hello world!\n");
         coro_yield_delay(1000);
@@ -39,7 +39,7 @@ Attach it to a scheduler and run.
 int main(int argc, char *argv[]) {
     // ...
 
-    coro_t * tasks[1] = {
+    coro_t *tasks[1] = {
         coro_create(my_coroutine, NULL, DEFAULT_STACK_SIZE)
         /* add other tasks */
     };
