@@ -1,12 +1,12 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief Declarations for coroutines in poco.
  *
  * Implements coroutines that can be suspended and resumed.
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
+
 #pragma once
 
 #ifdef __cplusplus

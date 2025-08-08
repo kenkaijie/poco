@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief In this example, 1024 coroutines are created, each one
@@ -5,9 +7,6 @@
  *
  * Due to the order defined within the basic scheduler, the output will just be the
  * numbers 0-2047.
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
 
 #include <poco/coro.h>

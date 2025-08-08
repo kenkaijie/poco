@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief Example showcasing the recipe of a single coroutine waiting on multiple
@@ -8,9 +10,6 @@
  * time.abort
  *
  * Here, we have 2 queues to be awaited.
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
 
 #include "consumer.h"

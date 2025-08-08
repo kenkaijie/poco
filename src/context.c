@@ -1,9 +1,8 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief Context implementation for single threaded scheduler support.
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
 
 #include <poco/context.h>

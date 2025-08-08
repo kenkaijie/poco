@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief Example of coroutine synchronisation using semaphores.
@@ -15,9 +17,6 @@
  * - 3 Acquired
  * - 2 Released
  * - 3 Released
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
 
 #include <poco/poco.h>

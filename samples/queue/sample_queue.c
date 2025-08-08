@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief Queue example, showcases the use of queues and the scheduler.
@@ -6,9 +8,6 @@
  * task will consume whatever values come through.
  *
  * The producer then signals the consumer to end task by sending a sentinel value.
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
 
 #include <poco/poco.h>

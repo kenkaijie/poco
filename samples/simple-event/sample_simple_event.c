@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief An example of using events to signal between coroutines.
@@ -6,9 +8,6 @@
  *
  * The press handler task is only interested in the long presses, and will ignore the
  * others.
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
 
 #include <poco/coro.h>

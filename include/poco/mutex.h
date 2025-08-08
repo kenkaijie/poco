@@ -1,12 +1,11 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief Mutex for resource ownership on a single coroutine.
  *
  * This does not have an ISR API, as mutexes are not no be used within an ISR context
  * (they are purely a coroutine primitive).
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
 
 #pragma once

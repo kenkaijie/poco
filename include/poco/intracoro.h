@@ -1,13 +1,13 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief Communication primitives between the coroutine and the scheduler.
  *
  * Event sinks and sources are connected that is, event sources can update one
  * or more event sinks.
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
+
 #pragma once
 
 #include <poco/platform.h>

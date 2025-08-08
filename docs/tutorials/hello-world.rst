@@ -86,9 +86,8 @@ returns to this function, it will resume where it left off.
 Coroutine Creation
 ==================
 
-To run the defined tasks, we will need to assign it to a scheduler. For most
-applications, you will only have a single scheduler. Each function that will be run as a
-task will need to be associated with a single coroutine structure.
+Each function that will be run as a task will need to be associated with a single
+coroutine structure. These can be defined in the program's ``main``.
 
 Each of the calls to ``coro_create`` will create a coroutine structure used by the
 scheduler. This includes all the necessary information to allow coroutines to pause and

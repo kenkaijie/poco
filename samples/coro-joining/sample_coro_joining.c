@@ -1,12 +1,11 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief An example showing the join mechanics.
  *
  * In this sample, coro1 will run to completetion before coro2, as coro2 will join
  * coro1 before printing its values.
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
 
 #include <poco/coro.h>

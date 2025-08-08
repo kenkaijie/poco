@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief Queue example with overflows.
@@ -5,9 +7,6 @@
  * In this example, the producer wants to put 20 items in the queue, but the consumer
  * is set to be slow in taking values. The queue also only has 5 slots, so the producer
  * will block until the consumer takes some values.
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
 
 #include <poco/coro.h>
