@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief An example of using events to signal between coroutines.
@@ -6,9 +8,6 @@
  *
  * The press handler task is only interested in the long presses, and will ignore the
  * others.
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
 
 #include <poco/coro.h>
@@ -17,11 +16,14 @@
 #include <poco/schedulers/round_robin.h>
 #include <stdio.h>
 
-#define CONSUMER_STOP (0xFFFFFFFF)
+#define CONSUMER_STOP (-1)
 #define STACK_SIZE (DEFAULT_STACK_SIZE)
 
-CORO_STATIC_DEFINE(producer, STACK_SIZE);
-CORO_STATIC_DEFINE(consumer, STACK_SIZE);
+coro_t producer_coro = {0};
+platform_stack_t producer_stack[STACK_SIZE] = {0};
+
+coro_t consumer_coro = {0};
+platform_stack_t consumer_stack[STACK_SIZE] = {0};
 
 event_t button_event;
 

@@ -35,6 +35,8 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 html_logo = "_static/logo-outline.svg"
 
+github_url = "https://github.com/kenkaijie/poco"
+
 # -- Options for Auto Section Label -----------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/autosectionlabel.html
 

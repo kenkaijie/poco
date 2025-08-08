@@ -11,8 +11,47 @@ SPDX-License-Identifier: MIT
 
 This is a small toy project that produces a bare minimum cooperative task framework.
 
-The objective here is to provide the minimum functionalities needed by a scheduler in
-order to support general purpose applications on a bare metal device.
+The objective is to provide a minimal framework for bare metal devices.
+
+## Nutshell
+
+Include poco.
+
+```c
+#include <poco/poco.h>
+```
+
+Define a coroutine.
+
+```c
+// Prints "hello world!" every 1 second.
+static void my_coroutine(void *context) {
+    for (;;) {
+        printf("hello world!\n");
+        coro_yield_delay(1000);
+    }
+}
+```
+
+Attach it to a scheduler and run.
+
+```c
+int main(int argc, char *argv[]) {
+    // ...
+
+    coro_t *tasks[1] = {
+        coro_create(my_coroutine, NULL, DEFAULT_STACK_SIZE)
+        /* add other tasks */
+    };
+
+    // ...
+
+    scheduler_t *scheduler = round_robin_scheduler_create(tasks, 1);
+
+    /* Will never return */
+    scheduler_run(scheduler);
+}
+```
 
 ## Features
 
@@ -20,7 +59,7 @@ order to support general purpose applications on a bare metal device.
 - Message queue.
 - Self Managed Scheduling (roll your own scheduler)
 - Basic Scheduling (Round Robin)
-- C99 support
+- Runnable on POSIX hosts
 
 ## WIP
 
@@ -28,6 +67,7 @@ order to support general purpose applications on a bare metal device.
 - More Thread Primitives? (Events, Mutexes, semaphores)
 - ISR Support (Primitive support for ISR usage, scheduler support for ISR)
 - Scheduler guidelines (tickless scheduler?)
+- Dynamic coroutine support (adding coroutines at runtime).
 
 ### Extensions
 

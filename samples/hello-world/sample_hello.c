@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief Hello world example, performs the classic hello world example using
@@ -8,14 +10,9 @@
  * The result should be 5 instances of the string "Hello world" printed to stdout.
  *
  * This example uses the basic round robin scheduler.
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
 
-#include <poco/coro.h>
-#include <poco/scheduler.h>
-#include <poco/schedulers/round_robin.h>
+#include <poco/poco.h>
 #include <stdio.h>
 
 #define STACK_SIZE (DEFAULT_STACK_SIZE)

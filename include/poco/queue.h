@@ -1,10 +1,10 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief Coroutine aware queue implementation.
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
+
 #pragma once
 
 #ifdef __cplusplus
@@ -27,18 +27,6 @@ enum res_code_queue {
     /*! Attempted to put an item into a full queue. */
     RES_QUEUE_FULL = RES_CODE(RES_GROUP_QUEUE, 1),
 };
-
-/*!
- * @brief Macro to define the items needed for a statically defined queue.
- *
- * @param name Name of the queue.
- * @param size Size of the queue, in items.
- * @param type Type of the items in the queue.
- */
-#define QUEUE_STATIC_DEFINE(name, size, type)                                          \
-    static uint8_t name##_queue_buffer[size * sizeof(type)]                            \
-        __attribute__((__aligned__(sizeof(type))));                                    \
-    static queue_t name##_queue
 
 typedef struct queue {
     size_t count;

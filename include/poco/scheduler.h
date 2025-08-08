@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief Scheduler Common interface, used by all schedulers.
@@ -9,9 +11,6 @@
  *
  * 1. Run each coroutine to completion (via resumes).
  * 2. Route coroutine signals to other coroutines.
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
 
 #pragma once

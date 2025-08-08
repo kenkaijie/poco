@@ -1,12 +1,11 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief Unix platform specific operations.
  *
  * Note as per the platform integration, none of the platform functions are guaranteed
  * to actually be functions.
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
 
 #pragma once

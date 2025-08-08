@@ -12,6 +12,9 @@ The activities generally fall into the following steps.
 2. Create tasks.
 3. Run the scheduler in the main loop.
 
+poco can be included either as a single header or as individual components. The examples
+provided as part of this library showcase both styles.
+
 Picking a Scheduler
 ===================
 

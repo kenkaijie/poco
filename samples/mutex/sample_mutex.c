@@ -1,12 +1,11 @@
+// SPDX-FileCopyrightText: Copyright contributors to the poco project.
+// SPDX-License-Identifier: MIT
 /*!
  * @file
  * @brief Example of coroutine synchronisation using mutexes.
  *
  * In this sample, even if the coroutines are using the roun robin scheduler. Due to
  * coroutine A and B sharing a mutex, the output will be all A's, then all B's.
- *
- * SPDX-FileCopyrightText: Copyright contributors to the poco project.
- * SPDX-License-Identifier: MIT
  */
 
 #include <poco/coro.h>
