@@ -11,8 +11,7 @@ SPDX-License-Identifier: MIT
 
 This is a small toy project that produces a bare minimum cooperative task framework.
 
-The objective here is to provide the minimum functionalities needed by a scheduler in
-order to support general purpose applications on a bare metal device.
+The objective is to provide a minimal framework for bare metal devices.
 
 ## Nutshell
 
@@ -60,6 +59,7 @@ int main(int argc, char *argv[]) {
 - Message queue.
 - Self Managed Scheduling (roll your own scheduler)
 - Basic Scheduling (Round Robin)
+- Runnable on POSIX hosts
 
 ## WIP
 
