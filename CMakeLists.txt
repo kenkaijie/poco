@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright contributors to the poco project.
+# SPDX-License-Identifier: MIT
+
 cmake_minimum_required(VERSION 3.21) # 3.21 for preset support
 
 project(poco LANGUAGES C ASM)

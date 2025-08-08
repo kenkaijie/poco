@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright contributors to the poco project.
+# SPDX-License-Identifier: MIT
+
 import os
 from pathlib import Path
 
@@ -9,7 +12,7 @@ version = os.environ.get("VERSION", "unknown")
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "poco"
-copyright = "2025, Kenneth Ng"
+copyright = "2025, Contributors to the poco project."
 author = "Kenneth Ng"
 
 # -- General configuration ---------------------------------------------------

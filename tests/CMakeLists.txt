@@ -1,4 +1,8 @@
+#
 # Tests samples.
+#
+# SPDX-FileCopyrightText: Copyright contributors to the poco project.
+# SPDX-License-Identifier: MIT
 
 # Function wrapper for tests that compare their outputs with a golden sample.
 #  

@@ -5,6 +5,8 @@
 # Use:
 # - doxygen -g [configFile] to generate the base file (kitchen sink)
 #
+# SPDX-FileCopyrightText: Copyright contributors to the poco project.
+# SPDX-License-Identifier: MIT
 
 PROJECT_NAME           = "poco"
 PROJECT_BRIEF          = "pocket coroutine library"

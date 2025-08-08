@@ -4,6 +4,9 @@
  *
  * Event sinks and sources are connected that is, event sources can update one
  * or more event sinks.
+ *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
  */
 #pragma once
 

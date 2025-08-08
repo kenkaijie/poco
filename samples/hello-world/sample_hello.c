@@ -7,8 +7,12 @@
  *
  * The result should be 5 instances of the string "Hello world" printed to stdout.
  *
- * This example uses the basic scheduler.
+ * This example uses the basic round robin scheduler.
+ *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
  */
+
 #include <poco/coro.h>
 #include <poco/scheduler.h>
 #include <poco/schedulers/round_robin.h>

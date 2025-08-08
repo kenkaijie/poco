@@ -1,3 +1,11 @@
+/*!
+ * @file
+ * @brief Sample consumer object for testing aggregated waits.
+ *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
+ */
+
 #include "consumer.h"
 #include <stdio.h>
 

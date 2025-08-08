@@ -1,3 +1,7 @@
+<!-- 
+SPDX-FileCopyrightText: Copyright contributors to the poco project.
+SPDX-License-Identifier: MIT
+-->
 # poco - Pocket Coroutines
 
 <img src="docs/_static/logo-transparent.svg" alt="poco" style="max-height:160px;margin-left: auto;margin-right: auto;display:block;"/>

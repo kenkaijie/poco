@@ -9,9 +9,16 @@
  *
  * 1. Run each coroutine to completion (via resumes).
  * 2. Route coroutine signals to other coroutines.
+ *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
  */
 
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <poco/coro.h>
 #include <poco/intracoro.h>
@@ -179,3 +186,7 @@ __attribute__((always_inline)) static inline coro_t *
 scheduler_get_current_coroutine(scheduler_t *scheduler) {
     return scheduler->get_current_coroutine(scheduler);
 }
+
+#ifdef __cplusplus
+}
+#endif

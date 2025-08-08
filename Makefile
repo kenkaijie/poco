@@ -1,3 +1,9 @@
+#
+# Top-level makefile for task handling.
+#
+# SPDX-FileCopyrightText: Copyright contributors to the poco project.
+# SPDX-License-Identifier: MIT
+
 .PHONY: clean docs docs-clean docs-gen docs-gen-clean project-version
 
 VERSION_CMD = git describe --first-parent --dirty 2>/dev/null || echo unknown

@@ -1,3 +1,7 @@
+<!-- 
+SPDX-FileCopyrightText: Copyright contributors to the poco project.
+SPDX-License-Identifier: MIT
+-->
 # Scheduler Choice
 
 poco comes with 2 basic schedulers; round-robin and priority. The user is free to choose

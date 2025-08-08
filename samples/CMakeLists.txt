@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright contributors to the poco project.
+# SPDX-License-Identifier: MIT
+
 add_subdirectory(aggregate-wait)
 add_subdirectory(coro-joining)
 add_subdirectory(hello-world)
