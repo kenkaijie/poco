@@ -3,6 +3,9 @@
  * @brief Cortex M4 Soft FP implementation of platform context switching for poco cooperative threading.
  *
  * @note As this is for software floating points, the FP registers are not preserved.
+ *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
  */
 
   .syntax unified

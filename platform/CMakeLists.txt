@@ -2,6 +2,8 @@
 # Platform targets are separated by the PLATFORM option. Depending on the target
 # compilation platform.
 #
+# SPDX-FileCopyrightText: Copyright contributors to the poco project.
+# SPDX-License-Identifier: MIT
 
 if (${POCO_PLATFORM} STREQUAL "unix")
     add_subdirectory(unix)

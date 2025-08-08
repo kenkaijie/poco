@@ -5,7 +5,11 @@
  *
  * Due to the order defined within the basic scheduler, the output will just be the
  * numbers 0-2047.
+ *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
  */
+
 #include <poco/coro.h>
 #include <poco/scheduler.h>
 #include <poco/schedulers/round_robin.h>

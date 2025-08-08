@@ -1,10 +1,11 @@
 /*!
  * @file
- * @brief User context (ucontext) inspired API implementation for cortex m4.
+ * @brief User context (ucontext) inspired API implementation for Cortex M4.
  *
- * Uses some Zephyr related primitives for time keeping and
+ * Uses some Zephyr related primitives for time keeping and critical sections.
  *
- * Has many shortcuts.
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
  */
 
 #pragma once

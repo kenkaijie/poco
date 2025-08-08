@@ -1,2 +1,5 @@
+# SPDX-FileCopyrightText: Copyright contributors to the poco project.
+# SPDX-License-Identifier: MIT
+
 add_executable(sample_simple_event sample_simple_event.c)
 target_link_libraries(sample_simple_event PRIVATE poco::poco)

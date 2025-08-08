@@ -1,3 +1,11 @@
+/*!
+ * @file
+ * @brief Base coroutine implementation.
+ *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
+ */
+
 #include <poco/context.h>
 #include <poco/coro.h>
 #include <string.h>

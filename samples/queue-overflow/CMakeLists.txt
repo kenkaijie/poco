@@ -1,2 +1,5 @@
+# SPDX-FileCopyrightText: Copyright contributors to the poco project.
+# SPDX-License-Identifier: MIT
+
 add_executable(sample_queue_overflow sample_queue_overflow.c)
 target_link_libraries(sample_queue_overflow PRIVATE poco::poco)

@@ -15,7 +15,11 @@
  * - 3 Acquired
  * - 2 Released
  * - 3 Released
+ *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
  */
+
 #include <poco/coro.h>
 #include <poco/scheduler.h>
 #include <poco/schedulers/round_robin.h>

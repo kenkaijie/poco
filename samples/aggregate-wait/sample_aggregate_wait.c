@@ -8,7 +8,11 @@
  * time.abort
  *
  * Here, we have 2 queues to be awaited.
+ *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
  */
+
 #include "consumer.h"
 #include <poco/coro.h>
 #include <poco/event.h>

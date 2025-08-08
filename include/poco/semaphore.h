@@ -3,9 +3,16 @@
  * @brief Semaphore communication primitive.
  *
  * Supports both binary and counting semaphores.
+ *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
  */
 
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <poco/coro.h>
 #include <poco/event.h>
@@ -113,3 +120,7 @@ result_t semaphore_acquire_from_isr(semaphore_t *semaphore);
  * @retval #RES_OK semaphore has been released
  */
 result_t semaphore_release_from_isr(semaphore_t *semaphore);
+
+#ifdef __cplusplus
+}
+#endif

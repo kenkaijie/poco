@@ -1,3 +1,7 @@
+<!-- 
+SPDX-FileCopyrightText: Copyright contributors to the poco project.
+SPDX-License-Identifier: MIT
+-->
 # Platform Porting
 
 poco is a realtively bare bones library, as such, it requires little from the underlying

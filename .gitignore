@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright contributors to the poco project.
+# SPDX-License-Identifier: MIT
+
 # Python build dependencies
 .venv/
 

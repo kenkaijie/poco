@@ -7,7 +7,10 @@
  * The press handler task is only interested in the long presses, and will ignore the
  * others.
  *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
  */
+
 #include <poco/coro.h>
 #include <poco/event.h>
 #include <poco/scheduler.h>

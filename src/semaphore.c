@@ -1,3 +1,11 @@
+/*!
+ * @file
+ * @brief Implementation for semaphore.
+ *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
+ */
+
 #include <poco/context.h>
 #include <poco/semaphore.h>
 

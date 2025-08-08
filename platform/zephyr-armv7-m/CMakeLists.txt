@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright contributors to the poco project.
+# SPDX-License-Identifier: MIT
+
 add_library(poco_platform)
 add_library(poco::platform ALIAS poco_platform)
 target_include_directories(poco_platform PUBLIC ${CMAKE_CURRENT_LIST_DIR})

@@ -1,6 +1,9 @@
 /*!
  * @file
  * @brief Used to store context used within the library.
+ *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
  */
 
 #pragma once

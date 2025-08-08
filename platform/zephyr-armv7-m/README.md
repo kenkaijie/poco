@@ -1,3 +1,7 @@
+<!-- 
+SPDX-FileCopyrightText: Copyright contributors to the poco project.
+SPDX-License-Identifier: MIT
+-->
 # Zephyr Platform Port for Cortex-M4 controllers
 
 This platform port enables poco to be used on cortex m4 devices.

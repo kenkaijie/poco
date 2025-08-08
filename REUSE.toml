@@ -1,0 +1,17 @@
+#
+# Top level license specifiers.
+#
+# Note:
+#
+# Entries should only be added as a last resort. Always prefer anotating the
+# file explicitly.
+#
+# SPDX-FileCopyrightText: Copyright contributors to the poco project.
+# SPDX-License-Identifier: MIT
+
+version = 1
+
+[[annotations]]
+path = "tests/*.expected"
+SPDX-FileCopyrightText = "Copyright contributors to the poco project."
+SPDX-License-Identifier = "MIT"

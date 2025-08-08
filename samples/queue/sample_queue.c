@@ -6,7 +6,11 @@
  * task will consume whatever values come through.
  *
  * The producer then signals the consumer to end task by sending a sentinel value.
+ *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
  */
+
 #include <poco/coro.h>
 #include <poco/queue.h>
 #include <poco/scheduler.h>

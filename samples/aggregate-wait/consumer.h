@@ -1,6 +1,9 @@
 /*!
  * @file
  * @brief Consumer example implementation.
+ *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
  */
 
 #pragma once

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: Copyright contributors to the poco project.
+# SPDX-License-Identifier: MIT
 name: Read The Docs documentation builder
 on:
   pull_request_target:

@@ -1,2 +1,5 @@
+# SPDX-FileCopyrightText: Copyright contributors to the poco project.
+# SPDX-License-Identifier: MIT
+
 add_executable(sample_semaphore sample_semaphore.c)
 target_link_libraries(sample_semaphore PRIVATE poco::poco)

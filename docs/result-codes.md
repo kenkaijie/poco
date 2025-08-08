@@ -1,3 +1,7 @@
+<!-- 
+SPDX-FileCopyrightText: Copyright contributors to the poco project.
+SPDX-License-Identifier: MIT
+-->
 # Result Codes
 
 Allows a unified result code separate from the standard codes, (EIO, etc.) which is

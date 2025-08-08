@@ -13,6 +13,9 @@
  * them.
  *
  * A producer can only set bits, it cannot clear them.
+ *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
  */
 
 #pragma once

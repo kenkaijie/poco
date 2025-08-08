@@ -1,6 +1,9 @@
 /*!
  * @file
  * @brief Common result codes used within the poco library.
+ *
+ * SPDX-FileCopyrightText: Copyright contributors to the poco project.
+ * SPDX-License-Identifier: MIT
  */
 #pragma once
 

@@ -1,6 +1,9 @@
 #!/bin/sh
 # This script is used to capture the output of a command and save it to a file.
 # Used to allow ctest to check the output.
+#
+# SPDX-FileCopyrightText: Copyright contributors to the poco project.
+# SPDX-License-Identifier: MIT
 
 # Check if the correct number of arguments is provided
 if [ "$#" -ne 2 ]; then
