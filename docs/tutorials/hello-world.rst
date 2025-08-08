@@ -77,11 +77,17 @@ implemented using normal flow control, and does not require any special handling
 
 .. literalinclude:: ../../samples/hello-world/sample_hello.c
     :language: c
-    :lines: 21-28
+    :lines: 20-27
 
 The key line is where the yield takes place. This instructs the scheduler to pause the
 current execution of the function, and move on to the next task. When the scheduler
 returns to this function, it will resume where it left off.
+
+We can also make the ``World\n`` task in the same manner.
+
+.. literalinclude:: ../../samples/hello-world/sample_hello.c
+    :language: c
+    :lines: 29-36
 
 Coroutine Creation
 ==================
@@ -95,7 +101,7 @@ resume execution.
 
 .. literalinclude:: ../../samples/hello-world/sample_hello.c
     :language: c
-    :lines: 41-44
+    :lines: 38-44
 
 Each call takes in 3 arguments, the function this coroutine will run, a user provided
 context, and the size of stack to allocate to this coroutine.
@@ -114,7 +120,7 @@ to support a wider variety of schedulers if needed. Once created, we can run usi
 
 .. literalinclude:: ../../samples/hello-world/sample_hello.c
     :language: c
-    :lines: 46-54
+    :lines: 45-56
 
 Running the Program
 ===================
