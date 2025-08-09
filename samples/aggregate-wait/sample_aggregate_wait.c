@@ -7,9 +7,12 @@
  *
  * This example shows how use of events can allow a coroutine to perform a
  * "wait for any" style of blocking for multiple communication primitives at a
- * time.abort
+ * time.
  *
- * Here, we have 2 queues to be awaited.
+ * Here, we have 2 producers, 1 sending commands, and another sending messages.
+ *
+ * The consumer task can wait for either queues as the send command and send message
+ * functions set an event.
  */
 
 #include "consumer.h"
@@ -33,15 +36,12 @@ consumer_t consumer;
 void producer_1_task(void *context) {
 
     consumer_t *consumer = (consumer_t *)context;
-
-    coro_yield_delay(100);
     message_t message = {
         .a = 12,
         .b = 11,
     };
     printf("Send message, a=%d, b=%d.\n", message.a, message.b);
     consumer_send_message(consumer, &message);
-    coro_yield_delay(100);
     message.a = 15;
     printf("Send message, a=%d, b=%d.\n", message.a, message.b);
     consumer_send_message(consumer, &message);
@@ -53,8 +53,6 @@ void producer_1_task(void *context) {
 
 void producer_2_task(void *context) {
     consumer_t *consumer = (consumer_t *)context;
-
-    coro_yield_delay(100);
     command_t command = {
         .a = 1,
         .b = 2,
@@ -62,7 +60,6 @@ void producer_2_task(void *context) {
     };
     printf("Send command, a=%d, b=%d, c=%d.\n", command.a, command.b, command.c);
     consumer_send_command(consumer, &command);
-    coro_yield_delay(100);
     command.a = 4;
     printf("Send command, a=%d, b=%d, c=%d.\n", command.a, command.b, command.c);
     consumer_send_command(consumer, &command);

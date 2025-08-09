@@ -1,3 +1,5 @@
+.. SPDX-FileCopyrightText: Copyright contributors to the poco project.
+.. SPDX-License-Identifier: MIT
 =======
 Streams
 =======
@@ -6,7 +8,7 @@ poco provides an API for sending bytes between ISR and coroutine, or between 2
 coroutines.
 
 Streams can only be used in situations where there is a single producer and single
-consumer (known as ``spsc``).
+consumer.
 
 The typical use case for this is to queue up bytes from an ISR handling some hardware
 protocol, such as UART, into a coroutine for handling.

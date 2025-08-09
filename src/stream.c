@@ -140,8 +140,8 @@ result_t stream_send_no_wait(stream_t *stream, uint8_t const *data, size_t *data
 
     if (bytes_written > 0) {
         /* Notify the consumer if we have put even a single byte. */
-        coro_event_source_t event = {.type = CORO_EVTSRC_STREAM_SEND,
-                                     .params.subject = stream};
+        coro_event_source_t const event = {.type = CORO_EVTSRC_STREAM_SEND,
+                                           .params.subject = stream};
         notify_result = scheduler_notify(scheduler, &event);
     }
 
@@ -173,8 +173,8 @@ result_t stream_send_from_isr(stream_t *stream, uint8_t const *data,
 
     if (bytes_written > 0) {
         /* Notify the consumer if we have put even a single byte. */
-        coro_event_source_t event = {.type = CORO_EVTSRC_STREAM_SEND,
-                                     .params.subject = stream};
+        coro_event_source_t const event = {.type = CORO_EVTSRC_STREAM_SEND,
+                                           .params.subject = stream};
         notify_result = scheduler_notify_from_isr(scheduler, &event);
     }
 
@@ -297,8 +297,8 @@ result_t stream_receive_no_wait(stream_t *stream, uint8_t *buffer,
 
     if (bytes_read > 0) {
         /* Notify the producer if we have taken out any bytes. */
-        coro_event_source_t event = {.type = CORO_EVTSRC_STREAM_RECV,
-                                     .params.subject = stream};
+        coro_event_source_t const event = {.type = CORO_EVTSRC_STREAM_RECV,
+                                           .params.subject = stream};
         notify_result = scheduler_notify_from_isr(scheduler, &event);
     }
 
@@ -329,8 +329,8 @@ result_t stream_receive_from_isr(stream_t *stream, uint8_t *buffer,
 
     if (bytes_read > 0) {
         /* Notify the producer if we have taken out any bytes. */
-        coro_event_source_t event = {.type = CORO_EVTSRC_STREAM_RECV,
-                                     .params.subject = stream};
+        coro_event_source_t const event = {.type = CORO_EVTSRC_STREAM_RECV,
+                                           .params.subject = stream};
         notify_result = scheduler_notify_from_isr(scheduler, &event);
     }
 

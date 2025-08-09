@@ -16,3 +16,5 @@ output_file=$2
 # Execute the command and capture the output
 
 $command 1> $output_file 2> /dev/null
+
+cat $output_file

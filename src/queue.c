@@ -219,9 +219,9 @@ result_t queue_put_no_wait(queue_t *queue, void const *item) {
     platform_exit_critical_section();
 
     if (put_success) {
-        coro_event_source_t event = {.type = CORO_EVTSRC_QUEUE_PUT,
-                                     .params.subject = queue};
-        notify_result = scheduler_notify(scheduler, CORO_SIG_NOTIFY);
+        coro_event_source_t const event = {.type = CORO_EVTSRC_QUEUE_PUT,
+                                           .params.subject = queue};
+        notify_result = scheduler_notify(scheduler, &event);
     }
 
     if (notify_result != RES_OK) {
@@ -245,9 +245,9 @@ result_t queue_get_no_wait(queue_t *queue, void *item) {
     platform_exit_critical_section();
 
     if (get_success) {
-        coro_event_source_t event = {.type = CORO_EVTSRC_QUEUE_GET,
-                                     .params.subject = queue};
-        notify_result = scheduler_notify(scheduler, CORO_SIG_NOTIFY);
+        coro_event_source_t const event = {.type = CORO_EVTSRC_QUEUE_GET,
+                                           .params.subject = queue};
+        notify_result = scheduler_notify(scheduler, &event);
     }
 
     if (notify_result != RES_OK) {

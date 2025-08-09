@@ -89,7 +89,7 @@ result_t event_set_from_isr(event_t *event, flags_t mask) {
     event->flags |= mask;
     platform_exit_critical_section();
 
-    coro_event_source_t event_source = {
+    coro_event_source_t const event_source = {
         .type = CORO_EVTSRC_EVENT_SET,
         .params.subject = event,
     };
