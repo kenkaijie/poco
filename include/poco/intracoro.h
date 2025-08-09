@@ -53,7 +53,7 @@ typedef enum coro_event_sink_type {
     /** Coroutine is waiting for a time delay before it can resume. */
     CORO_EVTSINK_DELAY,
 
-    /** coroutine is waiting on a queue to have an item. Uses the queue parameter. */
+    /** Coroutine is waiting on a queue to have an item. Uses the queue parameter. */
     CORO_EVTSINK_QUEUE_NOT_FULL,
 
     /** Coroutine is waiting on a queue to have space. Uses the queue parameter.*/
@@ -70,6 +70,12 @@ typedef enum coro_event_sink_type {
 
     /** Coroutine is waiting on another coroutine to finish. */
     CORO_EVTSINK_WAIT_FINISH,
+
+    /** Coroutine is waiting for the stream to free up. */
+    CORO_EVTSINK_STREAM_NOT_FULL,
+
+    /** Coroutine is waiting for the stream to have some bytes. */
+    CORO_EVTSINK_STREAM_NOT_EMPTY,
 
 } coro_event_sink_type_t;
 
@@ -107,6 +113,12 @@ typedef enum coro_event_source_type {
 
     /** Coroutine has finished. */
     CORO_EVTSRC_CORO_FINISHED,
+
+    /** Indicate the consumer has read some bytes from the stream. */
+    CORO_EVTSRC_STREAM_RECV,
+
+    /** Indicates the producer has written some bytes to the stream. */
+    CORO_EVTSRC_STREAM_SEND,
 
 } coro_event_source_type_t;
 

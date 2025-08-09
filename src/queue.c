@@ -9,6 +9,7 @@
 #include <poco/coro.h>
 #include <poco/intracoro.h>
 #include <poco/queue.h>
+#include <poco/scheduler.h>
 #include <string.h>
 
 /*!
@@ -206,7 +207,8 @@ result_t queue_get(queue_t *queue, void *item, platform_ticks_t timeout) {
 }
 
 result_t queue_put_no_wait(queue_t *queue, void const *item) {
-    coro_t *coro = context_get_coro();
+    result_t notify_result = RES_OK;
+    scheduler_t *scheduler = context_get_scheduler();
     bool put_success = false;
 
     platform_enter_critical_section();
@@ -217,16 +219,22 @@ result_t queue_put_no_wait(queue_t *queue, void const *item) {
     platform_exit_critical_section();
 
     if (put_success) {
-        coro->event_source.type = CORO_EVTSRC_QUEUE_PUT;
-        coro->event_source.params.subject = queue;
-        coro_yield_with_signal(CORO_SIG_NOTIFY);
+        coro_event_source_t const event = {.type = CORO_EVTSRC_QUEUE_PUT,
+                                           .params.subject = queue};
+        notify_result = scheduler_notify(scheduler, &event);
+    }
+
+    if (notify_result != RES_OK) {
+        /* Critical failure to notify scheduler. */
+        return RES_NOTIFY_FAILED;
     }
 
     return (put_success) ? RES_OK : RES_QUEUE_FULL;
 }
 
 result_t queue_get_no_wait(queue_t *queue, void *item) {
-    coro_t *coro = context_get_coro();
+    result_t notify_result = RES_OK;
+    scheduler_t *scheduler = context_get_scheduler();
     bool get_success = false;
 
     platform_enter_critical_section();
@@ -237,9 +245,14 @@ result_t queue_get_no_wait(queue_t *queue, void *item) {
     platform_exit_critical_section();
 
     if (get_success) {
-        coro->event_source.type = CORO_EVTSRC_QUEUE_GET;
-        coro->event_source.params.subject = queue;
-        coro_yield_with_signal(CORO_SIG_NOTIFY);
+        coro_event_source_t const event = {.type = CORO_EVTSRC_QUEUE_GET,
+                                           .params.subject = queue};
+        notify_result = scheduler_notify(scheduler, &event);
+    }
+
+    if (notify_result != RES_OK) {
+        /* Critical failure to notify scheduler. */
+        return RES_NOTIFY_FAILED;
     }
 
     return (get_success) ? RES_OK : RES_QUEUE_EMPTY;

@@ -153,6 +153,7 @@ bool scheduler_run_once(scheduler_t *scheduler);
  * @note other result codes are possible, but will depend on the implementation.
  *
  * @retval #RES_OK scheduler has been notified.
+ * @retval #RES_NOTIFY_FAILED if the scheduler has not been notified.
  */
 __attribute__((always_inline)) static inline result_t
 scheduler_notify(scheduler_t *scheduler, coro_event_source_t const *event) {
@@ -168,6 +169,7 @@ scheduler_notify(scheduler_t *scheduler, coro_event_source_t const *event) {
  * @note other result codes are possible, but will depend on the implementation.
  *
  * @retval #RES_OK scheduler has been notified.
+ * @retval #RES_NOTIFY_FAILED if the scheduler has not been notified.
  */
 __attribute__((always_inline)) static inline result_t
 scheduler_notify_from_isr(scheduler_t *scheduler, coro_event_source_t const *event) {

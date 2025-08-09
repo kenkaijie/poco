@@ -19,7 +19,8 @@ static inline size_t _increment_task_index(round_robin_scheduler_t *scheduler,
 
 static result_t _notify_from_isr(round_robin_scheduler_t *scheduler,
                                  coro_event_source_t const *event) {
-    return queue_raw_put(&scheduler->event_queue, (void const *)event);
+    result_t queue_result = queue_raw_put(&scheduler->event_queue, (void const *)event);
+    return (queue_result == RES_OK) ? RES_OK : RES_NOTIFY_FAILED;
 }
 
 static result_t _notify(round_robin_scheduler_t *scheduler,
@@ -30,7 +31,7 @@ static result_t _notify(round_robin_scheduler_t *scheduler,
     queue_result = queue_raw_put(&scheduler->event_queue, (void const *)event);
     platform_exit_critical_section();
 
-    return queue_result;
+    return (queue_result == RES_OK) ? RES_OK : RES_NOTIFY_FAILED;
 }
 
 static coro_t *_get_current_coro(round_robin_scheduler_t *scheduler) {

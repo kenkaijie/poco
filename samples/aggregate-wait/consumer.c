@@ -65,8 +65,8 @@ result_t consumer_send_message(consumer_t *consumer, message_t const *message) {
     return put_success;
 }
 
-result_t consumer_send_command(consumer_t *consumer, command_t const *message) {
-    result_t put_success = queue_put_no_wait(&consumer->command_queue, (void *)message);
+result_t consumer_send_command(consumer_t *consumer, command_t const *command) {
+    result_t put_success = queue_put_no_wait(&consumer->command_queue, (void *)command);
     if (put_success == RES_OK) {
         event_set(&consumer->event, CONSUMER_SIG_COMMAND);
     }

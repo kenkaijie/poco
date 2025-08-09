@@ -19,6 +19,7 @@ extern "C" {
 #include <poco/result.h>
 #include <poco/scheduler.h>
 #include <poco/semaphore.h>
+#include <poco/stream.h>
 
 /* Also include all the known schedulers. */
 #include <poco/schedulers/round_robin.h>

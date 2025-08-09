@@ -21,20 +21,21 @@ Internals section relating to the operational design.
     :hidden:
 
     quick-start.md
-    general-usage.md
-    scheduler-choice.md
+    general
     result-codes.md
     operation
+    streams
     Porting Platforms<platform.md>
 
+
 .. toctree::
-    :caption: Tutorial and Guides
+    :caption: Tutorials
     :hidden:
 
     tutorials/hello-world.rst
 
 .. toctree::
-    :caption: References
+    :caption: API
     :hidden:
 
     API Reference<_gen/filelist>
