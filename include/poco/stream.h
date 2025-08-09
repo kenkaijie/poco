@@ -132,6 +132,7 @@ result_t stream_send(stream_t *stream, uint8_t const *data, size_t *data_size,
  * @retval #RES_OK If data has been sent. Check the value of data_size to determine how
  *      muych was actually sent.
  * @retval #RES_STREAM_FULL If no bytes were sent.
+ * @retval #RES_NOTIFY_FAILED if the scheduler notification has failed.
  */
 result_t stream_send_no_wait(stream_t *stream, uint8_t const *data, size_t *data_size);
 
@@ -175,7 +176,7 @@ result_t stream_receive(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
  * @param buffer Buffer to store the bytes
  * @param buffer_size Number of bytes to receive. On return, displays the actual number
  *      of bytes read.
- * @param timeout maximum amount of time to wait.
+ * @param timeout Maximum amount of time to wait.
  *
  * @retval #RES_OK if the requested number of bytes has been read.
  * @retval #RES_TIMEOUT if the timeout has elapsed without all data being recevied. The
@@ -184,8 +185,30 @@ result_t stream_receive(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
 result_t stream_receive_up_to(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
                               platform_ticks_t timeout);
 
+/*!
+ * @brief Receive a number of bytes without blocking.
+ *
+ * @param stream Stream to read.
+ * @param buffer Buffer to read into.
+ * @param buffer_size Maximum number of bytes to read.
+ *
+ * @retval #RES_OK if data has been received. Number of bytes read may be less than
+ *      requested.
+ * @retval #RES_STREAM_EMPTY if the stream was empty.
+ * @retval #RES_NOTIFY_FAILED if the scheduler notification has failed.
+ */
 result_t stream_receive_no_wait(stream_t *stream, uint8_t *buffer, size_t *buffer_size);
 
+/*!
+ * @brief Receive a number of bytes from the ISR.
+ *
+ * @param stream Stream to read.
+ * @param buffer Buffer to read into.
+ * @param buffer_size Maximum number of bytes to read.
+ *
+ * @retval #RES_OK if data has been received.
+ * @retval #RES_NOTIFY_FAILED if the scheduler notification has failed.
+ */
 result_t stream_receive_from_isr(stream_t *stream, uint8_t *buffer,
                                  size_t *buffer_size);
 

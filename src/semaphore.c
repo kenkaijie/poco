@@ -96,6 +96,7 @@ result_t semaphore_acquire_from_isr(semaphore_t *semaphore) {
 
 result_t semaphore_release_from_isr(semaphore_t *semaphore) {
     bool released = false;
+    result_t notify_result = RES_OK;
     scheduler_t *scheduler = context_get_scheduler();
 
     if (semaphore->slots_remaining != semaphore->slot_count) {
@@ -106,8 +107,12 @@ result_t semaphore_release_from_isr(semaphore_t *semaphore) {
     if (released) {
         coro_event_source_t const event_source = {.type = CORO_EVTSRC_SEMAPHORE_RELEASE,
                                                   .params.subject = semaphore};
-        result_t event_queued = scheduler_notify_from_isr(scheduler, &event_source);
-        released = (event_queued == RES_OK);
+        notify_result = scheduler_notify_from_isr(scheduler, &event_source);
+    }
+
+    if (notify_result != RES_OK) {
+        /* Critical failure to notify scheduler. */
+        return RES_NOTIFY_FAILED;
     }
 
     return (released) ? RES_OK : RES_OVERFLOW;

@@ -105,7 +105,7 @@ result_t semaphore_release(semaphore_t *semaphore);
  * @param semaphore Semaphore to acquire.
  *
  * @retval #RES_OK semaphore has been acquired
- * @retval
+ * @retval #RES_TIMEOUT if the sempahore cannot be acquired.
  */
 result_t semaphore_acquire_from_isr(semaphore_t *semaphore);
 
@@ -116,7 +116,9 @@ result_t semaphore_acquire_from_isr(semaphore_t *semaphore);
  *
  * @param semaphore Semaphore to acquire.
  *
- * @retval #RES_OK semaphore has been released
+ * @retval #RES_OK semaphore has been released.
+ * @retval #RES_OVERFLOW if the semaphore could not be released.
+ * @retval #RES_NOTIFY_FAILED if the scheduler notification has failed.
  */
 result_t semaphore_release_from_isr(semaphore_t *semaphore);
 

@@ -71,8 +71,12 @@ void event_set(event_t *event, flags_t mask);
  *
  * @param event Event to set.
  * @param mask Mask to set.
+ *
+ * @param #RES_OK if the event was set.
+ * @param #RES_NOTIFY_FAILED if the scheduler could not be notified. This is a critical
+ *      error.
  */
-void event_set_from_ISR(event_t *event, flags_t mask);
+result_t event_set_from_isr(event_t *event, flags_t mask);
 
 #ifdef __cplusplus
 }

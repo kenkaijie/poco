@@ -81,8 +81,8 @@ void event_set(event_t *event, flags_t mask) {
     coro_yield_with_signal(CORO_SIG_NOTIFY);
 }
 
-void event_set_from_ISR(event_t *event, flags_t mask) {
-
+result_t event_set_from_isr(event_t *event, flags_t mask) {
+    result_t notify_result = RES_OK;
     scheduler_t *scheduler = context_get_scheduler();
 
     platform_enter_critical_section();
@@ -93,5 +93,6 @@ void event_set_from_ISR(event_t *event, flags_t mask) {
         .type = CORO_EVTSRC_EVENT_SET,
         .params.subject = event,
     };
-    scheduler_notify_from_isr(scheduler, &event_source);
+    notify_result = scheduler_notify_from_isr(scheduler, &event_source);
+    return (notify_result == RES_OK) ? RES_OK : RES_NOTIFY_FAILED;
 }

@@ -124,34 +124,7 @@ result_t stream_send(stream_t *stream, uint8_t const *data, size_t *data_size,
 
 result_t stream_send_no_wait(stream_t *stream, uint8_t const *data, size_t *data_size) {
 
-    coro_t *coro = context_get_coro();
-    size_t bytes_written = stream_bytes_free(stream);
-
-    // write as much as we can
-    if (*data_size < bytes_written) {
-        bytes_written = *data_size;
-    }
-
-    for (size_t count = 0; count < bytes_written; ++count) {
-        stream->buffer[stream->write_idx % stream->max_size] = data[count];
-        stream->write_idx += 1;
-    }
-
-    if (bytes_written > 0) {
-        /* Notify the consumer if we have put even a single byte. */
-        coro->event_source.type = CORO_EVTSRC_STREAM_SEND;
-        coro->event_source.params.subject = stream;
-        coro_yield_with_signal(CORO_SIG_NOTIFY);
-    }
-
-    *data_size = bytes_written;
-
-    return (bytes_written > 0) ? RES_OK : RES_STREAM_FULL;
-}
-
-result_t stream_send_from_isr(stream_t *stream, uint8_t const *data,
-                              size_t *data_size) {
-
+    result_t notify_result = RES_OK;
     scheduler_t *scheduler = context_get_scheduler();
     size_t bytes_written = stream_bytes_free(stream);
 
@@ -169,10 +142,48 @@ result_t stream_send_from_isr(stream_t *stream, uint8_t const *data,
         /* Notify the consumer if we have put even a single byte. */
         coro_event_source_t event = {.type = CORO_EVTSRC_STREAM_SEND,
                                      .params.subject = stream};
-        scheduler_notify_from_isr(scheduler, &event);
+        notify_result = scheduler_notify(scheduler, &event);
     }
 
     *data_size = bytes_written;
+
+    if (notify_result != RES_OK) {
+        /* Critical failure to notify scheduler. */
+        return RES_NOTIFY_FAILED;
+    }
+
+    return (bytes_written > 0) ? RES_OK : RES_STREAM_FULL;
+}
+
+result_t stream_send_from_isr(stream_t *stream, uint8_t const *data,
+                              size_t *data_size) {
+    result_t notify_result = RES_OK;
+    scheduler_t *scheduler = context_get_scheduler();
+    size_t bytes_written = stream_bytes_free(stream);
+
+    // write as much as we can
+    if (*data_size < bytes_written) {
+        bytes_written = *data_size;
+    }
+
+    for (size_t count = 0; count < bytes_written; ++count) {
+        stream->buffer[stream->write_idx % stream->max_size] = data[count];
+        stream->write_idx += 1;
+    }
+
+    if (bytes_written > 0) {
+        /* Notify the consumer if we have put even a single byte. */
+        coro_event_source_t event = {.type = CORO_EVTSRC_STREAM_SEND,
+                                     .params.subject = stream};
+        notify_result = scheduler_notify_from_isr(scheduler, &event);
+    }
+
+    *data_size = bytes_written;
+
+    if (notify_result != RES_OK) {
+        /* Critical failure to notify scheduler. */
+        return RES_NOTIFY_FAILED;
+    }
 
     return (bytes_written > 0) ? RES_OK : RES_STREAM_FULL;
 }
@@ -271,33 +282,7 @@ result_t stream_receive_up_to(stream_t *stream, uint8_t *buffer, size_t *buffer_
 
 result_t stream_receive_no_wait(stream_t *stream, uint8_t *buffer,
                                 size_t *buffer_size) {
-
-    coro_t *coro = context_get_coro();
-    size_t bytes_read = stream_bytes_used(stream);
-
-    if (*buffer_size < bytes_read) {
-        bytes_read = *buffer_size;
-    }
-
-    for (size_t count = 0; count < bytes_read; ++count) {
-        buffer[count] = stream->buffer[stream->read_idx % stream->max_size];
-        stream->read_idx += 1;
-    }
-
-    if (bytes_read > 0) {
-        /* Notify the producer if we have taken out any bytes. */
-        coro->event_source.type = CORO_EVTSRC_STREAM_RECV;
-        coro->event_source.params.subject = stream;
-        coro_yield_with_signal(CORO_SIG_NOTIFY);
-    }
-
-    *buffer_size = bytes_read;
-
-    return (bytes_read > 0) ? RES_OK : RES_STREAM_EMPTY;
-}
-
-result_t stream_receive_from_isr(stream_t *stream, uint8_t *buffer,
-                                 size_t *buffer_size) {
+    result_t notify_result = RES_OK;
     scheduler_t *scheduler = context_get_scheduler();
     size_t bytes_read = stream_bytes_used(stream);
 
@@ -314,10 +299,47 @@ result_t stream_receive_from_isr(stream_t *stream, uint8_t *buffer,
         /* Notify the producer if we have taken out any bytes. */
         coro_event_source_t event = {.type = CORO_EVTSRC_STREAM_RECV,
                                      .params.subject = stream};
-        scheduler_notify_from_isr(scheduler, &event);
+        notify_result = scheduler_notify_from_isr(scheduler, &event);
     }
 
     *buffer_size = bytes_read;
+
+    if (notify_result != RES_OK) {
+        /* Critical failure to notify scheduler. */
+        return RES_NOTIFY_FAILED;
+    }
+
+    return (bytes_read > 0) ? RES_OK : RES_STREAM_EMPTY;
+}
+
+result_t stream_receive_from_isr(stream_t *stream, uint8_t *buffer,
+                                 size_t *buffer_size) {
+    result_t notify_result = RES_OK;
+    scheduler_t *scheduler = context_get_scheduler();
+    size_t bytes_read = stream_bytes_used(stream);
+
+    if (*buffer_size < bytes_read) {
+        bytes_read = *buffer_size;
+    }
+
+    for (size_t count = 0; count < bytes_read; ++count) {
+        buffer[count] = stream->buffer[stream->read_idx % stream->max_size];
+        stream->read_idx += 1;
+    }
+
+    if (bytes_read > 0) {
+        /* Notify the producer if we have taken out any bytes. */
+        coro_event_source_t event = {.type = CORO_EVTSRC_STREAM_RECV,
+                                     .params.subject = stream};
+        notify_result = scheduler_notify_from_isr(scheduler, &event);
+    }
+
+    *buffer_size = bytes_read;
+
+    if (notify_result != RES_OK) {
+        /* Critical failure to notify scheduler. */
+        return RES_NOTIFY_FAILED;
+    }
 
     return (bytes_read > 0) ? RES_OK : RES_STREAM_EMPTY;
 }

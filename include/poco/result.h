@@ -53,6 +53,14 @@ enum res_codes_general {
 
     /*! Operation exceeded maximum allowable time. */
     RES_TIMEOUT = RES_CODE(RES_GROUP_GENERAL, 5),
+
+    /*!
+     * A scheduler notification failed.
+     *
+     * @warning This is a critical failure and indicates the number of events the
+     * scheduler has been configured with is not sufficient.
+     */
+    RES_NOTIFY_FAILED = RES_CODE(RES_GROUP_GENERAL, 6),
 };
 
 #ifdef __cplusplus

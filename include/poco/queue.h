@@ -136,6 +136,7 @@ result_t queue_get(queue_t *queue, void *item, platform_ticks_t timeout);
  *
  * @retval #RES_OK Item has been queued.
  * @retval #RES_QUEUE_FULL Queue is full, no item has been inserted.
+ * @retval #RES_NOTIFY_FAILED if the operation failed to notify the scheduler.
  */
 result_t queue_put_no_wait(queue_t *queue, void const *item);
 
@@ -147,6 +148,7 @@ result_t queue_put_no_wait(queue_t *queue, void const *item);
  *
  * @retval #RES_OK An item has been taken.
  * @retval #RES_QUEUE_EMPTY Queue has no items to get.
+ * @retval #RES_NOTIFY_FAILED if the operation failed to notify the scheduler.
  */
 result_t queue_get_no_wait(queue_t *queue, void *item);
 
