@@ -71,6 +71,16 @@ static bool _update_event_sink(coro_event_sink_t *sink,
             unblock_task = (sink->params.subject == event->params.subject);
         }
         break;
+    case CORO_EVTSRC_STREAM_RECV:
+        if (sink->type == CORO_EVTSINK_STREAM_NOT_FULL) {
+            unblock_task = (sink->params.subject == event->params.subject);
+        }
+        break;
+    case CORO_EVTSRC_STREAM_SEND:
+        if (sink->type == CORO_EVTSINK_STREAM_NOT_EMPTY) {
+            unblock_task = (sink->params.subject == event->params.subject);
+        }
+        break;
     default:
         unblock_task = false;
     }

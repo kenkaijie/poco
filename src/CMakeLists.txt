@@ -9,6 +9,7 @@ target_sources(poco PRIVATE
     queue.c
     scheduler.c
     semaphore.c
+    stream.c
 )
 
 add_subdirectory(scheduler)
