@@ -6,6 +6,9 @@
  *
  * The typical use case is for queuing bytes between ISRs and coroutines.
  *
+ * To allow both the producer and consumer to "run" unbounded, there is a limitation
+ * that the buffer size must be a multiple of 2.
+ *
  * The difference for this API and the queueing API is that streams treat the buffer
  * as a stream of bytes, whereas the queues treat the buffer as a set of elements.
  *
@@ -43,14 +46,34 @@ typedef struct stream {
     size_t max_size;
     size_t read_idx;
     size_t write_idx;
-    bool buffer_is_empty; /**< We use this method of determining between FULL and Empty
-                           */
 } stream_t;
 
+/*!
+ * @brief Creates a static stream from
+ *
+ * @param stream Pointer to the statically allocated stream structure.
+ * @param buffer_size Number of bytes in the stream. Must be a power of 2.
+ * @param buffer a buffer the stream can use. Must be at least buffer_size bytes.
+ *
+ * @return a pointer to the stream (same as the input) or NULL if the stream could not
+ *      be created.
+ */
 stream_t *stream_create_static(stream_t *stream, size_t buffer_size, uint8_t *buffer);
 
+/*!
+ * @brief Dynamically allocate space for a stream.
+ *
+ * @param buffer_size Number of bytes for the stream to use. Must be a power of 2.
+ *
+ * @return a pointer to a stream, or NULL if the stream could not be allocated.
+ */
 stream_t *stream_create(size_t buffer_size);
 
+/*!
+ * @brief Frees a dyanicamlly allocated stream.
+ *
+ * @param stream Stream to deallocate.
+ */
 void stream_free(stream_t *stream);
 
 /*!
@@ -70,6 +93,21 @@ result_t stream_send(stream_t *stream, uint8_t const *data, size_t *data_size,
                      platform_ticks_t timeout);
 
 /*!
+ * @brief Sends as much data onto the stream as possible without blocking.
+ *
+ * @param stream Stream to send.
+ * @param data Data to send.
+ * @param data_size Size of data, in bytes.
+ *
+ * @retval #RES_OK If data has been sent. Check the value of data_size to determine how
+ *      muych was actually sent.
+ * @retval #RES_STREAM_FULL If no bytes were sent.
+ */
+result_t stream_send_no_wait(stream_t *stream, uint8_t const *data, size_t *data_size);
+
+result_t stream_send_from_isr(stream_t *stream, uint8_t const *data, size_t *data_size);
+
+/*!
  * @brief Receive a number of bytes from the stream.
  *
  * @param stream Stream to read from.
@@ -82,8 +120,33 @@ result_t stream_send(stream_t *stream, uint8_t const *data, size_t *data_size,
  * @retval #RES_TIMEOUT if the timeout has elapsed without all data being recevied. The
  *      value of buffer_size indicates the actual number of bytes read.
  */
-result_t stream_recv(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
-                     platform_ticks_t timeout);
+result_t stream_receive(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
+                        platform_ticks_t timeout);
+
+/*!
+ * @brief Receive up to a number of bytes from the stream.
+ *
+ * This differs from @ref stream_receive as it will not attempt to wait for the
+ * requested length. This will only block if there is no data in the stream, and when
+ * data is present, will simply return all there is.
+ *
+ * @param stream Stream to read from.
+ * @param buffer Buffer to store the bytes
+ * @param buffer_size Number of bytes to receive. On return, displays the actual number
+ *      of bytes read.
+ * @param timeout maximum amount of time to wait.
+ *
+ * @retval #RES_OK if the requested number of bytes has been read.
+ * @retval #RES_TIMEOUT if the timeout has elapsed without all data being recevied. The
+ *      value of buffer_size indicates the actual number of bytes read.
+ */
+result_t stream_receive_up_to(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
+                              platform_ticks_t timeout);
+
+result_t stream_receive_no_wait(stream_t *stream, uint8_t *buffer, size_t *buffer_size);
+
+result_t stream_receive_from_isr(stream_t *stream, uint8_t *buffer,
+                                 size_t *buffer_size);
 
 /*!
  * @brief Block the producer until the stream is completely empty.

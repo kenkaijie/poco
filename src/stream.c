@@ -13,9 +13,14 @@
 
 stream_t *stream_create_static(stream_t *stream, size_t buffer_size, uint8_t *buffer) {
 
+    /* Power of 2 bit trick. */
+    if ((buffer_size == 0) || ((buffer_size & (buffer_size - 1)) != 0)) {
+        /* not a power of 2. */
+        return NULL;
+    }
+
     stream->buffer = buffer;
     stream->max_size = buffer_size;
-    stream->buffer_is_empty = true;
     stream->read_idx = 0;
     stream->write_idx = 0;
 
@@ -59,17 +64,7 @@ void stream_free(stream_t *stream) {
 }
 
 size_t stream_bytes_used(stream_t *stream) {
-    size_t diff;
-    platform_enter_critical_section();
-    diff = (stream->write_idx - stream->read_idx) % stream->max_size;
-    platform_exit_critical_section();
-
-    if (diff == 0) {
-        /* We are either full, or empty. */
-        return (stream->buffer_is_empty) ? 0 : stream->max_size;
-    }
-
-    return diff;
+    return (stream->write_idx - stream->read_idx) % stream->max_size;
 }
 
 size_t stream_bytes_free(stream_t *stream) {
@@ -107,10 +102,10 @@ result_t stream_send(stream_t *stream, uint8_t const *data, size_t *data_size,
         }
 
         for (size_t count = 0; count < bytes_available; ++count) {
-            stream->buffer[stream->write_idx] = data[bytes_written + count];
-            stream->write_idx = (stream->write_idx + 1) % stream->max_size;
+            stream->buffer[stream->write_idx % stream->max_size] =
+                data[bytes_written + count];
+            stream->write_idx += 1;
         }
-        stream->buffer_is_empty = false;
         bytes_written += bytes_available;
         bytes_remaining -= bytes_available;
     }
@@ -127,8 +122,8 @@ result_t stream_send(stream_t *stream, uint8_t const *data, size_t *data_size,
     return (bytes_remaining == 0) ? RES_OK : RES_TIMEOUT;
 }
 
-result_t stream_recv(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
-                     platform_ticks_t timeout) {
+result_t stream_receive(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
+                        platform_ticks_t timeout) {
 
     coro_t *coro = context_get_coro();
     size_t bytes_remaining = *buffer_size;
@@ -143,7 +138,6 @@ result_t stream_recv(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
 
         size_t bytes_available = stream_bytes_used(stream);
 
-        // write as much as we can
         if (bytes_remaining < bytes_available) {
             bytes_available = bytes_remaining;
         }
@@ -158,19 +152,17 @@ result_t stream_recv(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
         }
 
         for (size_t count = 0; count < bytes_available; ++count) {
-            buffer[bytes_read + count] = stream->buffer[stream->read_idx];
-            stream->read_idx = (stream->read_idx + 1) % stream->max_size;
+            buffer[bytes_read + count] =
+                stream->buffer[stream->read_idx % stream->max_size];
+            stream->read_idx += 1;
         }
         /* As we are reading, if they are the same, they must be empty. */
-        platform_enter_critical_section();
-        stream->buffer_is_empty = (stream->write_idx == stream->read_idx);
-        platform_exit_critical_section();
         bytes_read += bytes_available;
         bytes_remaining -= bytes_available;
     }
 
     if (bytes_read > 0) {
-        /* Notify the consumer if we have put even a single byte. */
+        /* Notify the producer if we have taken out any bytes. */
         coro->event_source.type = CORO_EVTSRC_STREAM_RECV;
         coro->event_source.params.subject = stream;
         coro_yield_with_signal(CORO_SIG_NOTIFY);
@@ -179,6 +171,47 @@ result_t stream_recv(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
     *buffer_size = bytes_read;
 
     return (bytes_remaining == 0) ? RES_OK : RES_TIMEOUT;
+}
+
+result_t stream_receive_up_to(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
+                              platform_ticks_t timeout) {
+
+    /* This is quite similar to the standard receive, except without a loop. */
+    coro_t *coro = context_get_coro();
+
+    coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_STREAM_NOT_EMPTY;
+    coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].params.subject = stream;
+    coro->event_sinks[EVENT_SINK_SLOT_TIMEOUT].type = CORO_EVTSINK_DELAY;
+    coro->event_sinks[EVENT_SINK_SLOT_TIMEOUT].params.ticks_remaining = timeout;
+
+    size_t bytes_available = stream_bytes_used(stream);
+
+    if (bytes_available == 0) {
+        /* No bytes available, we block and wait. */
+        coro_yield_with_signal(CORO_SIG_WAIT);
+        /* we just recheck regardless of timeout or actual data. */
+        bytes_available = stream_bytes_used(stream);
+    }
+
+    if (*buffer_size < bytes_available) {
+        bytes_available = *buffer_size;
+    }
+
+    for (size_t count = 0; count < bytes_available; ++count) {
+        buffer[count] = stream->buffer[stream->read_idx % stream->max_size];
+        stream->read_idx += 1;
+    }
+
+    if (bytes_available > 0) {
+        /* Notify as we have read some data */
+        coro->event_source.type = CORO_EVTSRC_STREAM_RECV;
+        coro->event_source.params.subject = stream;
+        coro_yield_with_signal(CORO_SIG_NOTIFY);
+    }
+
+    *buffer_size = bytes_available;
+
+    return (bytes_available > 0) ? RES_OK : RES_TIMEOUT;
 }
 
 result_t stream_flush(stream_t *stream, platform_ticks_t timeout) {

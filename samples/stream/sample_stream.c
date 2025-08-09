@@ -55,8 +55,8 @@ static void consumer_task(void *context) {
 
     while (buffer_len > 0) {
         buffer_len = sizeof(recv_buffer) - 1;
-        stream_recv(stream, recv_buffer, &buffer_len,
-                    1000 * platform_get_ticks_per_ms());
+        stream_receive_up_to(stream, recv_buffer, &buffer_len,
+                             1000 * platform_get_ticks_per_ms());
         recv_buffer[buffer_len] = '\0';
         printf("%s", recv_buffer);
     }
