@@ -77,6 +77,36 @@ stream_t *stream_create(size_t buffer_size);
 void stream_free(stream_t *stream);
 
 /*!
+ * @brief Gets the number of bytes used in the stream.
+ *
+ * @warning This value only represents a snpashot. However:
+ *
+ *      - If called from the consumer, guaranteed to be greater than or equal.
+ *
+ *      - If called from the producer, guaranteed to be lesser than or equal.
+ *
+ * @param stream Stream to check.
+ *
+ * @return The number of bytes the stream has in use. See warning for more information.
+ */
+size_t stream_bytes_used(stream_t *stream);
+
+/*!
+ * @brief Gets the number of bytes used in the stream.
+ *
+ * @warning This value only represents a snpashot. However:
+ *
+ *      - If called from the consumer, guaranteed to be lesser than or equal.
+ *
+ *      - If called from the producer, guaranteed to be greater than or equal.
+ *
+ * @param stream Stream to check.
+ *
+ * @return The number of bytes the stream has for use. See warning for more information.
+ */
+size_t stream_bytes_free(stream_t *stream);
+
+/*!
  * @brief Sends data across the stream.
  *
  * @param stream Stream to send on.
@@ -105,6 +135,17 @@ result_t stream_send(stream_t *stream, uint8_t const *data, size_t *data_size,
  */
 result_t stream_send_no_wait(stream_t *stream, uint8_t const *data, size_t *data_size);
 
+/*!
+ * @brief Sends as much data onto the stream as possible without blocking from an ISR.
+ *
+ * @param stream Stream to send.
+ * @param data Data to send.
+ * @param data_size Size of data, in bytes.
+ *
+ * @retval #RES_OK If data has been sent. Check the value of data_size to determine how
+ *      muych was actually sent.
+ * @retval #RES_STREAM_FULL If no bytes were sent.
+ */
 result_t stream_send_from_isr(stream_t *stream, uint8_t const *data, size_t *data_size);
 
 /*!
