@@ -85,9 +85,7 @@ result_t event_set_from_isr(event_t *event, flags_t mask) {
     result_t notify_result = RES_OK;
     scheduler_t *scheduler = context_get_scheduler();
 
-    platform_enter_critical_section();
     event->flags |= mask;
-    platform_exit_critical_section();
 
     coro_event_source_t const event_source = {
         .type = CORO_EVTSRC_EVENT_SET,

@@ -98,8 +98,6 @@ typedef coro_t *(*scheduler_get_current_coroutine_t)(scheduler_t *scheduler);
  */
 typedef struct scheduler {
     scheduler_run_t run;
-    scheduler_start_t start;
-    scheduler_run_once_t run_once;
     scheduler_notify_t notify;
     scheduler_notify_from_isr_t notify_from_isr;
     scheduler_get_current_coroutine_t get_current_coroutine;

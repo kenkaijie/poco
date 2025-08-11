@@ -14,7 +14,7 @@
  */
 static inline size_t _increment_task_index(round_robin_scheduler_t *scheduler,
                                            size_t task_index, size_t step) {
-    return (task_index + step) % scheduler->task_count;
+    return (task_index + step) % scheduler->max_tasks_count;
 }
 
 static result_t _notify_from_isr(round_robin_scheduler_t *scheduler,
@@ -38,22 +38,35 @@ static coro_t *_get_current_coro(round_robin_scheduler_t *scheduler) {
     return scheduler->current_task;
 }
 
-static size_t _get_finished_task_count(round_robin_scheduler_t *scheduler) {
+static size_t _get_finished_task_count(coro_t *const *coro_list, size_t max_count) {
     size_t finished_tasks = 0;
-    for (size_t i = 0; i < scheduler->task_count; ++i) {
-        if (scheduler->tasks[i]->coro_state == CORO_STATE_FINISHED) {
+    for (size_t idx = 0; idx < max_count; ++idx) {
+        coro_t *task = coro_list[idx];
+        if ((task != NULL) && (task->coro_state == CORO_STATE_FINISHED)) {
             finished_tasks++;
         }
     }
     return finished_tasks;
 }
 
+/*!
+ * Gets the actual task count based on non-empty values in the coroutine list.
+ */
+static size_t _get_task_count(coro_t *const *coro_list, size_t max_count) {
+    size_t coroutine_count = 0;
+    for (size_t idx = 0; idx < max_count; ++idx) {
+        coroutine_count += (coro_list[idx] != NULL) ? 1 : 0;
+    }
+    return coroutine_count;
+}
+
 static coro_t *_get_next_ready_task(round_robin_scheduler_t *scheduler) {
-    for (size_t offset = 0; offset < scheduler->task_count; ++offset) {
+    for (size_t offset = 0; offset < scheduler->max_tasks_count; ++offset) {
         size_t task_index =
             _increment_task_index(scheduler, scheduler->next_task_index, offset);
-        if (scheduler->tasks[task_index]->coro_state == CORO_STATE_READY) {
-            scheduler->current_task = scheduler->tasks[task_index];
+        coro_t *task = scheduler->tasks[task_index];
+        if ((task != NULL) && (task->coro_state == CORO_STATE_READY)) {
+            scheduler->current_task = task;
             scheduler->next_task_index =
                 _increment_task_index(scheduler, task_index, 1);
             return scheduler->current_task;
@@ -67,19 +80,22 @@ static coro_t *_get_next_ready_task(round_robin_scheduler_t *scheduler) {
  */
 static void _update_waiting_tasks(round_robin_scheduler_t *scheduler,
                                   coro_event_source_t const *event) {
-    for (size_t task_idx = 0; task_idx < scheduler->task_count; ++task_idx) {
+    for (size_t task_idx = 0; task_idx < scheduler->max_tasks_count; ++task_idx) {
         coro_t *task = scheduler->tasks[task_idx];
-        coro_notify(task, event);
+        if (task != NULL) {
+            coro_notify(task, event);
+        }
     }
 }
 
 static void _scheduler_start(round_robin_scheduler_t *scheduler) {
-    scheduler->finished_tasks = _get_finished_task_count(scheduler);
+    scheduler->finished_tasks =
+        _get_finished_task_count(scheduler->tasks, scheduler->max_tasks_count);
     scheduler->previous_ticks = platform_get_monotonic_ticks();
 }
 
 static bool _scheduler_run_once(round_robin_scheduler_t *scheduler) {
-    if (scheduler->finished_tasks >= scheduler->task_count) {
+    if (scheduler->finished_tasks >= scheduler->all_tasks) {
         /* no more tasks to run */
         return false;
     }
@@ -154,14 +170,11 @@ scheduler_t *round_robin_scheduler_create(coro_t *const *coro_list, size_t num_c
         copied_list[i] = coro_list[i];
     }
 
-    return round_robin_scheduler_create_static(scheduler, coro_list, num_coros);
+    return round_robin_scheduler_create_static(scheduler, copied_list, num_coros);
 }
 
 scheduler_t *round_robin_scheduler_create_static(round_robin_scheduler_t *scheduler,
-                                                 coro_t *const *coro_list,
-                                                 size_t num_coros) {
-    scheduler->scheduler.start = (scheduler_start_t)_scheduler_start;
-    scheduler->scheduler.run_once = (scheduler_run_once_t)_scheduler_run_once;
+                                                 coro_t **coro_list, size_t num_coros) {
     scheduler->scheduler.run = (scheduler_run_t)_scheduler_loop;
     scheduler->scheduler.notify_from_isr =
         (scheduler_notify_from_isr_t)_notify_from_isr;
@@ -169,7 +182,8 @@ scheduler_t *round_robin_scheduler_create_static(round_robin_scheduler_t *schedu
     scheduler->scheduler.get_current_coroutine =
         (scheduler_get_current_coroutine_t)_get_current_coro;
     scheduler->tasks = coro_list;
-    scheduler->task_count = num_coros;
+    scheduler->max_tasks_count = num_coros;
+    scheduler->all_tasks = _get_task_count(coro_list, num_coros);
     scheduler->finished_tasks = 0;
     scheduler->current_task = NULL;
     scheduler->next_task_index = 0;
@@ -180,4 +194,52 @@ scheduler_t *round_robin_scheduler_create_static(round_robin_scheduler_t *schedu
                         (uint8_t *)scheduler->external_events);
 
     return (scheduler_t *)scheduler;
+}
+
+void round_round_robin_scheduler_free(round_robin_scheduler_t *scheduler) {
+    if (scheduler == NULL) {
+        /* cannot free null pointer, as we cannot access the stack to free it first. */
+        return;
+    }
+
+    if (scheduler->tasks != NULL) {
+        /* Note we dont free the underlying coroutines, just the scheduler! */
+        free((coro_t **)scheduler->tasks);
+    }
+
+    free(scheduler);
+}
+
+result_t round_robin_scheduler_add_coro(round_robin_scheduler_t *scheduler,
+                                        coro_t *coro) {
+    // This doens't have to be particularly fast, a linear search is sufficient.
+
+    for (size_t idx = 0; idx < scheduler->max_tasks_count; ++idx) {
+        coro_t *task = scheduler->tasks[idx];
+
+        if (task == NULL) {
+            scheduler->tasks[idx] = coro;
+            scheduler->all_tasks =
+                _get_task_count(scheduler->tasks, scheduler->max_tasks_count);
+            return RES_OK;
+        }
+    }
+
+    return RES_NO_MEM;
+}
+
+void round_robin_scheduler_remove_coro(round_robin_scheduler_t *scheduler,
+                                       coro_t *coro) {
+    // This doens't have to be particularly fast, a linear search is sufficient.
+
+    for (size_t idx = 0; idx < scheduler->max_tasks_count; ++idx) {
+        coro_t *task = scheduler->tasks[idx];
+
+        if ((task == coro)) {
+            scheduler->tasks[idx] = NULL;
+            scheduler->all_tasks =
+                _get_task_count(scheduler->tasks, scheduler->max_tasks_count);
+            return;
+        }
+    }
 }

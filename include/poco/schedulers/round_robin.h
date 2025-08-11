@@ -23,8 +23,9 @@ extern "C" {
 
 typedef struct round_robin_scheduler {
     scheduler_t scheduler;
-    coro_t *const *tasks;
-    size_t task_count;
+    coro_t **tasks;
+    size_t max_tasks_count; /**< Maximum number of tasks the task array can store. */
+    size_t all_tasks;       /**<* Number of actual tasks in the task list. */
     size_t finished_tasks;
     coro_t *current_task;
     size_t next_task_index; /**< index to check next when performing a context switch */
@@ -44,8 +45,33 @@ typedef struct round_robin_scheduler {
 scheduler_t *round_robin_scheduler_create(coro_t *const *coro_list, size_t num_coros);
 
 scheduler_t *round_robin_scheduler_create_static(round_robin_scheduler_t *scheduler,
-                                                 coro_t *const *coro_list,
-                                                 size_t num_coros);
+                                                 coro_t **coro_list, size_t num_coros);
+
+/*!
+ * @brief Frees a dynamically allocated scheduler.
+ *
+ * @param scheduler Scheduler to free, must have been created from @ref
+ *      round_robin_scheduler_create.
+ */
+void round_round_robin_scheduler_free(round_robin_scheduler_t *scheduler);
+
+/*!
+ * @brief Add a coroutine to the scheduler.
+ *
+ * @note This will only use empty slots. If a coroutine is finished, its slow must be
+ *      explicitly cleared by the caller. This is to guarantee to the caller that the
+ *      scheduler holds the reference (until being told not to).
+ *
+ * @param scheduler
+ * @param coro
+ *
+ * @retval #RES_OK if the coroutine has been added
+ * @retval #RES_NO_MEM if there was no space for the coroutine
+ */
+result_t round_robin_scheduler_add_coro(round_robin_scheduler_t *scheduler,
+                                        coro_t *coro);
+void round_robin_scheduler_remove_coro(round_robin_scheduler_t *scheduler,
+                                       coro_t *coro);
 
 #ifdef __cplusplus
 }
