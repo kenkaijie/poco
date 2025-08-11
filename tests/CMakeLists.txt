@@ -43,4 +43,7 @@ add_golden_test(test_sample_semaphore sample_semaphore)
 add_golden_test(test_sample_simple_event sample_simple_event)
 add_golden_test(test_sample_stream sample_stream)
 
+add_cmocka_test(test_event_alloc test_event_alloc.c)
+target_link_libraries(test_event_alloc_runner PRIVATE -Wl,--wrap=malloc)
+add_cmocka_test(test_event test_event.c)
 add_cmocka_test(test_queue test_queue.c)
