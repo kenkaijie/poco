@@ -20,6 +20,18 @@ function(add_golden_test TEST_NAME TEST_TARGET)
     )
 endfunction()
 
+# Adds a cmocka test to CTest.
+#
+# Inputs:
+#   TEST_NAME name of the test.
+#   SRCS sources to include as part of the test runner
+function(add_cmocka_test TEST_NAME SRCS)
+    add_executable(${TEST_NAME}_runner ${SRCS} cmocka_coro_helper.c)
+    target_link_libraries(${TEST_NAME}_runner PRIVATE poco::poco)
+    target_link_libraries(${TEST_NAME}_runner PRIVATE -lcmocka)
+    add_test(NAME ${TEST_NAME}_runner COMMAND ${TEST_NAME}_runner)
+endfunction()
+
 add_golden_test(test_sample_aggregate_wait sample_aggregate_wait)
 add_golden_test(test_sample_coro_joining sample_coro_joining)
 add_golden_test(test_sample_hello_world sample_hello_world)
@@ -30,3 +42,5 @@ add_golden_test(test_sample_queue sample_queue)
 add_golden_test(test_sample_semaphore sample_semaphore)
 add_golden_test(test_sample_simple_event sample_simple_event)
 add_golden_test(test_sample_stream sample_stream)
+
+add_cmocka_test(test_queue test_queue.c)
