@@ -175,8 +175,6 @@ scheduler_t *round_robin_scheduler_create(coro_t *const *coro_list, size_t num_c
 
 scheduler_t *round_robin_scheduler_create_static(round_robin_scheduler_t *scheduler,
                                                  coro_t **coro_list, size_t num_coros) {
-    scheduler->scheduler.start = (scheduler_start_t)_scheduler_start;
-    scheduler->scheduler.run_once = (scheduler_run_once_t)_scheduler_run_once;
     scheduler->scheduler.run = (scheduler_run_t)_scheduler_loop;
     scheduler->scheduler.notify_from_isr =
         (scheduler_notify_from_isr_t)_notify_from_isr;
