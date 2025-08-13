@@ -11,7 +11,7 @@ elseif (${POCO_PLATFORM} STREQUAL "zephyr-armv7-m")
     add_subdirectory(zephyr-armv7-m)
 elseif (${POCO_PLATFORM} STREQUAL "custom")
     # User provided platform, they should add their platform sources to the 
-    # poco::platform target.
+    # poco::poco target.
 else()
     message(
         FATAL_ERROR

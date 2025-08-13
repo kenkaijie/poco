@@ -1,27 +1,94 @@
 # SPDX-FileCopyrightText: Copyright contributors to the poco project.
 # SPDX-License-Identifier: MIT
 
-cmake_minimum_required(VERSION 3.21) # 3.21 for preset support
+cmake_minimum_required(VERSION 3.23) # 3.23 for file sets
 
 project(poco LANGUAGES C ASM)
 
-set(POCO_PLATFORM "unix" CACHE STRING "Platform to compile for")
+# Options
+set(
+    POCO_PLATFORM
+    "unix"
+    CACHE
+    STRING
+    "Set the underlying platform. Default: unix. Values: {unix, custom}"
+)
 
-add_subdirectory(platform)
-add_subdirectory(samples)
+option(
+    POCO_BUILD_TESTS
+"\
+Enable building tests and test infrastructure. Default: ${PROJECT_IS_TOP_LEVEL}.\
+Values: { ON, OFF }.\
+"
+    ${PROJECT_IS_TOP_LEVEL}
+)
+
+option(
+    POCO_BUILD_SAMPLES
+"\
+Enable building examples, not if building samples and enabling testing, additional\
+sample tests are also enabled. Default: ${PROJECT_IS_TOP_LEVEL}. Values: { ON, OFF }.\
+"
+    ${PROJECT_IS_TOP_LEVEL}
+)
 
 add_library(poco)
 add_library(poco::poco ALIAS poco)
-target_link_libraries(poco PUBLIC poco::platform)
-target_include_directories(poco PUBLIC include)
+
+set_target_properties(
+    poco
+    PROPERTIES
+        VERIFY_INTERFACE_HEADER_SETS ON
+        EXPORT_NAME poco
+)
+
+add_subdirectory(include)
+add_subdirectory(platform)
 add_subdirectory(src)
 
-# Add testing
-
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    include(CTest)
+# Add samples
+if(POCO_BUILD_SAMPLES)
+    add_subdirectory(samples)
 endif()
 
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
+# Add testing
+include(CTest)
+if(POCO_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
+
+# Installation Sets
+include(GNUInstallDirs)
+
+install(
+    TARGETS poco COMPONENT poco
+    EXPORT poco
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    FILE_SET HEADERS
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+# Export Sets
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/poco-config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/poco-config.cmake
+    INSTALL_DESTINATION
+    ${CMAKE_INSTALL_LIBDIR}/cmake/poco
+    PATH_VARS PROJECT_NAME
+)
+
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/poco-config.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/poco
+    COMPONENT poco
+)
+
+install(
+    EXPORT poco
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/poco
+    NAMESPACE poco::
+    FILE poco-targets.cmake
+    COMPONENT poco
+)
