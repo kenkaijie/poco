@@ -116,6 +116,15 @@ coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context
                            platform_stack_t *stack, size_t stack_size);
 
 /*!
+ * @brief Destroy a static coroutine.
+ *
+ * @note This does not free memory, it just deinitialises the underlying members.
+ *
+ * @param coro Coroutine created using coro_create_static.
+ */
+void coro_destroy_static(coro_t *coro);
+
+/*!
  * @brief Creates a coroutine with the specific stack and entrypoint.
  *
  * @note For stack diagnostics, we actually consume the first and last element of the
