@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright contributors to the poco project.
 # SPDX-License-Identifier: MIT
 
-cmake_minimum_required(VERSION 3.23) # 3.23 for file sets
+cmake_minimum_required(VERSION 3.24) # 3.24 for FetchContent FIND_PACKAGE_ARGS
 
 project(poco LANGUAGES C ASM)
 
@@ -52,8 +52,22 @@ if(POCO_BUILD_SAMPLES)
 endif()
 
 # Add testing
-include(CTest)
 if(POCO_BUILD_TESTS)
+    include(CTest)
+    include(FetchContent)
+
+    FetchContent_Declare(
+        cmocka
+        GIT_REPOSITORY https://gitlab.com/cmocka/cmocka.git
+        GIT_TAG cmocka-1.1.5
+        FIND_PACKAGE_ARGS 1.1.5
+    )
+
+    set(UNIT_TESTING OFF CACHE BOOL "")
+    set(WITH_EXAMPLES OFF CACHE BOOL "")
+
+    FetchContent_MakeAvailable(cmocka)
+
     add_subdirectory(tests)
 endif()
 

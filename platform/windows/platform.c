@@ -1,7 +1,7 @@
 #include <poco/platform.h>
 
 /**< Every coro yields back to the main fiber (where the scheduler resides) */
-static volatile void *main_fiber = NULL;
+static void *main_fiber = NULL;
 
 typedef struct _shim {
     void (*function)(void *, void *);
