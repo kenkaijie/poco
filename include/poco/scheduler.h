@@ -153,8 +153,8 @@ bool scheduler_run_once(scheduler_t *scheduler);
  * @retval #RES_OK scheduler has been notified.
  * @retval #RES_NOTIFY_FAILED if the scheduler has not been notified.
  */
-__attribute__((always_inline)) static inline result_t
-scheduler_notify(scheduler_t *scheduler, coro_event_source_t const *event) {
+static inline result_t scheduler_notify(scheduler_t *scheduler,
+                                        coro_event_source_t const *event) {
     return scheduler->notify(scheduler, event);
 }
 
@@ -169,8 +169,8 @@ scheduler_notify(scheduler_t *scheduler, coro_event_source_t const *event) {
  * @retval #RES_OK scheduler has been notified.
  * @retval #RES_NOTIFY_FAILED if the scheduler has not been notified.
  */
-__attribute__((always_inline)) static inline result_t
-scheduler_notify_from_isr(scheduler_t *scheduler, coro_event_source_t const *event) {
+static inline result_t scheduler_notify_from_isr(scheduler_t *scheduler,
+                                                 coro_event_source_t const *event) {
     return scheduler->notify_from_isr(scheduler, event);
 }
 
@@ -181,8 +181,7 @@ scheduler_notify_from_isr(scheduler_t *scheduler, coro_event_source_t const *eve
  *
  * @retval pointer to the coroutine, or NULL if the scheduler is not running.
  */
-__attribute__((always_inline)) static inline coro_t *
-scheduler_get_current_coroutine(scheduler_t *scheduler) {
+static inline coro_t *scheduler_get_current_coroutine(scheduler_t *scheduler) {
     return scheduler->get_current_coroutine(scheduler);
 }
 

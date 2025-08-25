@@ -41,6 +41,8 @@ typedef ucontext_t platform_context_t;
 #define platform_make_context(context, function, coro, user_context)                   \
     makecontext(context, (void (*)(void))function, 2, coro, user_context)
 
+#define platform_destroy_context(context) // no context to destroy
+
 // Platform Timing
 typedef int64_t platform_ticks_t;
 
