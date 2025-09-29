@@ -66,7 +66,7 @@ struct platform_context {
  * @param[in] context Context structure to save state in.
  * @return 0 on success, -1 otherwise.
  */
-int platform_get_context(platform_context_t *context);
+extern int platform_get_context(platform_context_t *context);
 
 /*!
  * @brief Restore the use context defined in context.
@@ -76,10 +76,10 @@ int platform_get_context(platform_context_t *context);
  * @param[in] context Context to restore.
  * @return will not return on success, -1 on failure.
  */
-int platform_set_context(const platform_context_t *context);
+extern int platform_set_context(const platform_context_t *context);
 
-int platform_swap_context(platform_context_t *current_context,
-                          const platform_context_t *new_context);
+extern int platform_swap_context(platform_context_t *current_context,
+                                 const platform_context_t *new_context);
 
 /*!
  * @brief Create a new context and set the entry point to the function func.
@@ -89,12 +89,13 @@ int platform_swap_context(platform_context_t *current_context,
 void platform_make_context(platform_context_t *context, void (*func)(void *, void *),
                            void *context1, void *context2);
 
+#define platform_destroy_context(context) // no context to destroy
+
 typedef int64_t platform_ticks_t;
 
 #define PLATFORM_TICKS_FOREVER (INT64_MIN)
 
-__attribute__((always_inline)) static inline platform_ticks_t
-platform_get_monotonic_ticks(void) {
+static inline platform_ticks_t platform_get_monotonic_ticks(void) {
     // This case is safe as our platform (NRF) casts it from a uint64 to int64 anyway.
     return (uint64_t)k_uptime_ticks();
 }

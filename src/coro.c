@@ -89,9 +89,15 @@ static bool _update_event_sink(coro_event_sink_t *sink,
 
 coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context,
                            platform_stack_t *stack, size_t stack_size) {
-    // paint the stack with 0x55s
-    // mark the start of the stack with a magic number,
-    // and the end with another magic number, we will reduce the stack size by 2 bytes
+
+    if (stack_size < 2) {
+        // need to paint, so we need at least 2
+        return NULL;
+    }
+
+    /* Paint the stack with 0x55s marking the start of the stack with a magic number,
+     * and the end with another magic number, we will reduce the stack size by 2 bytes.
+     */
     memset(stack, STACK_PAINT_MAGIC, stack_size);
     stack[0] = STACK_START_MAGIC;
     stack[stack_size - 1] = STACK_END_MAGIC;
@@ -103,6 +109,8 @@ coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context
     coro->resume_context.uc_stack.ss_sp = (void *)(stack + 1);
     coro->resume_context.uc_stack.ss_size = (stack_size - 2) * sizeof(platform_stack_t);
     coro->resume_context.uc_link = 0;
+
+    memset(&coro->suspend_context, 0, sizeof(coro->suspend_context));
 
     platform_get_context(&coro->resume_context);
     platform_make_context(&coro->resume_context, _coro_entry_point, coro, context);
