@@ -15,8 +15,7 @@
 /*!
  * @brief Unsafe push, does not perform checking and is for internal use only.
  */
-__attribute__((always_inline)) static inline void _put(queue_t *queue,
-                                                       void const *item) {
+static inline void _put(queue_t *queue, void const *item) {
     memcpy(&queue->item_buffer[queue->write_idx * queue->item_size], item,
            queue->item_size);
     queue->write_idx = (queue->write_idx + 1) % queue->max_items;
@@ -26,24 +25,18 @@ __attribute__((always_inline)) static inline void _put(queue_t *queue,
 /*!
  * @brief Unsafe pop, does not perform checking and is for internal use only.
  */
-__attribute__((always_inline)) static inline void _get(queue_t *queue, void *item) {
+static inline void _get(queue_t *queue, void *item) {
     memcpy(item, &queue->item_buffer[queue->read_idx * queue->item_size],
            queue->item_size);
     queue->read_idx = (queue->read_idx + 1) % queue->max_items;
     queue->count--;
 }
 
-__attribute__((always_inline)) static inline bool _is_full(queue_t *queue) {
-    return queue->count == queue->max_items;
-}
+static inline bool _is_full(queue_t *queue) { return queue->count == queue->max_items; }
 
-__attribute__((always_inline)) static inline bool _is_empty(queue_t *queue) {
-    return queue->count == 0;
-}
+static inline bool _is_empty(queue_t *queue) { return queue->count == 0; }
 
-__attribute__((always_inline)) static inline size_t _item_count(queue_t *queue) {
-    return queue->count;
-}
+static inline size_t _item_count(queue_t *queue) { return queue->count; }
 
 queue_t *queue_create_static(queue_t *queue, size_t num_items, size_t item_size,
                              uint8_t *item_buffer) {

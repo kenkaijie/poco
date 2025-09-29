@@ -8,8 +8,12 @@
 // cmocka has to be included after its dependencies
 #include <cmocka.h>
 
+#include <stdio.h>
+
+#define MAX_TASK_COUNT (16)
+
 typedef struct test_coro_context {
-    coro_t *tasks[16];
+    coro_t *tasks[MAX_TASK_COUNT];
     scheduler_t *scheduler;
 } test_coro_context_t;
 
@@ -26,7 +30,7 @@ int test_coro_setup(void **state) {
 
     context->tasks[0] =
         coro_create((coro_function_t)test_function, NULL, DEFAULT_STACK_SIZE);
-    context->scheduler = round_robin_scheduler_create(context->tasks, 16);
+    context->scheduler = round_robin_scheduler_create(context->tasks, MAX_TASK_COUNT);
     *state = context;
     return 0;
 }
@@ -40,7 +44,7 @@ int test_coro_teardown(void **state) {
     test_coro_context_t *context = (test_coro_context_t *)*state;
 
     /* perform all teardowns */
-    for (size_t idx = 0; idx < 16; ++idx) {
+    for (size_t idx = 0; idx < MAX_TASK_COUNT; ++idx) {
         coro_free(context->tasks[idx]);
     }
 

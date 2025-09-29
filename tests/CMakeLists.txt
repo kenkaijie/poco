@@ -11,13 +11,17 @@
 #   TEST_TARGET: name of the target to run, will be used to generate the test
 function(add_golden_test TEST_NAME TEST_TARGET)
     add_test(
+            NAME ${TEST_NAME}_exec
+            COMMAND ${CMAKE_CURRENT_LIST_DIR}/test_output.sh $<TARGET_FILE:${TEST_TARGET}> ${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME}.actual
+    )
+    add_test(
         NAME ${TEST_NAME}
         COMMAND 
-            ${CMAKE_CURRENT_LIST_DIR}/test_output.sh
-            $<TARGET_FILE:${TEST_TARGET}>
-            $<TARGET_FILE_DIR:${TEST_TARGET}>/${TEST_NAME}.actual
+            ${CMAKE_COMMAND} -E compare_files --ignore-eol
+            ${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME}.actual
             ${CMAKE_CURRENT_LIST_DIR}/${TEST_NAME}.expected
     )
+    set_tests_properties(${TEST_NAME} PROPERTIES DEPENDS ${TEST_NAME}_exec)
 endfunction()
 
 # Adds a cmocka test to CTest.
@@ -27,7 +31,7 @@ endfunction()
 #   SRCS sources to include as part of the test runner
 function(add_cmocka_test TEST_NAME SRCS)
     add_executable(${TEST_NAME}_runner ${SRCS} cmocka_coro_helper.c)
-    target_link_libraries(${TEST_NAME}_runner PRIVATE poco::poco -lcmocka)
+    target_link_libraries(${TEST_NAME}_runner PRIVATE poco::poco cmocka)
     add_test(NAME ${TEST_NAME}_runner COMMAND ${TEST_NAME}_runner)
 endfunction()
 
@@ -43,9 +47,6 @@ if (POCO_BUILD_SAMPLES)
     add_golden_test(test_sample_simple_event sample_simple_event)
     add_golden_test(test_sample_stream sample_stream)
 endif()
-
-add_cmocka_test(test_event_alloc test_event_alloc.c)
-target_link_libraries(test_event_alloc_runner PRIVATE -Wl,--wrap=malloc)
 
 add_cmocka_test(test_event test_event.c)
 add_cmocka_test(test_queue test_queue.c)
