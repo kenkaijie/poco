@@ -40,6 +40,7 @@ set_target_properties(
     PROPERTIES
         VERIFY_INTERFACE_HEADER_SETS ON
         EXPORT_NAME poco
+        C_STANDARD 99
 )
 
 add_subdirectory(include)

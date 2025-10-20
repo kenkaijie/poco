@@ -137,7 +137,8 @@ coro_t *coro_create(coro_function_t function, void *context, size_t stack_size) 
     coro_t *coro_handle =
         coro_create_static(coro, function, context, stack, stack_size_bytes);
     if (coro_handle == NULL) {
-        coro_free(coro);
+        free(coro);
+        free(stack);
     }
 
     return coro_handle;

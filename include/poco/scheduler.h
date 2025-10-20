@@ -96,12 +96,12 @@ typedef coro_t *(*scheduler_get_current_coroutine_t)(scheduler_t *scheduler);
 /*!
  * @brief Scheduler common interface.
  */
-typedef struct scheduler {
+struct scheduler {
     scheduler_run_t run;
     scheduler_notify_t notify;
     scheduler_notify_from_isr_t notify_from_isr;
     scheduler_get_current_coroutine_t get_current_coroutine;
-} scheduler_t;
+};
 
 /*!
  * @brief Runs the scheduler until completion.

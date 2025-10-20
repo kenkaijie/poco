@@ -11,10 +11,14 @@
 #include <poco/stream.h>
 #include <string.h>
 
+static inline bool _is_power_of_two(size_t buffer_size) {
+    /* Power of 2 bit trick. */
+    return ((buffer_size & (buffer_size - 1)) == 0);
+}
+
 stream_t *stream_create_static(stream_t *stream, size_t buffer_size, uint8_t *buffer) {
 
-    /* Power of 2 bit trick. */
-    if ((buffer_size == 0) || ((buffer_size & (buffer_size - 1)) != 0)) {
+    if ((buffer_size == 0) || !_is_power_of_two(buffer_size)) {
         /* not a power of 2. */
         return NULL;
     }
@@ -45,7 +49,8 @@ stream_t *stream_create(size_t buffer_size) {
 
     stream_t *stream_handle = stream_create_static(stream, buffer_size, stream_buffer);
     if (stream_handle == NULL) {
-        stream_free(stream);
+        free(stream);
+        free(stream_buffer);
     }
     return stream_handle;
 }

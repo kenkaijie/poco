@@ -44,8 +44,8 @@ enum res_code_stream {
 typedef struct stream {
     uint8_t *buffer;
     size_t max_size;
-    size_t read_idx;
-    size_t write_idx;
+    size_t volatile read_idx;
+    size_t volatile write_idx;
 } stream_t;
 
 /*!

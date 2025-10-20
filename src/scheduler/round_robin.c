@@ -159,10 +159,17 @@ static void _scheduler_loop(round_robin_scheduler_t *scheduler) {
 
 scheduler_t *round_robin_scheduler_create(coro_t *const *coro_list, size_t num_coros) {
     round_robin_scheduler_t *scheduler = malloc(sizeof(round_robin_scheduler_t));
+
+    if (scheduler == NULL) {
+        /* No more memory. */
+        return NULL;
+    }
+
     coro_t **copied_list = (coro_t **)malloc(num_coros * sizeof(coro_t *));
 
-    if (scheduler == NULL || coro_list == NULL) {
+    if (copied_list == NULL) {
         /* No more memory. */
+        free(scheduler);
         return NULL;
     }
 
@@ -235,7 +242,7 @@ void round_robin_scheduler_remove_coro(round_robin_scheduler_t *scheduler,
     for (size_t idx = 0; idx < scheduler->max_tasks_count; ++idx) {
         coro_t *task = scheduler->tasks[idx];
 
-        if ((task == coro)) {
+        if (task == coro) {
             scheduler->tasks[idx] = NULL;
             scheduler->all_tasks =
                 _get_task_count(scheduler->tasks, scheduler->max_tasks_count);

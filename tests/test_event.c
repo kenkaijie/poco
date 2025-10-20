@@ -70,12 +70,11 @@ static void test_event_wait_on_all_bit(void **state) {
  */
 static void test_setting_from_isr(void **state) {
     event_t *event = event_create(0);
-    result_t isr_result = RES_OK;
-
-    isr_result = event_set_from_isr(event, 0x80);
+    result_t isr_result = event_set_from_isr(event, 0x80);
 
     flags_t result = event_get(event, 0x80, 0x080, true, PLATFORM_TICKS_FOREVER);
 
+    assert_int_equal(isr_result, RES_OK);
     assert_int_equal(result, 0x80);
 }
 

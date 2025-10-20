@@ -65,9 +65,6 @@ typedef void (*coro_function_t)(void *context);
  */
 struct coro {
 
-    /** The current coroutine state. Schedulers should only has read-access to this. */
-    coro_state_t coro_state;
-
     /** Coroutine's main entrypoint function. */
     coro_function_t entrypoint;
 
@@ -78,12 +75,10 @@ struct coro {
      */
     size_t stack_size;
 
-    // Ping pong contexts
-    platform_context_t suspend_context;
-    platform_context_t resume_context;
-
-    /** For a non running coroutine, this is the signal it last yielded with. */
-    coro_signal_t yield_signal;
+    /** The event sink item that unblocked this sink, only valid after a blocked
+     * coroutine as been unblocked.
+     */
+    size_t triggered_event_sink_slot;
 
     /** Managed event source, only valid if the coroutine has notified the scheduler. */
     coro_event_source_t event_source;
@@ -91,10 +86,15 @@ struct coro {
     /** Managed event sinks, only valid if the coroutine is blocked. */
     coro_event_sink_t event_sinks[EVENT_SINK_SLOT_COUNT];
 
-    /** The event sink item that unblocked this sink, only valid after a blocked
-     * coroutine as been unblocked.
-     */
-    size_t triggered_event_sink_slot;
+    // Ping pong contexts
+    platform_context_t suspend_context;
+    platform_context_t resume_context;
+
+    /** The current coroutine state. Schedulers should only has read-access to this. */
+    coro_state_t coro_state;
+
+    /** For a non running coroutine, this is the signal it last yielded with. */
+    coro_signal_t yield_signal;
 };
 
 /*!

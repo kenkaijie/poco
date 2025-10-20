@@ -33,6 +33,7 @@ function(add_cmocka_test TEST_NAME SRCS)
     add_executable(${TEST_NAME}_runner ${SRCS} cmocka_coro_helper.c)
     target_link_libraries(${TEST_NAME}_runner PRIVATE poco::poco cmocka)
     add_test(NAME ${TEST_NAME}_runner COMMAND ${TEST_NAME}_runner)
+    set_target_properties(${TEST_NAME}_runner PROPERTIES C_STANDARD 99)
 endfunction()
 
 if (POCO_BUILD_SAMPLES)

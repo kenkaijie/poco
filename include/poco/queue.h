@@ -29,9 +29,9 @@ enum res_code_queue {
 };
 
 typedef struct queue {
-    size_t count;
-    size_t read_idx;
-    size_t write_idx;
+    size_t volatile count;
+    size_t volatile read_idx;
+    size_t volatile write_idx;
     uint8_t *item_buffer;
     size_t item_size;
     size_t max_items;
