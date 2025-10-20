@@ -42,7 +42,7 @@ void accessor_2(void *context) {
     semaphore_acquire(resource, PLATFORM_TICKS_FOREVER);
 
     printf("2 Acquired\n");
-    coro_yield_delay(1000);
+    coro_yield_delay(800);
     printf("2 Released\n");
 
     semaphore_release(resource);

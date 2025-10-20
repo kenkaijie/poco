@@ -20,7 +20,7 @@ extern "C" {
 #include <stddef.h>
 
 typedef struct semaphore {
-    size_t slots_remaining;
+    size_t volatile slots_remaining;
     size_t slot_count;
 } semaphore_t;
 
