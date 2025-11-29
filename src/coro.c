@@ -144,6 +144,11 @@ coro_t *coro_create(coro_function_t function, void *context, size_t stack_size) 
     return coro_handle;
 }
 
+void coro_destroy_static(coro_t *coro) {
+    platform_destroy_context(&coro->resume_context);
+    platform_destroy_context(&coro->suspend_context);
+}
+
 void coro_free(coro_t *coro) {
     if (coro == NULL) {
         /* cannot free null pointer, as we cannot access the stack to free it first. */
@@ -153,6 +158,9 @@ void coro_free(coro_t *coro) {
     if (coro->stack != NULL) {
         free(coro->stack);
     }
+
+    platform_destroy_context(&coro->resume_context);
+    platform_destroy_context(&coro->suspend_context);
 
     free(coro);
 }
