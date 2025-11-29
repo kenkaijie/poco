@@ -7,11 +7,11 @@ project(poco LANGUAGES C ASM)
 
 # Options
 set(
-    POCO_PLATFORM
-    "unix"
+    POCO_CUSTOM_PLATFORM
+    ""
     CACHE
     STRING
-    "Set the underlying platform. Default: unix. Values: {unix, custom}"
+    "Force the underlying platform."
 )
 
 option(

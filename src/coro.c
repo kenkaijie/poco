@@ -88,26 +88,27 @@ static bool _update_event_sink(coro_event_sink_t *sink,
 }
 
 coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context,
-                           platform_stack_t *stack, size_t stack_size) {
+                           platform_stack_t *stack, size_t stack_count) {
 
-    if (stack_size < 2) {
-        // need to paint, so we need at least 2
+    if (stack_count < 3) {
+        /* need at least 3 elements: start magic, usable stack, end magic */
         return NULL;
     }
 
-    /* Paint the stack with 0x55s marking the start of the stack with a magic number,
-     * and the end with another magic number, we will reduce the stack size by 2 bytes.
-     */
-    memset(stack, STACK_PAINT_MAGIC, stack_size);
+    // paint the stack with 0x55s
+    // mark the start of the stack with a magic number,
+    // and the end with another magic number, we will reduce the stack size by 2 bytes
+    memset(stack, STACK_PAINT_MAGIC, stack_count);
     stack[0] = STACK_START_MAGIC;
-    stack[stack_size - 1] = STACK_END_MAGIC;
+    stack[stack_count - 1] = STACK_END_MAGIC;
 
     coro->coro_state = CORO_STATE_READY;
     coro->entrypoint = function;
     coro->stack = stack;
-    coro->stack_size = stack_size;
+    coro->stack_size = stack_count;
     coro->resume_context.uc_stack.ss_sp = (void *)(stack + 1);
-    coro->resume_context.uc_stack.ss_size = (stack_size - 2) * sizeof(platform_stack_t);
+    coro->resume_context.uc_stack.ss_size =
+        (stack_count - 2) * sizeof(platform_stack_t);
     coro->resume_context.uc_link = 0;
 
     memset(&coro->suspend_context, 0, sizeof(coro->suspend_context));
@@ -117,7 +118,7 @@ coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context
     return coro;
 }
 
-coro_t *coro_create(coro_function_t function, void *context, size_t stack_size) {
+coro_t *coro_create(coro_function_t function, void *context, size_t stack_count) {
     coro_t *coro = (coro_t *)malloc(sizeof(coro_t));
     if (coro == NULL) {
         /* No memory */
@@ -125,8 +126,8 @@ coro_t *coro_create(coro_function_t function, void *context, size_t stack_size) 
     }
 
     // we can only create items which are multiples of platform_stack_t.
-    size_t const stack_size_bytes = sizeof(platform_stack_t) * stack_size;
-    platform_stack_t *stack = (platform_stack_t *)malloc(stack_size_bytes);
+    platform_stack_t *stack =
+        (platform_stack_t *)malloc(sizeof(platform_stack_t) * stack_count);
 
     if (stack == NULL) {
         /* No memory. */
@@ -135,13 +136,18 @@ coro_t *coro_create(coro_function_t function, void *context, size_t stack_size) 
     }
 
     coro_t *coro_handle =
-        coro_create_static(coro, function, context, stack, stack_size_bytes);
+        coro_create_static(coro, function, context, stack, stack_count);
     if (coro_handle == NULL) {
         free(coro);
         free(stack);
     }
 
     return coro_handle;
+}
+
+void coro_destroy_static(coro_t *coro) {
+    platform_destroy_context(&coro->resume_context);
+    platform_destroy_context(&coro->suspend_context);
 }
 
 void coro_free(coro_t *coro) {
@@ -153,6 +159,8 @@ void coro_free(coro_t *coro) {
     if (coro->stack != NULL) {
         free(coro->stack);
     }
+
+    coro_destroy_static(coro);
 
     free(coro);
 }
