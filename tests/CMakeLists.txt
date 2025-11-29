@@ -45,6 +45,15 @@ function(add_cmocka_test TEST_NAME SRCS)
     target_link_libraries(${TEST_NAME}_runner PRIVATE poco::poco cmocka)
     add_test(NAME ${TEST_NAME}_runner COMMAND ${TEST_NAME}_runner)
     set_target_properties(${TEST_NAME}_runner PROPERTIES C_STANDARD 99)
+
+    # Windows cannot find the built cmocka DLL to link with. We add the cmocka
+    # dll directory to the test environment.
+    if (WIN32)
+        set_property(
+            TEST ${TEST_NAME}_runner
+            PROPERTY
+                ENVIRONMENT_MODIFICATION  "PATH=path_list_append:$<TARGET_FILE_DIR:cmocka>")
+    endif()
 endfunction()
 
 if (POCO_BUILD_SAMPLES)

@@ -5,19 +5,22 @@
 # SPDX-FileCopyrightText: Copyright contributors to the poco project.
 # SPDX-License-Identifier: MIT
 
-if (${POCO_PLATFORM} STREQUAL "unix")
+if (NOT "${POCO_CUSTOM_PLATFORM}" STREQUAL "")
+
+    if (${POCO_CUSTOM_PLATFORM} STREQUAL "zephyr-armv7-m")
+        add_subdirectory(zephyr-armv7-m)
+    else()
+        # User provided platform, they should add their platform sources to the 
+        # poco::poco target.
+    endif()
+
+elseif (${UNIX})
     add_subdirectory(unix)
-elseif (${POCO_PLATFORM} STREQUAL "zephyr-armv7-m")
-    add_subdirectory(zephyr-armv7-m)
-elseif (${POCO_PLATFORM} STREQUAL "windows")
+elseif (${WIN32})
     add_subdirectory(windows)
-elseif (${POCO_PLATFORM} STREQUAL "custom")
-    # User provided platform, they should add their platform sources to the 
-    # poco::poco target.
 else()
     message(
         FATAL_ERROR
-        "Unsupported platform: ${POCO_PLATFORM}. Check platforms folder for "
-        "possibilities"
+        "Unsupported platform: ${CMAKE_SYSTEM_NAME}. Check platforms folder for possibilities"
     )
 endif()

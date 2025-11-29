@@ -6,4 +6,4 @@
 set command=%1
 set output_file=%2
 
-%command% > %output_file%
+%command% >  %output_file%

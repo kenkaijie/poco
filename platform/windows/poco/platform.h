@@ -14,19 +14,21 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <time.h>
 #include <windows.h>
 
-// Platform Context implementation
+// Platform Context implementation, in windows, as the stack is managed by windows
+// internally, this shouldn't matter, as we don't use it.
 typedef uint32_t platform_stack_t;
 
 /** Default stack size needed to run the coroutine, in platform specific elements. */
-#define DEFAULT_STACK_SIZE (1) /* In windows, stack is always dynamic */
+#define DEFAULT_STACK_SIZE (3) /* In windows, stack is always dynamic */
 
 /** Minimum stack size needed to run the coroutine, in platform specific elements. */
-#define MIN_STACK_SIZE (1) /* In windows, stack is always dynamic */
+#define MIN_STACK_SIZE (3) /* In windows, stack is always dynamic */
 
 typedef struct stack_descriptor {
     /**< Pointer to a stack, note that stack must be double word aligned. */
@@ -38,9 +40,11 @@ typedef struct stack_descriptor {
 typedef struct platform_context platform_context_t;
 
 struct platform_context {
+    /* In the Windows implementation, we don't use any of the fields here, just the
+     * fiber pointer. */
     struct platform_context *uc_link;
-    stack_descriptor_t uc_stack; // Stack information
-    void *fiber;                 // Machine context
+    stack_descriptor_t uc_stack;
+    LPVOID fiber;
 };
 
 int platform_get_context(platform_context_t *context);

@@ -1,7 +1,7 @@
 #include <poco/platform.h>
 
 /**< Every coro yields back to the main fiber (where the scheduler resides) */
-static void *main_fiber = NULL;
+static LPVOID main_fiber = NULL;
 
 typedef struct _shim {
     void (*function)(void *, void *);
@@ -24,7 +24,7 @@ int platform_get_context(platform_context_t *context) {
         main_fiber = ConvertThreadToFiber(0);
     }
     context->fiber = GetCurrentFiber();
-    return (context->fiber == NULL) ? 1 : 0;
+    return ((context->fiber == NULL) || (main_fiber == NULL)) ? 1 : 0;
 }
 
 int platform_set_context(platform_context_t *context) {
@@ -34,12 +34,12 @@ int platform_set_context(platform_context_t *context) {
 
 int platform_swap_context(platform_context_t *old_context,
                           platform_context_t *new_context) {
-    if (new_context->fiber != NULL) {
-        SwitchToFiber(new_context->fiber);
-    } else {
-        SwitchToFiber(main_fiber);
+    /* Inject the null fiber to become the main fiber */
+    if (platform_get_context(old_context) != 0) {
+        return -1;
     }
-    return 0;
+
+    return platform_set_context(new_context);
 }
 
 int platform_make_context(platform_context_t *context, void (*function)(void *, void *),
@@ -61,7 +61,7 @@ int platform_make_context(platform_context_t *context, void (*function)(void *, 
 }
 
 int platform_destroy_context(platform_context_t *context) {
-    if (context->fiber != NULL) {
+    if ((context->fiber != NULL) && (context->fiber != main_fiber)) {
         DeleteFiber(context->fiber);
     }
     return 0;
