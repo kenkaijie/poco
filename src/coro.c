@@ -159,8 +159,7 @@ void coro_free(coro_t *coro) {
         free(coro->stack);
     }
 
-    platform_destroy_context(&coro->resume_context);
-    platform_destroy_context(&coro->suspend_context);
+    coro_destroy_static(coro);
 
     free(coro);
 }

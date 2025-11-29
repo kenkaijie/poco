@@ -10,6 +10,17 @@
 #   TEST_NAME: name of the test, will generated both the test and the output test
 #   TEST_TARGET: name of the target to run, will be used to generate the test
 function(add_golden_test TEST_NAME TEST_TARGET)
+    if (WIN32)
+        add_test(
+            NAME ${TEST_NAME}_exec
+            COMMAND ${CMAKE_CURRENT_LIST_DIR}/test_output.bat $<TARGET_FILE:${TEST_TARGET}> ${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME}.actual
+        )
+    else()
+        add_test(
+            NAME ${TEST_NAME}_exec
+            COMMAND ${CMAKE_CURRENT_LIST_DIR}/test_output.sh $<TARGET_FILE:${TEST_TARGET}> ${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME}.actual
+        )
+    endif()
     add_test(
             NAME ${TEST_NAME}_exec
             COMMAND ${CMAKE_CURRENT_LIST_DIR}/test_output.sh $<TARGET_FILE:${TEST_TARGET}> ${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME}.actual
