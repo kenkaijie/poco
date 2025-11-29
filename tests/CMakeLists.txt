@@ -22,10 +22,6 @@ function(add_golden_test TEST_NAME TEST_TARGET)
         )
     endif()
     add_test(
-            NAME ${TEST_NAME}_exec
-            COMMAND ${CMAKE_CURRENT_LIST_DIR}/test_output.sh $<TARGET_FILE:${TEST_TARGET}> ${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME}.actual
-    )
-    add_test(
         NAME ${TEST_NAME}
         COMMAND 
             ${CMAKE_COMMAND} -E compare_files --ignore-eol
