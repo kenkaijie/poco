@@ -19,13 +19,13 @@
 #define CONSUMER_STOP (-1)
 #define STACK_SIZE (DEFAULT_STACK_SIZE)
 
-coro_t producer_coro = {0};
-platform_stack_t producer_stack[STACK_SIZE] = {0};
+Coro producer_coro = {0};
+PlatformStackElement producer_stack[STACK_SIZE] = {0};
 
-coro_t consumer_coro = {0};
-platform_stack_t consumer_stack[STACK_SIZE] = {0};
+Coro consumer_coro = {0};
+PlatformStackElement consumer_stack[STACK_SIZE] = {0};
 
-event_t button_event;
+Event button_event;
 
 enum button_event_type {
     EVT_PRESS = (1 << 0),
@@ -34,7 +34,7 @@ enum button_event_type {
 };
 
 void producer_task(void *context) {
-    event_t *event = (event_t *)context;
+    Event *event = context;
     coro_yield_delay(100);
     printf("Trigger press\n");
     event_set(event, EVT_PRESS);
@@ -44,30 +44,29 @@ void producer_task(void *context) {
     coro_yield_delay(100);
     printf("Trigger press and long press\n");
     event_set(event, EVT_PRESS | EVT_LONG_PRESS);
-    return;
 }
 
 void consumer_task(void *context) {
-    event_t *event = (event_t *)context;
-    flags_t flags = event_get(event, EVT_LONG_PRESS, 0, true, PLATFORM_TICKS_FOREVER);
+    Event *event = context;
+    Flags const flags =
+        event_get(event, EVT_LONG_PRESS, 0, true, PLATFORM_TICKS_FOREVER);
     if (flags & EVT_LONG_PRESS) {
         printf("Handling long press\n");
     }
-    return;
 }
 
 int main(void) {
 
-    coro_t *tasks[2] = {0};
+    Coro *tasks[2] = {0};
 
-    event_t *event = event_create_static(&button_event, 0);
+    Event *event = event_create_static(&button_event, 0);
 
-    tasks[0] = coro_create_static(&producer_coro, producer_task, (void *)event,
-                                  producer_stack, STACK_SIZE);
-    tasks[1] = coro_create_static(&consumer_coro, consumer_task, (void *)event,
-                                  consumer_stack, STACK_SIZE);
+    tasks[0] = coro_create_static(&producer_coro, producer_task, event, producer_stack,
+                                  STACK_SIZE);
+    tasks[1] = coro_create_static(&consumer_coro, consumer_task, event, consumer_stack,
+                                  STACK_SIZE);
 
-    scheduler_t *scheduler =
+    Scheduler *scheduler =
         round_robin_scheduler_create(tasks, sizeof(tasks) / sizeof(tasks[0]));
 
     if (scheduler == NULL) {

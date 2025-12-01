@@ -11,13 +11,11 @@
 #pragma once
 
 #include <poco/platform.h>
-#include <stdbool.h>
-#include <stdint.h>
 
 /*!
  * @brief Types of signals that can be sent to the scheduler.
  *
- * Each one encoders an expected behaviour.
+ * Each one encodes an expected behaviour.
  */
 typedef enum coro_signal {
     /**
@@ -44,7 +42,7 @@ typedef enum coro_signal {
      * scheduled. Implies the event_source is active.
      */
     CORO_SIG_NOTIFY_AND_DONE,
-} coro_signal_t;
+} CoroSignal;
 
 typedef enum coro_event_sink_type {
     /** Disabled event. */
@@ -77,21 +75,21 @@ typedef enum coro_event_sink_type {
     /** Coroutine is waiting for the stream to have some bytes. */
     CORO_EVTSINK_STREAM_NOT_EMPTY,
 
-} coro_event_sink_type_t;
+} CoroEventSinkType;
 
 typedef struct coro_event_sink {
-    coro_event_sink_type_t type;
+    CoroEventSinkType type;
     union {
-        platform_ticks_t ticks_remaining;
+        PlatformTick ticks_remaining;
         void *subject;
     } params;
-} coro_event_sink_t;
+} CoroEventSink;
 
 typedef enum coro_event_source_type {
     /** No special event. */
     CORO_EVTSRC_NOOP = 0,
 
-    /** Indicates that an elasped period of time has passed. */
+    /** Indicates that an elapsed period of time has passed. */
     CORO_EVTSRC_ELAPSED,
 
     /** Indicates a queue has had an item put in it, coroutines waiting should unblock.
@@ -120,12 +118,12 @@ typedef enum coro_event_source_type {
     /** Indicates the producer has written some bytes to the stream. */
     CORO_EVTSRC_STREAM_SEND,
 
-} coro_event_source_type_t;
+} CoroEventSourceType;
 
 typedef struct coro_event_source {
-    coro_event_source_type_t type;
+    CoroEventSourceType type;
     union {
-        platform_ticks_t elasped_ticks;
+        PlatformTick elapsed_ticks;
         void *subject;
     } params;
-} coro_event_source_t;
+} CoroEventSource;

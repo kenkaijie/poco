@@ -6,7 +6,7 @@
  * states yourself.
  */
 #define cmocka_coro_unit_test(f)                                                       \
-    { #f, test_coro_run, test_coro_setup, test_coro_teardown, f }
+    {#f, test_coro_run, test_coro_setup, test_coro_teardown, f}
 
 // Special cmocka shim functions to perform unit tests within a coroutine.
 

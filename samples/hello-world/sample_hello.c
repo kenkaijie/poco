@@ -23,7 +23,6 @@ void hello_task(void *context) {
         printf("Hello ");
         coro_yield();
     }
-    return;
 }
 
 void world_task(void *context) {
@@ -32,17 +31,16 @@ void world_task(void *context) {
         printf("World!\n");
         coro_yield();
     }
-    return;
 }
 
 int main() {
 
-    coro_t *tasks[] = {
+    Coro *tasks[] = {
         coro_create(hello_task, NULL, STACK_SIZE),
         coro_create(world_task, NULL, STACK_SIZE),
     };
 
-    scheduler_t *scheduler =
+    Scheduler *scheduler =
         round_robin_scheduler_create(tasks, sizeof(tasks) / sizeof(tasks[0]));
 
     if (scheduler == NULL) {

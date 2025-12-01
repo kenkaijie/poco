@@ -4,13 +4,13 @@
  * @file
  * @brief Event communication primitive.
  *
- * Enables coroutines to signal each other in a light weight manner, as compared to
+ * Enables coroutines to signal each other in a lightweight manner, as compared to
  * the queue API.
  *
  * These are designed to be a multi producer and single consumer, where the consumer is
  * a coroutine.
  *
- * An event comprises of 32 bit flags. Each can be set. It is expected the consumer is
+ * An event consists of 32 bit flags. Each can be set. It is expected the consumer is
  * responsible for clearing the bits, while the producer is responsible for setting
  * them.
  *
@@ -27,17 +27,17 @@ extern "C" {
 #include <poco/scheduler.h>
 #include <stdint.h>
 
-typedef uint32_t flags_t;
+typedef uint32_t Flags;
 
 typedef struct event {
-    flags_t flags;
-} event_t;
+    Flags flags;
+} Event;
 
-event_t *event_create_static(event_t *event, flags_t initial);
+Event *event_create_static(Event *event, Flags initial);
 
-event_t *event_create(flags_t initial);
+Event *event_create(Flags initial);
 
-void event_free(event_t *event);
+void event_free(Event *event);
 
 /*!
  * @brief Waits on the specific event flags.
@@ -46,14 +46,14 @@ void event_free(event_t *event);
  * @param mask Mask to wait on, can be used to ignore flags.
  * @param clear_mask Flags to clear after the wait has finished.
  * @param wait_for_all If true, all flags must be set before the coroutine will yield.
- *                     This effective sets if the mask uses OR or AND for its wait
+ *                     This effective sets if the mask uses "OR" or "AND" for its wait
  *                     logic.
  * @param timeout Number of ticks to wait before timing out.
  *
- * @returns The flags that ended the wait. If flags are all 0, an error has occured.
+ * @returns The flags that ended the wait. If flags are all 0, an error has occurred.
  */
-flags_t event_get(event_t *event, flags_t mask, flags_t clear_mask, bool wait_for_all,
-                  platform_ticks_t timeout);
+Flags event_get(Event *event, Flags mask, Flags clear_mask, bool wait_for_all,
+                PlatformTick timeout);
 
 /*!
  * @brief Sets the event flags.
@@ -61,7 +61,7 @@ flags_t event_get(event_t *event, flags_t mask, flags_t clear_mask, bool wait_fo
  * @param event Event to set.
  * @param mask Mask to set.
  */
-void event_set(event_t *event, flags_t mask);
+void event_set(Event *event, Flags mask);
 
 /*!
  * @brief Sets the event flags from an ISR.
@@ -76,7 +76,7 @@ void event_set(event_t *event, flags_t mask);
  * @param #RES_NOTIFY_FAILED if the scheduler could not be notified. This is a critical
  *      error.
  */
-result_t event_set_from_isr(event_t *event, flags_t mask);
+Result event_set_from_isr(Event *event, Flags mask);
 
 #ifdef __cplusplus
 }

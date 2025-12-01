@@ -14,7 +14,7 @@
 #define STACK_END_MAGIC (0xEFBEADBA)   // 0xBAADBEEF
 #define STACK_PAINT_MAGIC (0x55)
 
-static void _coro_entry_point(coro_t *coro, void *context) {
+static void enter_coro(Coro *coro, void *context) {
     coro->entrypoint(context);
 
     /** Coroutine is finished, setup events. */
@@ -23,8 +23,7 @@ static void _coro_entry_point(coro_t *coro, void *context) {
     coro_yield_with_signal(CORO_SIG_NOTIFY_AND_DONE);
 }
 
-static bool _update_event_sink(coro_event_sink_t *sink,
-                               coro_event_source_t const *event) {
+static bool update_event_sink(CoroEventSink *sink, CoroEventSource const *event) {
     bool unblock_task = false;
 
     switch (event->type) {
@@ -32,12 +31,12 @@ static bool _update_event_sink(coro_event_sink_t *sink,
         if (sink->type == CORO_EVTSINK_DELAY &&
             sink->params.ticks_remaining != PLATFORM_TICKS_FOREVER) {
             /* We need to consider both signed and unsigned cases. */
-            if (event->params.elasped_ticks > sink->params.ticks_remaining) {
+            if (event->params.elapsed_ticks > sink->params.ticks_remaining) {
                 sink->params.ticks_remaining = 0;
             } else {
-                sink->params.ticks_remaining -= event->params.elasped_ticks;
+                sink->params.ticks_remaining -= event->params.elapsed_ticks;
             }
-            sink->params.ticks_remaining -= event->params.elasped_ticks;
+            sink->params.ticks_remaining -= event->params.elapsed_ticks;
             unblock_task = (sink->params.ticks_remaining <= 0);
         }
         break;
@@ -87,8 +86,8 @@ static bool _update_event_sink(coro_event_sink_t *sink,
     return unblock_task;
 }
 
-coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context,
-                           platform_stack_t *stack, size_t stack_count) {
+Coro *coro_create_static(Coro *coro, CoroEntrypoint const entrypoint, void *context,
+                         PlatformStackElement *stack, size_t const stack_count) {
 
     if (stack_count < 3) {
         /* need at least 3 elements: start magic, usable stack, end magic */
@@ -103,31 +102,32 @@ coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context
     stack[stack_count - 1] = STACK_END_MAGIC;
 
     coro->coro_state = CORO_STATE_READY;
-    coro->entrypoint = function;
+    coro->entrypoint = entrypoint;
     coro->stack = stack;
     coro->stack_size = stack_count;
     coro->resume_context.uc_stack.ss_sp = (void *)(stack + 1);
     coro->resume_context.uc_stack.ss_size =
-        (stack_count - 2) * sizeof(platform_stack_t);
+        (stack_count - 2) * sizeof(PlatformStackElement);
     coro->resume_context.uc_link = 0;
 
     memset(&coro->suspend_context, 0, sizeof(coro->suspend_context));
 
     platform_get_context(&coro->resume_context);
-    platform_make_context(&coro->resume_context, _coro_entry_point, coro, context);
+    platform_make_context(&coro->resume_context, (void (*)(void *, void *))enter_coro,
+                          coro, context);
     return coro;
 }
 
-coro_t *coro_create(coro_function_t function, void *context, size_t stack_count) {
-    coro_t *coro = (coro_t *)malloc(sizeof(coro_t));
+Coro *coro_create(CoroEntrypoint const entrypoint, void *context,
+                  size_t const stack_count) {
+    Coro *coro = malloc(sizeof(Coro));
     if (coro == NULL) {
         /* No memory */
         return NULL;
     }
 
-    // we can only create items which are multiples of platform_stack_t.
-    platform_stack_t *stack =
-        (platform_stack_t *)malloc(sizeof(platform_stack_t) * stack_count);
+    // we can only create items which are multiples of PlatformStackElement.
+    PlatformStackElement *stack = malloc(sizeof(PlatformStackElement) * stack_count);
 
     if (stack == NULL) {
         /* No memory. */
@@ -135,8 +135,7 @@ coro_t *coro_create(coro_function_t function, void *context, size_t stack_count)
         return NULL;
     }
 
-    coro_t *coro_handle =
-        coro_create_static(coro, function, context, stack, stack_count);
+    Coro *coro_handle = coro_create_static(coro, entrypoint, context, stack, stack_count);
     if (coro_handle == NULL) {
         free(coro);
         free(stack);
@@ -145,12 +144,12 @@ coro_t *coro_create(coro_function_t function, void *context, size_t stack_count)
     return coro_handle;
 }
 
-void coro_destroy_static(coro_t *coro) {
+void coro_destroy_static(Coro *coro) {
     platform_destroy_context(&coro->resume_context);
     platform_destroy_context(&coro->suspend_context);
 }
 
-void coro_free(coro_t *coro) {
+void coro_free(Coro *coro) {
     if (coro == NULL) {
         /* cannot free null pointer, as we cannot access the stack to free it first. */
         return;
@@ -166,14 +165,14 @@ void coro_free(coro_t *coro) {
 }
 
 void coro_yield(void) {
-    coro_t *coro = context_get_coro();
+    Coro *coro = context_get_coro();
     coro->event_source.type = CORO_EVTSRC_NOOP;
     coro->yield_signal = CORO_SIG_NOTIFY;
     platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
-void coro_yield_delay(int64_t duration_ms) {
-    coro_t *coro = context_get_coro();
+void coro_yield_delay(int64_t const duration_ms) {
+    Coro *coro = context_get_coro();
     coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_NONE;
     coro->event_sinks[EVENT_SINK_SLOT_TIMEOUT].type = CORO_EVTSINK_DELAY;
     coro->event_sinks[EVENT_SINK_SLOT_TIMEOUT].params.ticks_remaining =
@@ -183,20 +182,20 @@ void coro_yield_delay(int64_t duration_ms) {
     platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
-void coro_yield_with_event(coro_event_source_t const *event) {
-    coro_t *coro = context_get_coro();
+void coro_yield_with_event(CoroEventSource const *event) {
+    Coro *coro = context_get_coro();
     coro->event_source = *event;
     coro->yield_signal = CORO_SIG_NOTIFY;
     platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
-void coro_yield_with_signal(coro_signal_t signal) {
-    coro_t *coro = context_get_coro();
+void coro_yield_with_signal(CoroSignal const signal) {
+    Coro *coro = context_get_coro();
     coro->yield_signal = signal;
     platform_swap_context(&coro->resume_context, &coro->suspend_context);
 }
 
-bool coro_notify(coro_t *coro, coro_event_source_t const *event) {
+bool coro_notify(Coro *coro, CoroEventSource const *event) {
     if (coro->coro_state != CORO_STATE_BLOCKED) {
         /* Only blocked coroutines actually look for events. */
         return false;
@@ -205,7 +204,7 @@ bool coro_notify(coro_t *coro, coro_event_source_t const *event) {
     bool unblock_task = false;
 
     for (size_t idx = 0; (idx < EVENT_SINK_SLOT_COUNT); ++idx) {
-        unblock_task = _update_event_sink(&coro->event_sinks[idx], event);
+        unblock_task = update_event_sink(&coro->event_sinks[idx], event);
         if (unblock_task) {
             coro->triggered_event_sink_slot = idx;
             coro->coro_state = CORO_STATE_READY;
@@ -216,7 +215,7 @@ bool coro_notify(coro_t *coro, coro_event_source_t const *event) {
     return unblock_task;
 }
 
-coro_signal_t coro_resume(coro_t *coro) {
+CoroSignal coro_resume(Coro *coro) {
     if (coro->coro_state == CORO_STATE_FINISHED)
         return CORO_SIG_NOTIFY_AND_DONE;
 
@@ -239,8 +238,8 @@ coro_signal_t coro_resume(coro_t *coro) {
     return coro->yield_signal;
 }
 
-void coro_join(coro_t *coro) {
-    coro_t *this_coro = context_get_coro();
+void coro_join(Coro *coro) {
+    Coro *this_coro = context_get_coro();
     if (coro->coro_state == CORO_STATE_FINISHED) {
         /* Already done. */
         coro_yield();
@@ -252,6 +251,4 @@ void coro_join(coro_t *coro) {
     this_coro->event_sinks[EVENT_SINK_SLOT_TIMEOUT].type = CORO_EVTSINK_NONE;
 
     coro_yield_with_signal(CORO_SIG_WAIT);
-
-    return;
 }

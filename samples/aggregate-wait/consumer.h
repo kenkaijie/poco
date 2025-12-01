@@ -19,32 +19,32 @@
 typedef struct message {
     int a;
     int b;
-} message_t;
+} Message;
 
 typedef struct command {
     int a;
     int b;
     int c;
-} command_t;
+} Command;
 
 typedef struct consumer {
-    platform_stack_t stack[DEFAULT_STACK_SIZE];
-    coro_t coro;
-    event_t event;
-    message_t message_queue_buffer[16];
-    queue_t message_queue;
-    command_t command_queue_buffer[16];
-    queue_t command_queue;
-} consumer_t;
+    PlatformStackElement stack[DEFAULT_STACK_SIZE];
+    Coro coro;
+    Event event;
+    Message message_queue_buffer[16];
+    Queue message_queue;
+    Command command_queue_buffer[16];
+    Queue command_queue;
+} Consumer;
 
-result_t consumer_init(consumer_t *consumer);
+Result consumer_init(Consumer *consumer);
 
 /*!
  * @brief Sends a message via the consumer.
  */
-result_t consumer_send_message(consumer_t *consumer, message_t const *message);
+Result consumer_send_message(Consumer *consumer, Message const *message);
 
 /*!
  * @brief Sends a command via the consumer.
  */
-result_t consumer_send_command(consumer_t *consumer, command_t const *message);
+Result consumer_send_command(Consumer *consumer, Command const *message);

@@ -8,7 +8,7 @@
 #include <poco/context.h>
 #include <poco/scheduler.h>
 
-void scheduler_run(scheduler_t *scheduler) {
+void scheduler_run(Scheduler *scheduler) {
     context_set_scheduler(scheduler);
     scheduler->run(scheduler);
 }

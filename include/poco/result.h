@@ -13,7 +13,7 @@ extern "C" {
 
 #include <stdint.h>
 
-typedef uint32_t result_t;
+typedef uint32_t Result;
 
 /*!
  * @brief Macro to define an error code within the poco error space (0xXXYY).
@@ -21,8 +21,11 @@ typedef uint32_t result_t;
  * @param group Group this error code belongs to.
  * @param code Error code (YY).
  */
-#define RES_CODE(group, code) ((result_t)(((group) << 16) | (code)))
+#define RES_CODE(group, code) ((Result)(((group) << 16) | (code)))
 
+/* These categories should not change once allocated to avoid breaking changes with the
+ * Result API.
+ */
 enum result_category {
     RES_GROUP_GENERAL = 0, /**< General space for common error codes. */
     RES_GROUP_CORE = 1,
@@ -30,6 +33,7 @@ enum result_category {
     RES_GROUP_EVENT = 3,
     RES_GROUP_MUTEX = 4,
     RES_GROUP_STREAM = 5,
+    RES_GROUP_SEMAPHORE = 7,
 };
 
 /*!
@@ -45,10 +49,10 @@ enum res_codes_general {
     /*! Cannot perform operation in the current state. */
     RES_INVALID_STATE = RES_CODE(RES_GROUP_GENERAL, 2),
 
-    /*! Provided value is outside of the expected range. */
+    /*! Provided value is outside the expected range. */
     RES_INVALID_VALUE = RES_CODE(RES_GROUP_GENERAL, 3),
 
-    /*! Operation that would cause an overflow has occured. */
+    /*! Operation that would cause an overflow has occurred. */
     RES_OVERFLOW = RES_CODE(RES_GROUP_GENERAL, 4),
 
     /*! Operation exceeded maximum allowable time. */

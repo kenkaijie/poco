@@ -16,6 +16,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 /*!
  * @brief Queue specific result codes.
@@ -35,7 +36,7 @@ typedef struct queue {
     uint8_t *item_buffer;
     size_t item_size;
     size_t max_items;
-} queue_t;
+} Queue;
 
 /*!
  * @brief Initialises a statically defined queue.
@@ -45,10 +46,10 @@ typedef struct queue {
  * @param item_size Size of an individual item, in bytes.
  * @param item_buffer Buffer containing enough space for the items.
  *
- * @return Pointer to the queue, or NULL if an error has occured.
+ * @return Pointer to the queue, or NULL if an error has occurred.
  */
-queue_t *queue_create_static(queue_t *queue, size_t num_items, size_t item_size,
-                             uint8_t *item_buffer);
+Queue *queue_create_static(Queue *queue, size_t num_items, size_t item_size,
+                           uint8_t *item_buffer);
 
 /*!
  * @brief Creates a queue with a fixed number of elements.
@@ -56,9 +57,9 @@ queue_t *queue_create_static(queue_t *queue, size_t num_items, size_t item_size,
  * @param num_items Number of items this queue will manage.
  * @param item_size Size of an individual item, in bytes.
  *
- * @return Pointer to the queue, or NULL if an error has occured.
+ * @return Pointer to the queue, or NULL if an error has occurred.
  */
-queue_t *queue_create(size_t num_items, size_t item_size);
+Queue *queue_create(size_t num_items, size_t item_size);
 
 /*!
  * @brief Frees a previously created queue.
@@ -67,7 +68,7 @@ queue_t *queue_create(size_t num_items, size_t item_size);
  *
  * @param queue Queue to Free.
  */
-void queue_free(queue_t *queue);
+void queue_free(Queue *queue);
 
 /*!
  * @brief Gets the number of items in a queue.
@@ -76,7 +77,7 @@ void queue_free(queue_t *queue);
  *
  * @return Number of items in the queue.
  */
-size_t queue_item_count(queue_t *queue);
+size_t queue_item_count(Queue const *queue);
 
 /*!
  * @brief Check if the queue is full.
@@ -85,7 +86,7 @@ size_t queue_item_count(queue_t *queue);
  *
  * @return True if queue is full, false otherwise.
  */
-bool queue_is_full(queue_t *queue);
+bool queue_is_full(Queue const *queue);
 
 /*!
  * @brief Gets the number of items in a queue.
@@ -94,7 +95,7 @@ bool queue_is_full(queue_t *queue);
  *
  * @return True if queue is empty, false otherwise.
  */
-bool queue_is_empty(queue_t *queue);
+bool queue_is_empty(Queue const *queue);
 
 /*!
  * @brief Puts an item into the queue from a coroutine.
@@ -111,7 +112,7 @@ bool queue_is_empty(queue_t *queue);
  * @retval #RES_OK on success.
  * @retval #RES_TIMEOUT if the maximum time was awaited.
  */
-result_t queue_put(queue_t *queue, void const *item, platform_ticks_t timeout);
+Result queue_put(Queue *queue, void const *item, PlatformTick timeout);
 
 /*!
  * @brief Gets an item from the queue from a coroutine.
@@ -126,7 +127,7 @@ result_t queue_put(queue_t *queue, void const *item, platform_ticks_t timeout);
  * @retval #RES_OK on success.
  * @retval #RES_TIMEOUT if the maximum time was awaited.
  */
-result_t queue_get(queue_t *queue, void *item, platform_ticks_t timeout);
+Result queue_get(Queue *queue, void *item, PlatformTick timeout);
 
 /*!
  * @brief Puts an item without waiting.
@@ -138,7 +139,7 @@ result_t queue_get(queue_t *queue, void *item, platform_ticks_t timeout);
  * @retval #RES_QUEUE_FULL Queue is full, no item has been inserted.
  * @retval #RES_NOTIFY_FAILED if the operation failed to notify the scheduler.
  */
-result_t queue_put_no_wait(queue_t *queue, void const *item);
+Result queue_put_no_wait(Queue *queue, void const *item);
 
 /*!
  * @brief Gets an item without waiting.
@@ -150,37 +151,7 @@ result_t queue_put_no_wait(queue_t *queue, void const *item);
  * @retval #RES_QUEUE_EMPTY Queue has no items to get.
  * @retval #RES_NOTIFY_FAILED if the operation failed to notify the scheduler.
  */
-result_t queue_get_no_wait(queue_t *queue, void *item);
-
-/*!
- * @brief Puts an item into the queue without notifying the scheduler.
- *
- * @warning Not notifying the scheduler may result in coroutines that are blocked
- *          forever. This is only used for queues that are not used for inter coroutine
- *          communications.
- *
- * @param queue Queue to put the item into.
- * @param item Item to put into the queue.
- *
- * @retval #RES_OK Item has been queued.
- * @retval #RES_QUEUE_FULL Queue is full, no item has been inserted.
- */
-result_t queue_raw_put(queue_t *queue, void const *item);
-
-/*!
- * @brief Gets an item from the queue without notifying the scheduler.
- *
- * @warning Not notifying the scheduler may result in coroutines that are blocked
- *          forever. This is only used for queues that are not used for inter coroutine
- *          communications.
- *
- * @param queue Queue to get the item from.
- * @param item Item to get from the queue, only valid if result was #RES_OK.
- *
- * @retval #RES_OK Item has been queued.
- * @retval #RES_QUEUE_FULL Queue is full, no item has been inserted.
- */
-result_t queue_raw_get(queue_t *queue, void *item);
+Result queue_get_no_wait(Queue *queue, void *item);
 
 #ifdef __cplusplus
 }

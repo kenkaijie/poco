@@ -17,7 +17,7 @@
 .global  platform_get_context
 
 // Note this is just set and get (with slightly different registers)
-//int platform_swap_context(platform_context_t *ocp (r0), const platform_context_t *ucp (r1)) {
+//int platform_swap_context(PlatformContext *ocp (r0), const PlatformContext *ucp (r1)) {
 platform_swap_context:
     // Save current context, the state to save is one where we are about to return.
 	add   	r0, r0, #0x1C		// r0 = &ctx->r4 (sizeof(uc_link)=4, sizeof(stack_descriptor)=12)
@@ -36,7 +36,7 @@ platform_swap_context:
     bx		lr				// Manual return back.
 
 
-/* int platform_set_context(const platform_context_t *ucp (r0)) */
+/* int platform_set_context(const PlatformContext *ucp (r0)) */
 platform_set_context:
 	add 	r14, r0, #0xC		// r14 = &ctx->r0
     ldmia 	r14, {r0-r12}		// restore all registers
@@ -48,7 +48,7 @@ platform_set_context:
     bx 		lr				// Manual return back.
 
 
-/* int platform_get_context(platform_context_t *ucp (r0))  */
+/* int platform_get_context(PlatformContext *ucp (r0))  */
 platform_get_context:
     // Save current context, the state to save is one where we are about to return.
 	add   	r0, r0, #0x1C		// r0 = &ctx->r4 (sizeof(uc_link)=4, sizeof(stack_descriptor)=12)

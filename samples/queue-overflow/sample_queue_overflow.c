@@ -18,33 +18,32 @@
 #define CONSUMER_STOP (-1)
 #define STACK_SIZE (DEFAULT_STACK_SIZE)
 
-coro_t producer_coro = {0};
-platform_stack_t producer_stack[STACK_SIZE] = {0};
+Coro producer_coro = {0};
+PlatformStackElement producer_stack[STACK_SIZE] = {0};
 
-coro_t consumer_coro = {0};
-platform_stack_t consumer_stack[STACK_SIZE] = {0};
+Coro consumer_coro = {0};
+PlatformStackElement consumer_stack[STACK_SIZE] = {0};
 
-queue_t numbers_queue = {0};
+Queue numbers_queue = {0};
 uint8_t numbers_queue_buffer[5 * sizeof(int)] = {0};
 
 void producer_task(void *context) {
-    queue_t *queue = (queue_t *)context;
+    Queue *queue = context;
     for (int i = 0; i < 20; ++i) {
-        queue_put(queue, (void *)&i, PLATFORM_TICKS_FOREVER);
+        queue_put(queue, &i, PLATFORM_TICKS_FOREVER);
         printf("Put %d\n", i);
         coro_yield();
     }
-    int sentinel = CONSUMER_STOP;
-    queue_put(queue, (void *)&sentinel, PLATFORM_TICKS_FOREVER);
+    int const sentinel = CONSUMER_STOP;
+    queue_put(queue, &sentinel, PLATFORM_TICKS_FOREVER);
     printf("Put %d\n", sentinel);
-    return;
 }
 
 void consumer_task(void *context) {
-    queue_t *queue = (queue_t *)context;
+    Queue *queue = context;
     while (1) {
         int received_value = 0;
-        queue_get(queue, (void *)&received_value, PLATFORM_TICKS_FOREVER);
+        queue_get(queue, &received_value, PLATFORM_TICKS_FOREVER);
         printf("Got: %d\n", received_value);
 
         if (received_value == CONSUMER_STOP) {
@@ -53,22 +52,21 @@ void consumer_task(void *context) {
         }
         coro_yield_delay(100);
     }
-    return;
 }
 
 int main(void) {
 
-    coro_t *tasks[2] = {0};
+    Coro *tasks[2] = {0};
 
-    queue_t *queue =
+    Queue *queue =
         queue_create_static(&numbers_queue, 5, sizeof(int), numbers_queue_buffer);
 
-    tasks[0] = coro_create_static(&producer_coro, producer_task, (void *)queue,
-                                  producer_stack, STACK_SIZE);
-    tasks[1] = coro_create_static(&consumer_coro, consumer_task, (void *)queue,
-                                  consumer_stack, STACK_SIZE);
+    tasks[0] = coro_create_static(&producer_coro, producer_task, queue, producer_stack,
+                                  STACK_SIZE);
+    tasks[1] = coro_create_static(&consumer_coro, consumer_task, queue, consumer_stack,
+                                  STACK_SIZE);
 
-    scheduler_t *scheduler =
+    Scheduler *scheduler =
         round_robin_scheduler_create(tasks, sizeof(tasks) / sizeof(tasks[0]));
 
     if (scheduler == NULL) {

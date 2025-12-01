@@ -13,16 +13,19 @@
 extern "C" {
 #endif
 
-#include <poco/coro.h>
-#include <poco/event.h>
 #include <poco/platform.h>
 #include <poco/result.h>
 #include <stddef.h>
 
+enum res_codes_semaphore {
+    /* Semaphore cannot be acquired as it has no available slots. */
+    RES_SEMAPHORE_FULL = RES_CODE(RES_GROUP_SEMAPHORE, 0),
+};
+
 typedef struct semaphore {
     size_t volatile slots_remaining;
     size_t slot_count;
-} semaphore_t;
+} Semaphore;
 
 /*!
  * @brief Create a binary semaphore of a particular size.
@@ -31,7 +34,7 @@ typedef struct semaphore {
  *
  * @return the created semaphore, or NULL.
  */
-semaphore_t *semaphore_create_binary(void);
+Semaphore *semaphore_create_binary(void);
 
 /*!
  * @brief Initialise a statically allocated binary semaphore.
@@ -42,7 +45,7 @@ semaphore_t *semaphore_create_binary(void);
  *
  * @return the same semaphore as the input.
  */
-semaphore_t *semaphore_create_binary_static(semaphore_t *semaphore);
+Semaphore *semaphore_create_binary_static(Semaphore *semaphore);
 
 /*!
  * @brief Create a bounded semaphore of a particular size.
@@ -51,7 +54,7 @@ semaphore_t *semaphore_create_binary_static(semaphore_t *semaphore);
  *
  * @return the created semaphore, or NULL.
  */
-semaphore_t *semaphore_create(size_t slot_count);
+Semaphore *semaphore_create(size_t slot_count);
 
 /*!
  * @brief Initialise a statically allocated semaphore.
@@ -61,41 +64,38 @@ semaphore_t *semaphore_create(size_t slot_count);
  *
  * @return the same semaphore as the input.
  */
-semaphore_t *semaphore_create_static(semaphore_t *semaphore, size_t slot_count);
+Semaphore *semaphore_create_static(Semaphore *semaphore, size_t slot_count);
 
 /*!
- * @brief Frees a semaphore created using the dyanamic allocation functions.
+ * @brief Frees a semaphore created using the dynamic allocation functions.
  *
- * @warning Freeing a sempahore not created by semaphore_create* is causes undefined
+ * @warning Freeing a semaphore not created by semaphore_create* is causes undefined
  * behaviour.
  *
  * @param semaphore Semaphore to free (binary or counting).
  */
-void semaphore_free(semaphore_t *semaphore);
+void semaphore_free(Semaphore *semaphore);
 
 /*!
  * @brief Acquire the semaphore, waiting forever.
  *
- * @param coro Calling coroutine.
  * @param semaphore Semaphore to acquire.
  * @param delay_ticks Number of ticks to wait before timing out.
  *
  * @retval #RES_OK If semaphore was acquired
  * @retval #RES_TIMEOUT The maximum timeout duration has been reached.
  */
-result_t semaphore_acquire(semaphore_t *semaphore, platform_ticks_t delay_ticks);
+Result semaphore_acquire(Semaphore *semaphore, PlatformTick delay_ticks);
 
 /*!
- * @brief Release the semaphore.
+ * @brief Acquire the semaphore, does not wait.
  *
- * @param coro Calling coroutine.
- * @param semaphore Semaphore to release.
+ * @param semaphore Semaphore to acquire.
  *
- * @retval #RES_OK Semaphore has been released.
- * @retval #RES_OVERFLOW Semaphore has already hit the maximum number of releases.
- *                       (A double release has occurred.)
+ * @retval #RES_OK If semaphore was acquired.
+ * @retval #RES_SEMAPHORE_FULL If the semaphore has no available slots to acquire.
  */
-result_t semaphore_release(semaphore_t *semaphore);
+Result semaphore_acquire_no_wait(Semaphore *semaphore);
 
 /*!
  * @brief Acquire the semaphore from an ISR, does not block.
@@ -105,9 +105,20 @@ result_t semaphore_release(semaphore_t *semaphore);
  * @param semaphore Semaphore to acquire.
  *
  * @retval #RES_OK semaphore has been acquired
- * @retval #RES_TIMEOUT if the sempahore cannot be acquired.
+ * @retval #RES_TIMEOUT if the semaphore cannot be acquired.
  */
-result_t semaphore_acquire_from_isr(semaphore_t *semaphore);
+Result semaphore_acquire_from_isr(Semaphore *semaphore);
+
+/*!
+ * @brief Release the semaphore.
+ *
+ * @param semaphore Semaphore to release.
+ *
+ * @retval #RES_OK Semaphore has been released.
+ * @retval #RES_OVERFLOW Semaphore has already hit the maximum number of releases.
+ *                       (A double release has occurred.)
+ */
+Result semaphore_release(Semaphore *semaphore);
 
 /*!
  * @brief Release the semaphore from an ISR, does not block.
@@ -120,7 +131,7 @@ result_t semaphore_acquire_from_isr(semaphore_t *semaphore);
  * @retval #RES_OVERFLOW if the semaphore could not be released.
  * @retval #RES_NOTIFY_FAILED if the scheduler notification has failed.
  */
-result_t semaphore_release_from_isr(semaphore_t *semaphore);
+Result semaphore_release_from_isr(Semaphore *semaphore);
 
 #ifdef __cplusplus
 }

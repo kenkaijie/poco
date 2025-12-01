@@ -21,15 +21,15 @@ extern "C" {
 #include <ucontext.h>
 
 // Platform Context implementation
-typedef uint32_t platform_stack_t;
+typedef uint32_t PlatformStackElement;
 
 /** Default stack size needed to run the coroutine, in platform specific elements. */
-#define DEFAULT_STACK_SIZE (SIGSTKSZ / sizeof(platform_stack_t))
+#define DEFAULT_STACK_SIZE (SIGSTKSZ / sizeof(PlatformStackElement))
 
 /** Minimum stack size needed to run the coroutine, in platform specific elements. */
-#define MIN_STACK_SIZE (MINSIGSTKSZ / sizeof(platform_stack_t))
+#define MIN_STACK_SIZE (MINSIGSTKSZ / sizeof(PlatformStackElement))
 
-typedef ucontext_t platform_context_t;
+typedef ucontext_t PlatformContext;
 
 #define platform_get_context(context) getcontext(context)
 
@@ -38,21 +38,20 @@ typedef ucontext_t platform_context_t;
 #define platform_swap_context(old_context, new_context)                                \
     swapcontext(old_context, new_context)
 
-#define platform_make_context(context, function, coro, user_context)                   \
-    makecontext(context, (void (*)(void))function, 2, coro, user_context)
+#define platform_make_context(context, entrypoint, coro, user_context)                 \
+    makecontext(context, (void (*)(void))entrypoint, 2, coro, user_context)
 
 #define platform_destroy_context(context) // no context to destroy
 
 // Platform Timing
-typedef int64_t platform_ticks_t;
+typedef int64_t PlatformTick;
 
 #define PLATFORM_TICKS_FOREVER (INT64_MIN)
 
-__attribute__((always_inline)) static inline platform_ticks_t
-platform_get_monotonic_ticks(void) {
+static inline PlatformTick platform_get_monotonic_ticks(void) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (platform_ticks_t)ts.tv_sec * 1000 + (platform_ticks_t)ts.tv_nsec / 1000000;
+    return (PlatformTick)ts.tv_sec * 1000 + (PlatformTick)ts.tv_nsec / 1000000;
 }
 
 #define platform_get_ticks_per_ms() (1)

@@ -4,7 +4,7 @@
 poco - Pocket Coroutines
 ========================
 
-This documentation covers the basica of using poco within your application.
+This documentation covers the basics of using poco within your application.
 
 A good place to start is the :ref:`quick-start:Quick Start`.
 

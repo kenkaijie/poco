@@ -10,13 +10,13 @@
 #include <poco/event.h>
 #include <poco/intracoro.h>
 
-event_t *event_create_static(event_t *event, flags_t initial) {
+Event *event_create_static(Event *event, Flags const initial) {
     event->flags = initial;
     return event;
 }
 
-event_t *event_create(flags_t initial) {
-    event_t *event = (event_t *)malloc(sizeof(event_t));
+Event *event_create(Flags const initial) {
+    Event *event = malloc(sizeof(Event));
 
     if (event == NULL) {
         return event;
@@ -25,14 +25,14 @@ event_t *event_create(flags_t initial) {
     return event_create_static(event, initial);
 }
 
-void event_free(event_t *event) { free(event); }
+void event_free(Event *event) { free(event); }
 
-flags_t event_get(event_t *event, flags_t mask, flags_t clear_mask, bool wait_for_all,
-                  platform_ticks_t timeout) {
+Flags event_get(Event *event, Flags const mask, Flags const clear_mask,
+                bool const wait_for_all, PlatformTick const timeout) {
 
-    coro_t *coro = context_get_coro();
+    Coro *coro = context_get_coro();
 
-    flags_t captured_flags = 0;
+    Flags captured_flags = 0;
     bool event_triggered = false;
 
     coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_EVENT_GET;
@@ -68,9 +68,9 @@ flags_t event_get(event_t *event, flags_t mask, flags_t clear_mask, bool wait_fo
     return captured_flags;
 }
 
-void event_set(event_t *event, flags_t mask) {
+void event_set(Event *event, Flags const mask) {
 
-    coro_t *coro = context_get_coro();
+    Coro *coro = context_get_coro();
 
     platform_enter_critical_section();
     event->flags |= mask;
@@ -81,13 +81,13 @@ void event_set(event_t *event, flags_t mask) {
     coro_yield_with_signal(CORO_SIG_NOTIFY);
 }
 
-result_t event_set_from_isr(event_t *event, flags_t mask) {
-    result_t notify_result = RES_OK;
-    scheduler_t *scheduler = context_get_scheduler();
+Result event_set_from_isr(Event *event, Flags const mask) {
+    Result notify_result = RES_OK;
+    Scheduler *scheduler = context_get_scheduler();
 
     event->flags |= mask;
 
-    coro_event_source_t const event_source = {
+    CoroEventSource const event_source = {
         .type = CORO_EVTSRC_EVENT_SET,
         .params.subject = event,
     };

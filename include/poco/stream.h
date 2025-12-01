@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 /*!
  * @file
- * @brief Streams are spsc queues specialised for byte data.
+ * @brief Streams are single-producer, single-consumer queues specialised for byte data.
  *
  * The typical use case is for queuing bytes between ISRs and coroutines.
  *
@@ -26,7 +26,6 @@ extern "C" {
 
 #include <poco/platform.h>
 #include <poco/result.h>
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -46,7 +45,7 @@ typedef struct stream {
     size_t max_size;
     size_t volatile read_idx;
     size_t volatile write_idx;
-} stream_t;
+} Stream;
 
 /*!
  * @brief Creates a static stream from
@@ -58,7 +57,7 @@ typedef struct stream {
  * @return a pointer to the stream (same as the input) or NULL if the stream could not
  *      be created.
  */
-stream_t *stream_create_static(stream_t *stream, size_t buffer_size, uint8_t *buffer);
+Stream *stream_create_static(Stream *stream, size_t buffer_size, uint8_t *buffer);
 
 /*!
  * @brief Dynamically allocate space for a stream.
@@ -67,19 +66,19 @@ stream_t *stream_create_static(stream_t *stream, size_t buffer_size, uint8_t *bu
  *
  * @return a pointer to a stream, or NULL if the stream could not be allocated.
  */
-stream_t *stream_create(size_t buffer_size);
+Stream *stream_create(size_t buffer_size);
 
 /*!
- * @brief Frees a dyanicamlly allocated stream.
+ * @brief Frees a dynamically allocated stream.
  *
  * @param stream Stream to deallocate.
  */
-void stream_free(stream_t *stream);
+void stream_free(Stream *stream);
 
 /*!
  * @brief Gets the number of bytes used in the stream.
  *
- * @warning This value only represents a snpashot. However:
+ * @warning This value only represents a snapshot. However:
  *
  *      - If called from the consumer, guaranteed to be greater than or equal.
  *
@@ -89,12 +88,12 @@ void stream_free(stream_t *stream);
  *
  * @return The number of bytes the stream has in use. See warning for more information.
  */
-size_t stream_bytes_used(stream_t *stream);
+size_t stream_bytes_used(Stream const *stream);
 
 /*!
  * @brief Gets the number of bytes used in the stream.
  *
- * @warning This value only represents a snpashot. However:
+ * @warning This value only represents a snapshot. However:
  *
  *      - If called from the consumer, guaranteed to be lesser than or equal.
  *
@@ -104,7 +103,7 @@ size_t stream_bytes_used(stream_t *stream);
  *
  * @return The number of bytes the stream has for use. See warning for more information.
  */
-size_t stream_bytes_free(stream_t *stream);
+size_t stream_bytes_free(Stream const *stream);
 
 /*!
  * @brief Sends data across the stream.
@@ -119,8 +118,8 @@ size_t stream_bytes_free(stream_t *stream);
  * @retval #RES_TIMEOUT if the timeout has elapsed without all data being sent. The
  *      value of data_size indicates the actual number of bytes that was sent.
  */
-result_t stream_send(stream_t *stream, uint8_t const *data, size_t *data_size,
-                     platform_ticks_t timeout);
+Result stream_send(Stream *stream, uint8_t const *data, size_t *data_size,
+                   PlatformTick timeout);
 
 /*!
  * @brief Sends as much data onto the stream as possible without blocking.
@@ -130,11 +129,11 @@ result_t stream_send(stream_t *stream, uint8_t const *data, size_t *data_size,
  * @param data_size Size of data, in bytes.
  *
  * @retval #RES_OK If data has been sent. Check the value of data_size to determine how
- *      muych was actually sent.
+ *      much was actually sent.
  * @retval #RES_STREAM_FULL If no bytes were sent.
  * @retval #RES_NOTIFY_FAILED if the scheduler notification has failed.
  */
-result_t stream_send_no_wait(stream_t *stream, uint8_t const *data, size_t *data_size);
+Result stream_send_no_wait(Stream *stream, uint8_t const *data, size_t *data_size);
 
 /*!
  * @brief Sends as much data onto the stream as possible without blocking from an ISR.
@@ -144,10 +143,10 @@ result_t stream_send_no_wait(stream_t *stream, uint8_t const *data, size_t *data
  * @param data_size Size of data, in bytes.
  *
  * @retval #RES_OK If data has been sent. Check the value of data_size to determine how
- *      muych was actually sent.
+ *      much was actually sent.
  * @retval #RES_STREAM_FULL If no bytes were sent.
  */
-result_t stream_send_from_isr(stream_t *stream, uint8_t const *data, size_t *data_size);
+Result stream_send_from_isr(Stream *stream, uint8_t const *data, size_t *data_size);
 
 /*!
  * @brief Receive a number of bytes from the stream.
@@ -159,11 +158,11 @@ result_t stream_send_from_isr(stream_t *stream, uint8_t const *data, size_t *dat
  * @param timeout maximum amount of time to wait.
  *
  * @retval #RES_OK if the requested number of bytes has been read.
- * @retval #RES_TIMEOUT if the timeout has elapsed without all data being recevied. The
+ * @retval #RES_TIMEOUT if the timeout has elapsed without all data being received. The
  *      value of buffer_size indicates the actual number of bytes read.
  */
-result_t stream_receive(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
-                        platform_ticks_t timeout);
+Result stream_receive(Stream *stream, uint8_t *buffer, size_t *buffer_size,
+                      PlatformTick timeout);
 
 /*!
  * @brief Receive up to a number of bytes from the stream.
@@ -179,11 +178,11 @@ result_t stream_receive(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
  * @param timeout Maximum amount of time to wait.
  *
  * @retval #RES_OK if the requested number of bytes has been read.
- * @retval #RES_TIMEOUT if the timeout has elapsed without all data being recevied. The
+ * @retval #RES_TIMEOUT if the timeout has elapsed without all data being received. The
  *      value of buffer_size indicates the actual number of bytes read.
  */
-result_t stream_receive_up_to(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
-                              platform_ticks_t timeout);
+Result stream_receive_up_to(Stream *stream, uint8_t *buffer, size_t *buffer_size,
+                            PlatformTick timeout);
 
 /*!
  * @brief Receive a number of bytes without blocking.
@@ -197,7 +196,7 @@ result_t stream_receive_up_to(stream_t *stream, uint8_t *buffer, size_t *buffer_
  * @retval #RES_STREAM_EMPTY if the stream was empty.
  * @retval #RES_NOTIFY_FAILED if the scheduler notification has failed.
  */
-result_t stream_receive_no_wait(stream_t *stream, uint8_t *buffer, size_t *buffer_size);
+Result stream_receive_no_wait(Stream *stream, uint8_t *buffer, size_t *buffer_size);
 
 /*!
  * @brief Receive a number of bytes from the ISR.
@@ -209,8 +208,7 @@ result_t stream_receive_no_wait(stream_t *stream, uint8_t *buffer, size_t *buffe
  * @retval #RES_OK if data has been received.
  * @retval #RES_NOTIFY_FAILED if the scheduler notification has failed.
  */
-result_t stream_receive_from_isr(stream_t *stream, uint8_t *buffer,
-                                 size_t *buffer_size);
+Result stream_receive_from_isr(Stream *stream, uint8_t *buffer, size_t *buffer_size);
 
 /*!
  * @brief Block the producer until the stream is completely empty.
@@ -221,7 +219,7 @@ result_t stream_receive_from_isr(stream_t *stream, uint8_t *buffer,
  * @retval #RES_OK if the stream was flushed.
  * @retval #RES_TIMEOUT if the timeout elapsed without the stream being flushed.
  */
-result_t stream_flush(stream_t *stream, platform_ticks_t timeout);
+Result stream_flush(Stream *stream, PlatformTick timeout);
 
 #ifdef __cplusplus
 }
