@@ -15,6 +15,7 @@ target_sources(
             ${CMAKE_CURRENT_SOURCE_DIR}/poco/mutex.h
             ${CMAKE_CURRENT_SOURCE_DIR}/poco/poco.h
             ${CMAKE_CURRENT_SOURCE_DIR}/poco/queue.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/poco/queue_raw.h
             ${CMAKE_CURRENT_SOURCE_DIR}/poco/result.h
             ${CMAKE_CURRENT_SOURCE_DIR}/poco/scheduler.h
             ${CMAKE_CURRENT_SOURCE_DIR}/poco/semaphore.h

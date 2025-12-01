@@ -9,6 +9,7 @@
 #include <poco/coro.h>
 #include <poco/intracoro.h>
 #include <poco/queue.h>
+#include <poco/queue_raw.h>
 #include <poco/scheduler.h>
 #include <string.h>
 

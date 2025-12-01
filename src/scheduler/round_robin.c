@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: MIT
 /*!
  * @file
- * @brief Round robin scheduler implementation.
+ * @brief Round-robin scheduler implementation.
  */
 
 #include <poco/platform.h>
+#include <poco/queue_raw.h>
 #include <poco/schedulers/round_robin.h>
 #include <string.h>
 
