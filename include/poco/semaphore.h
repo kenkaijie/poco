@@ -17,6 +17,11 @@ extern "C" {
 #include <poco/result.h>
 #include <stddef.h>
 
+enum res_codes_semaphore {
+    /* Semaphore cannot be acquired as it has no available slots. */
+    RES_SEMAPHORE_FULL = RES_CODE(RES_GROUP_SEMAPHORE, 0),
+};
+
 typedef struct semaphore {
     size_t volatile slots_remaining;
     size_t slot_count;
@@ -83,15 +88,14 @@ void semaphore_free(Semaphore *semaphore);
 Result semaphore_acquire(Semaphore *semaphore, PlatformTicks delay_ticks);
 
 /*!
- * @brief Release the semaphore.
+ * @brief Acquire the semaphore, does not wait.
  *
- * @param semaphore Semaphore to release.
+ * @param semaphore Semaphore to acquire.
  *
- * @retval #RES_OK Semaphore has been released.
- * @retval #RES_OVERFLOW Semaphore has already hit the maximum number of releases.
- *                       (A double release has occurred.)
+ * @retval #RES_OK If semaphore was acquired.
+ * @retval #RES_SEMAPHORE_FULL If the semaphore has no available slots to acquire.
  */
-Result semaphore_release(Semaphore *semaphore);
+Result semaphore_acquire_no_wait(Semaphore *semaphore);
 
 /*!
  * @brief Acquire the semaphore from an ISR, does not block.
@@ -104,6 +108,17 @@ Result semaphore_release(Semaphore *semaphore);
  * @retval #RES_TIMEOUT if the semaphore cannot be acquired.
  */
 Result semaphore_acquire_from_isr(Semaphore *semaphore);
+
+/*!
+ * @brief Release the semaphore.
+ *
+ * @param semaphore Semaphore to release.
+ *
+ * @retval #RES_OK Semaphore has been released.
+ * @retval #RES_OVERFLOW Semaphore has already hit the maximum number of releases.
+ *                       (A double release has occurred.)
+ */
+Result semaphore_release(Semaphore *semaphore);
 
 /*!
  * @brief Release the semaphore from an ISR, does not block.

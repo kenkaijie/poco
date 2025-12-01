@@ -58,15 +58,15 @@ Result mutex_acquire(Mutex *mutex, PlatformTicks timeout) {
 
 Result mutex_acquire_no_wait(Mutex *mutex) {
     // no need locks, mutex operations should only happen within coroutines.
+    bool acquired = false;
     Coro *coro = context_get_coro();
 
     if (mutex->owner != NULL) {
-        return RES_MUTEX_OCCUPIED;
+        mutex->owner = coro;
+        acquired = true;
     }
 
-    mutex->owner = coro;
-
-    return RES_OK;
+    return (acquired) ? RES_OK : RES_MUTEX_OCCUPIED;
 }
 
 Result mutex_release(Mutex *mutex) {

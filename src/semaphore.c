@@ -64,6 +64,30 @@ Result semaphore_acquire(Semaphore *semaphore, PlatformTicks const delay_ticks) 
     return (acquired) ? RES_OK : RES_TIMEOUT;
 }
 
+Result semaphore_acquire_no_wait(Semaphore *semaphore) {
+    bool acquired = false;
+
+    platform_enter_critical_section();
+    if (semaphore->slots_remaining != 0) {
+        semaphore->slots_remaining--;
+        acquired = true;
+    }
+    platform_exit_critical_section();
+
+    return (acquired) ? RES_OK : RES_SEMAPHORE_FULL;
+}
+
+Result semaphore_acquire_from_isr(Semaphore *semaphore) {
+    bool acquired = false;
+
+    if (semaphore->slots_remaining != 0) {
+        semaphore->slots_remaining--;
+        acquired = true;
+    }
+
+    return (acquired) ? RES_OK : RES_TIMEOUT;
+}
+
 Result semaphore_release(Semaphore *semaphore) {
     bool released = false;
 
@@ -81,17 +105,6 @@ Result semaphore_release(Semaphore *semaphore) {
     }
 
     return (released) ? RES_OK : RES_OVERFLOW;
-}
-
-Result semaphore_acquire_from_isr(Semaphore *semaphore) {
-    bool acquired = false;
-
-    if (semaphore->slots_remaining != 0) {
-        semaphore->slots_remaining--;
-        acquired = true;
-    }
-
-    return (acquired) ? RES_OK : RES_TIMEOUT;
 }
 
 Result semaphore_release_from_isr(Semaphore *semaphore) {

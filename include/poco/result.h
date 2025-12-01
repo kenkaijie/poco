@@ -23,6 +23,9 @@ typedef uint32_t Result;
  */
 #define RES_CODE(group, code) ((Result)(((group) << 16) | (code)))
 
+/* These categories should not change once allocated to avoid breaking changes with the
+ * Result API.
+ */
 enum result_category {
     RES_GROUP_GENERAL = 0, /**< General space for common error codes. */
     RES_GROUP_CORE = 1,
@@ -30,6 +33,7 @@ enum result_category {
     RES_GROUP_EVENT = 3,
     RES_GROUP_MUTEX = 4,
     RES_GROUP_STREAM = 5,
+    RES_GROUP_SEMAPHORE = 7,
 };
 
 /*!
