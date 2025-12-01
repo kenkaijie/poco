@@ -9,6 +9,7 @@
  * numbers 0-2047.
  */
 
+#include <inttypes.h>
 #include <poco/coro.h>
 #include <poco/scheduler.h>
 #include <poco/schedulers/round_robin.h>
@@ -26,9 +27,9 @@ static PlatformStackElement coroutine_stacks[CORO_COUNT][STACK_SIZE];
 // We are using the same entry for all coroutines.
 void producer_task(void *context) {
     intptr_t const starting_number = (intptr_t)context;
-    printf("%lld\n", starting_number);
+    printf("%" PRIdPTR "\n", starting_number);
     coro_yield();
-    printf("%lld\n", starting_number + CORO_COUNT);
+    printf("%" PRIdPTR "\n", starting_number + CORO_COUNT);
     coro_yield();
 }
 
