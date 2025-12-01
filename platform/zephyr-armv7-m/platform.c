@@ -11,7 +11,7 @@
 
 // We modify the context to think it originates from the function provided. That way the
 // next time we resume this context, it will magically appear inside.
-void platform_make_context(platform_context_t *ucp, void (*func)(void *, void *),
+void platform_make_context(PlatformContext *ucp, void (*func)(void *, void *),
                            void *context1, void *context2) {
     // Pre-populate first 4 with arguments used within the entry point (+ some others).
     // This is okay as we know the first 2 will be the correct values.

@@ -8,14 +8,14 @@
 #include <poco/context.h>
 #include <poco/semaphore.h>
 
-semaphore_t *semaphore_create_binary() { return semaphore_create(1); }
+Semaphore *semaphore_create_binary() { return semaphore_create(1); }
 
-semaphore_t *semaphore_create_binary_static(semaphore_t *semaphore) {
+Semaphore *semaphore_create_binary_static(Semaphore *semaphore) {
     return semaphore_create_static(semaphore, 1);
 }
 
-semaphore_t *semaphore_create(size_t slot_count) {
-    semaphore_t *semaphore = (semaphore_t *)malloc(sizeof(semaphore_t));
+Semaphore *semaphore_create(size_t const slot_count) {
+    Semaphore *semaphore = malloc(sizeof(Semaphore));
     if (semaphore == NULL) {
         /* Malloc failure. */
         return semaphore;
@@ -24,18 +24,18 @@ semaphore_t *semaphore_create(size_t slot_count) {
     return semaphore_create_static(semaphore, slot_count);
 }
 
-semaphore_t *semaphore_create_static(semaphore_t *semaphore, size_t slot_count) {
+Semaphore *semaphore_create_static(Semaphore *semaphore, size_t slot_count) {
     semaphore->slots_remaining = slot_count;
     semaphore->slot_count = slot_count;
 
     return semaphore;
 }
 
-void semaphore_free(semaphore_t *semaphore) { free(semaphore); }
+void semaphore_free(Semaphore *semaphore) { free(semaphore); }
 
-result_t semaphore_acquire(semaphore_t *semaphore, platform_ticks_t delay_ticks) {
+Result semaphore_acquire(Semaphore *semaphore, PlatformTicks const delay_ticks) {
     bool acquired = false;
-    coro_t *coro = context_get_coro();
+    Coro *coro = context_get_coro();
 
     coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_SEMAPHORE_ACQUIRE;
     coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].params.subject = semaphore;
@@ -64,7 +64,7 @@ result_t semaphore_acquire(semaphore_t *semaphore, platform_ticks_t delay_ticks)
     return (acquired) ? RES_OK : RES_TIMEOUT;
 }
 
-result_t semaphore_release(semaphore_t *semaphore) {
+Result semaphore_release(Semaphore *semaphore) {
     bool released = false;
 
     platform_enter_critical_section();
@@ -75,15 +75,15 @@ result_t semaphore_release(semaphore_t *semaphore) {
     platform_exit_critical_section();
 
     if (released) {
-        coro_event_source_t const event = {.type = CORO_EVTSRC_SEMAPHORE_RELEASE,
-                                           .params.subject = semaphore};
+        CoroEventSource const event = {.type = CORO_EVTSRC_SEMAPHORE_RELEASE,
+                                       .params.subject = semaphore};
         coro_yield_with_event(&event);
     }
 
     return (released) ? RES_OK : RES_OVERFLOW;
 }
 
-result_t semaphore_acquire_from_isr(semaphore_t *semaphore) {
+Result semaphore_acquire_from_isr(Semaphore *semaphore) {
     bool acquired = false;
 
     if (semaphore->slots_remaining != 0) {
@@ -94,10 +94,10 @@ result_t semaphore_acquire_from_isr(semaphore_t *semaphore) {
     return (acquired) ? RES_OK : RES_TIMEOUT;
 }
 
-result_t semaphore_release_from_isr(semaphore_t *semaphore) {
+Result semaphore_release_from_isr(Semaphore *semaphore) {
     bool released = false;
-    result_t notify_result = RES_OK;
-    scheduler_t *scheduler = context_get_scheduler();
+    Result notify_result = RES_OK;
+    Scheduler *scheduler = context_get_scheduler();
 
     if (semaphore->slots_remaining != semaphore->slot_count) {
         semaphore->slots_remaining++;
@@ -105,8 +105,8 @@ result_t semaphore_release_from_isr(semaphore_t *semaphore) {
     }
 
     if (released) {
-        coro_event_source_t const event = {.type = CORO_EVTSRC_SEMAPHORE_RELEASE,
-                                           .params.subject = semaphore};
+        CoroEventSource const event = {.type = CORO_EVTSRC_SEMAPHORE_RELEASE,
+                                       .params.subject = semaphore};
         notify_result = scheduler_notify_from_isr(scheduler, &event);
     }
 

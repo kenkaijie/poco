@@ -35,7 +35,7 @@ static char const *messages[13] = {
 };
 
 static void producer_task(void *context) {
-    stream_t *stream = (stream_t *)context;
+    Stream *stream = (Stream *)context;
 
     for (size_t idx = 0; idx < (sizeof(messages) / sizeof(messages[0])); ++idx) {
         char const *message = messages[idx];
@@ -47,7 +47,7 @@ static void producer_task(void *context) {
 }
 
 static void consumer_task(void *context) {
-    stream_t *stream = (stream_t *)context;
+    Stream *stream = (Stream *)context;
 
     uint8_t recv_buffer[128] = {0};
     // keep last byte for a null terminating character
@@ -64,14 +64,14 @@ static void consumer_task(void *context) {
 
 int main(void) {
 
-    stream_t *stream = stream_create(1024);
+    Stream *stream = stream_create(1024);
 
     if (stream == NULL) {
         printf("Failed to create stream.");
         return -1;
     }
 
-    coro_t *tasks[] = {
+    Coro *tasks[] = {
         coro_create(producer_task, (void *)stream, STACK_SIZE),
         coro_create(consumer_task, (void *)stream, STACK_SIZE),
     };
@@ -82,7 +82,7 @@ int main(void) {
             return -1;
     }
 
-    scheduler_t *scheduler =
+    Scheduler *scheduler =
         round_robin_scheduler_create(tasks, sizeof(tasks) / sizeof(tasks[0]));
 
     if (scheduler == NULL) {

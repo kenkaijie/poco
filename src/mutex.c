@@ -9,13 +9,13 @@
 #include <poco/coro.h>
 #include <poco/mutex.h>
 
-mutex_t *mutex_create_static(mutex_t *mutex) {
+Mutex *mutex_create_static(Mutex *mutex) {
     mutex->owner = NULL;
     return mutex;
 }
 
-mutex_t *mutex_create(void) {
-    mutex_t *mutex = (mutex_t *)malloc(sizeof(mutex_t));
+Mutex *mutex_create(void) {
+    Mutex *mutex = (Mutex *)malloc(sizeof(Mutex));
 
     if (mutex == NULL) {
         /* No memory. */
@@ -25,10 +25,10 @@ mutex_t *mutex_create(void) {
     return mutex_create_static(mutex);
 }
 
-void mutex_free(mutex_t *mutex) { free(mutex); }
+void mutex_free(Mutex *mutex) { free(mutex); }
 
-result_t mutex_acquire(mutex_t *mutex, platform_ticks_t timeout) {
-    coro_t *coro = context_get_coro();
+Result mutex_acquire(Mutex *mutex, PlatformTicks timeout) {
+    Coro *coro = context_get_coro();
     bool acquire_success = false;
 
     coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_MUTEX_ACQUIRE;
@@ -56,9 +56,9 @@ result_t mutex_acquire(mutex_t *mutex, platform_ticks_t timeout) {
     return (acquire_success) ? RES_OK : RES_TIMEOUT;
 }
 
-result_t mutex_acquire_no_wait(mutex_t *mutex) {
+Result mutex_acquire_no_wait(Mutex *mutex) {
     // no need locks, mutex operations should only happen within coroutines.
-    coro_t *coro = context_get_coro();
+    Coro *coro = context_get_coro();
 
     if (mutex->owner != NULL) {
         return RES_MUTEX_OCCUPIED;
@@ -69,8 +69,8 @@ result_t mutex_acquire_no_wait(mutex_t *mutex) {
     return RES_OK;
 }
 
-result_t mutex_release(mutex_t *mutex) {
-    coro_t *coro = context_get_coro();
+Result mutex_release(Mutex *mutex) {
+    Coro *coro = context_get_coro();
 
     if ((mutex->owner != NULL) && (mutex->owner != coro)) {
         return RES_MUTEX_NOT_OWNER;
@@ -78,8 +78,8 @@ result_t mutex_release(mutex_t *mutex) {
 
     mutex->owner = NULL;
 
-    coro_event_source_t const event_source = {.type = CORO_EVTSRC_MUTEX_RELEASE,
-                                              .params.subject = mutex};
+    CoroEventSource const event_source = {.type = CORO_EVTSRC_MUTEX_RELEASE,
+                                          .params.subject = mutex};
 
     coro_yield_with_event(&event_source);
 

@@ -17,16 +17,16 @@ extern "C" {
 /*!
  * @brief Get the scheduler.
  */
-scheduler_t *context_get_scheduler(void);
+Scheduler *context_get_scheduler(void);
 
-coro_t *context_get_coro(void);
+Coro *context_get_coro(void);
 
 /*!
  * @brief Sets the scheduler for this context.
  *
  * @param scheduler Scheduler to set.
  */
-void context_set_scheduler(scheduler_t *scheduler);
+void context_set_scheduler(Scheduler *scheduler);
 
 #ifdef __cplusplus
 }

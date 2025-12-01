@@ -17,7 +17,7 @@
 #define STACK_SIZE (DEFAULT_STACK_SIZE)
 
 void coroutine_a(void *context) {
-    mutex_t *mutex = (mutex_t *)context;
+    Mutex *mutex = (Mutex *)context;
 
     mutex_acquire(mutex, PLATFORM_TICKS_FOREVER);
 
@@ -29,7 +29,7 @@ void coroutine_a(void *context) {
 }
 
 void coroutine_b(void *context) {
-    mutex_t *mutex = (mutex_t *)context;
+    Mutex *mutex = (Mutex *)context;
 
     mutex_acquire(mutex, PLATFORM_TICKS_FOREVER);
 
@@ -42,30 +42,30 @@ void coroutine_b(void *context) {
 
 int main(void) {
 
-    mutex_t *mutex = mutex_create();
+    Mutex *mutex = mutex_create();
 
     if (mutex == NULL) {
         /* Memory error */
         return -1;
     }
 
-    coro_t *coro_a = coro_create(coroutine_a, (void *)mutex, STACK_SIZE);
+    Coro *coro_a = coro_create(coroutine_a, mutex, STACK_SIZE);
 
     if (coro_a == NULL) {
         /* Memory error */
         return -1;
     }
 
-    coro_t *coro_b = coro_create(coroutine_b, (void *)mutex, STACK_SIZE);
+    Coro *coro_b = coro_create(coroutine_b, mutex, STACK_SIZE);
 
     if (coro_b == NULL) {
         /* Memory error */
         return -1;
     }
 
-    coro_t *tasks[] = {coro_a, coro_b};
+    Coro *tasks[] = {coro_a, coro_b};
 
-    scheduler_t *scheduler =
+    Scheduler *scheduler =
         round_robin_scheduler_create(tasks, sizeof(tasks) / sizeof(tasks[0]));
 
     if (scheduler == NULL) {

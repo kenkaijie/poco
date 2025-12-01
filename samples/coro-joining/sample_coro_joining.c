@@ -17,11 +17,11 @@
 #define CONSUMER_STOP (-1)
 #define STACK_SIZE (DEFAULT_STACK_SIZE)
 
-coro_t coro1_coro = {0};
-platform_stack_t coro1_stack[STACK_SIZE] = {0};
+Coro coro1_coro = {0};
+PlatformStackElement coro1_stack[STACK_SIZE] = {0};
 
-coro_t coro2_coro = {0};
-platform_stack_t coro2_stack[STACK_SIZE] = {0};
+Coro coro2_coro = {0};
+PlatformStackElement coro2_stack[STACK_SIZE] = {0};
 
 void coro1_task(void *context) {
     (void)context;
@@ -32,7 +32,7 @@ void coro1_task(void *context) {
 }
 
 void coro2_task(void *context) {
-    coro_t *coro1 = (coro_t *)context;
+    Coro *coro1 = context;
 
     coro_join(coro1);
 
@@ -44,14 +44,14 @@ void coro2_task(void *context) {
 
 int main(void) {
 
-    coro_t *tasks[2] = {0};
+    Coro *tasks[2] = {0};
 
     tasks[0] =
         coro_create_static(&coro1_coro, coro1_task, NULL, coro1_stack, STACK_SIZE);
     tasks[1] = coro_create_static(&coro2_coro, coro2_task, (void *)tasks[0],
                                   coro2_stack, STACK_SIZE);
 
-    scheduler_t *scheduler =
+    Scheduler *scheduler =
         round_robin_scheduler_create(tasks, sizeof(tasks) / sizeof(tasks[0]));
 
     if (scheduler == NULL) {

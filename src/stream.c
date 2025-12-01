@@ -9,14 +9,14 @@
 #include <poco/coro.h>
 #include <poco/intracoro.h>
 #include <poco/stream.h>
-#include <string.h>
 
-static inline bool _is_power_of_two(size_t buffer_size) {
+static bool _is_power_of_two(size_t const buffer_size) {
     /* Power of 2 bit trick. */
     return ((buffer_size & (buffer_size - 1)) == 0);
 }
 
-stream_t *stream_create_static(stream_t *stream, size_t buffer_size, uint8_t *buffer) {
+Stream *stream_create_static(Stream *stream, size_t const buffer_size,
+                             uint8_t *buffer) {
 
     if ((buffer_size == 0) || !_is_power_of_two(buffer_size)) {
         /* not a power of 2. */
@@ -31,15 +31,15 @@ stream_t *stream_create_static(stream_t *stream, size_t buffer_size, uint8_t *bu
     return stream;
 }
 
-stream_t *stream_create(size_t buffer_size) {
-    stream_t *stream = (stream_t *)malloc(sizeof(stream_t));
+Stream *stream_create(size_t const buffer_size) {
+    Stream *stream = malloc(sizeof(Stream));
 
     if (stream == NULL) {
         /* No memory. */
         return NULL;
     }
 
-    uint8_t *stream_buffer = (uint8_t *)malloc(buffer_size * sizeof(uint8_t));
+    uint8_t *stream_buffer = malloc(buffer_size * sizeof(uint8_t));
 
     if (stream_buffer == NULL) {
         /* No memory for buffer. */
@@ -47,7 +47,7 @@ stream_t *stream_create(size_t buffer_size) {
         return NULL;
     }
 
-    stream_t *stream_handle = stream_create_static(stream, buffer_size, stream_buffer);
+    Stream *stream_handle = stream_create_static(stream, buffer_size, stream_buffer);
     if (stream_handle == NULL) {
         free(stream);
         free(stream_buffer);
@@ -55,9 +55,9 @@ stream_t *stream_create(size_t buffer_size) {
     return stream_handle;
 }
 
-void stream_free(stream_t *stream) {
+void stream_free(Stream *stream) {
     if (stream == NULL) {
-        /* Cannot free null pointer, need a non null to free the internal buffer. */
+        /* Cannot free null pointer, need a non-null to free the internal buffer. */
         return;
     }
 
@@ -68,18 +68,18 @@ void stream_free(stream_t *stream) {
     free(stream);
 }
 
-size_t stream_bytes_used(stream_t *stream) {
+size_t stream_bytes_used(Stream const *stream) {
     return (stream->write_idx - stream->read_idx) % stream->max_size;
 }
 
-size_t stream_bytes_free(stream_t *stream) {
+size_t stream_bytes_free(Stream const *stream) {
     return stream->max_size - stream_bytes_used(stream);
 }
 
-result_t stream_send(stream_t *stream, uint8_t const *data, size_t *data_size,
-                     platform_ticks_t timeout) {
+Result stream_send(Stream *stream, uint8_t const *data, size_t *data_size,
+                   PlatformTicks const timeout) {
 
-    coro_t *coro = context_get_coro();
+    Coro *coro = context_get_coro();
     size_t bytes_remaining = *data_size;
     size_t bytes_written = 0;
 
@@ -127,10 +127,10 @@ result_t stream_send(stream_t *stream, uint8_t const *data, size_t *data_size,
     return (bytes_remaining == 0) ? RES_OK : RES_TIMEOUT;
 }
 
-result_t stream_send_no_wait(stream_t *stream, uint8_t const *data, size_t *data_size) {
+Result stream_send_no_wait(Stream *stream, uint8_t const *data, size_t *data_size) {
 
-    result_t notify_result = RES_OK;
-    scheduler_t *scheduler = context_get_scheduler();
+    Result notify_result = RES_OK;
+    Scheduler *scheduler = context_get_scheduler();
     size_t bytes_written = stream_bytes_free(stream);
 
     // write as much as we can
@@ -145,8 +145,8 @@ result_t stream_send_no_wait(stream_t *stream, uint8_t const *data, size_t *data
 
     if (bytes_written > 0) {
         /* Notify the consumer if we have put even a single byte. */
-        coro_event_source_t const event = {.type = CORO_EVTSRC_STREAM_SEND,
-                                           .params.subject = stream};
+        CoroEventSource const event = {.type = CORO_EVTSRC_STREAM_SEND,
+                                       .params.subject = stream};
         notify_result = scheduler_notify(scheduler, &event);
     }
 
@@ -160,10 +160,9 @@ result_t stream_send_no_wait(stream_t *stream, uint8_t const *data, size_t *data
     return (bytes_written > 0) ? RES_OK : RES_STREAM_FULL;
 }
 
-result_t stream_send_from_isr(stream_t *stream, uint8_t const *data,
-                              size_t *data_size) {
-    result_t notify_result = RES_OK;
-    scheduler_t *scheduler = context_get_scheduler();
+Result stream_send_from_isr(Stream *stream, uint8_t const *data, size_t *data_size) {
+    Result notify_result = RES_OK;
+    Scheduler *scheduler = context_get_scheduler();
     size_t bytes_written = stream_bytes_free(stream);
 
     // write as much as we can
@@ -178,8 +177,8 @@ result_t stream_send_from_isr(stream_t *stream, uint8_t const *data,
 
     if (bytes_written > 0) {
         /* Notify the consumer if we have put even a single byte. */
-        coro_event_source_t const event = {.type = CORO_EVTSRC_STREAM_SEND,
-                                           .params.subject = stream};
+        CoroEventSource const event = {.type = CORO_EVTSRC_STREAM_SEND,
+                                       .params.subject = stream};
         notify_result = scheduler_notify_from_isr(scheduler, &event);
     }
 
@@ -193,10 +192,10 @@ result_t stream_send_from_isr(stream_t *stream, uint8_t const *data,
     return (bytes_written > 0) ? RES_OK : RES_STREAM_FULL;
 }
 
-result_t stream_receive(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
-                        platform_ticks_t timeout) {
+Result stream_receive(Stream *stream, uint8_t *buffer, size_t *buffer_size,
+                      PlatformTicks const timeout) {
 
-    coro_t *coro = context_get_coro();
+    Coro *coro = context_get_coro();
     size_t bytes_remaining = *buffer_size;
     size_t bytes_read = 0;
 
@@ -244,11 +243,11 @@ result_t stream_receive(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
     return (bytes_remaining == 0) ? RES_OK : RES_TIMEOUT;
 }
 
-result_t stream_receive_up_to(stream_t *stream, uint8_t *buffer, size_t *buffer_size,
-                              platform_ticks_t timeout) {
+Result stream_receive_up_to(Stream *stream, uint8_t *buffer, size_t *buffer_size,
+                            PlatformTicks const timeout) {
 
     /* This is quite similar to the standard receive, except without a loop. */
-    coro_t *coro = context_get_coro();
+    Coro *coro = context_get_coro();
 
     coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_STREAM_NOT_EMPTY;
     coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].params.subject = stream;
@@ -285,10 +284,9 @@ result_t stream_receive_up_to(stream_t *stream, uint8_t *buffer, size_t *buffer_
     return (bytes_available > 0) ? RES_OK : RES_TIMEOUT;
 }
 
-result_t stream_receive_no_wait(stream_t *stream, uint8_t *buffer,
-                                size_t *buffer_size) {
-    result_t notify_result = RES_OK;
-    scheduler_t *scheduler = context_get_scheduler();
+Result stream_receive_no_wait(Stream *stream, uint8_t *buffer, size_t *buffer_size) {
+    Result notify_result = RES_OK;
+    Scheduler *scheduler = context_get_scheduler();
     size_t bytes_read = stream_bytes_used(stream);
 
     if (*buffer_size < bytes_read) {
@@ -302,8 +300,8 @@ result_t stream_receive_no_wait(stream_t *stream, uint8_t *buffer,
 
     if (bytes_read > 0) {
         /* Notify the producer if we have taken out any bytes. */
-        coro_event_source_t const event = {.type = CORO_EVTSRC_STREAM_RECV,
-                                           .params.subject = stream};
+        CoroEventSource const event = {.type = CORO_EVTSRC_STREAM_RECV,
+                                       .params.subject = stream};
         notify_result = scheduler_notify_from_isr(scheduler, &event);
     }
 
@@ -317,10 +315,9 @@ result_t stream_receive_no_wait(stream_t *stream, uint8_t *buffer,
     return (bytes_read > 0) ? RES_OK : RES_STREAM_EMPTY;
 }
 
-result_t stream_receive_from_isr(stream_t *stream, uint8_t *buffer,
-                                 size_t *buffer_size) {
-    result_t notify_result = RES_OK;
-    scheduler_t *scheduler = context_get_scheduler();
+Result stream_receive_from_isr(Stream *stream, uint8_t *buffer, size_t *buffer_size) {
+    Result notify_result = RES_OK;
+    Scheduler *scheduler = context_get_scheduler();
     size_t bytes_read = stream_bytes_used(stream);
 
     if (*buffer_size < bytes_read) {
@@ -334,8 +331,8 @@ result_t stream_receive_from_isr(stream_t *stream, uint8_t *buffer,
 
     if (bytes_read > 0) {
         /* Notify the producer if we have taken out any bytes. */
-        coro_event_source_t const event = {.type = CORO_EVTSRC_STREAM_RECV,
-                                           .params.subject = stream};
+        CoroEventSource const event = {.type = CORO_EVTSRC_STREAM_RECV,
+                                       .params.subject = stream};
         notify_result = scheduler_notify_from_isr(scheduler, &event);
     }
 
@@ -349,8 +346,8 @@ result_t stream_receive_from_isr(stream_t *stream, uint8_t *buffer,
     return (bytes_read > 0) ? RES_OK : RES_STREAM_EMPTY;
 }
 
-result_t stream_flush(stream_t *stream, platform_ticks_t timeout) {
-    coro_t *coro = context_get_coro();
+Result stream_flush(Stream *stream, PlatformTicks const timeout) {
+    Coro *coro = context_get_coro();
 
     coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_STREAM_NOT_FULL;
     coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].params.subject = stream;

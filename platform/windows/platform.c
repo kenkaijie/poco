@@ -19,7 +19,7 @@ static void _shim_entry(void *context) {
     function(context1, context2);
 }
 
-int platform_get_context(platform_context_t *context) {
+int platform_get_context(PlatformContext *context) {
     if (main_fiber == NULL) {
         main_fiber = ConvertThreadToFiber(0);
     }
@@ -27,13 +27,12 @@ int platform_get_context(platform_context_t *context) {
     return ((context->fiber == NULL) || (main_fiber == NULL)) ? 1 : 0;
 }
 
-int platform_set_context(platform_context_t *context) {
+int platform_set_context(PlatformContext *context) {
     SwitchToFiber(context->fiber);
     return 0;
 }
 
-int platform_swap_context(platform_context_t *old_context,
-                          platform_context_t *new_context) {
+int platform_swap_context(PlatformContext *old_context, PlatformContext *new_context) {
     /* Inject the null fiber to become the main fiber */
     if (platform_get_context(old_context) != 0) {
         return -1;
@@ -42,7 +41,7 @@ int platform_swap_context(platform_context_t *old_context,
     return platform_set_context(new_context);
 }
 
-int platform_make_context(platform_context_t *context, void (*function)(void *, void *),
+int platform_make_context(PlatformContext *context, void (*function)(void *, void *),
                           void *coro, void *user_context) {
     _shim_t *shim = malloc(sizeof(_shim_t));
 
@@ -60,7 +59,7 @@ int platform_make_context(platform_context_t *context, void (*function)(void *, 
     return (context->fiber == NULL) ? 1 : 0;
 }
 
-int platform_destroy_context(platform_context_t *context) {
+int platform_destroy_context(PlatformContext *context) {
     if ((context->fiber != NULL) && (context->fiber != main_fiber)) {
         DeleteFiber(context->fiber);
     }

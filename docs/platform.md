@@ -26,9 +26,10 @@ modelled around `ucontext` and borrows all the names.
 
 The PC platform port (`unix`) just uses ucontext under the hood.
 
-- `platform_context_t` should be a type definition pointing to an structure representing
+- `PlatformContext` should be a type definition pointing to an structure representing
   all required information to describe the CPU state at any given point.
-- `platform_stack_t` should bne defined to the aligned type required for the stack. For
+- `PlatformStackElement` should be defined to the aligned type required for the stack.
+  For
   maximum interop, stack sizes should be defined at an array of 32-bit values.
 - `platform_get_context()` is used to save the current CPU state to the provided context
   for resumption at a later point.
@@ -48,7 +49,7 @@ the following definitions need to be present.
 3. Tick arithmetic is always performed as differences between 2 points. The value of the
    tick at any given point is not relevent.
 
-- `platform_ticks_t` type defintion of the tick unit.
+- `PlatformTicks` type defintion of the tick unit.
 - `platform_get_monotonic_ticks()` get the current tick value.
 - `platform_get_ticks_per_ms()` helps perform conversion between
   ticks and clock time.

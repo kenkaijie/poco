@@ -23,7 +23,7 @@ extern "C" {
 #include <poco/intracoro.h>
 #include <poco/result.h>
 
-typedef struct scheduler scheduler_t;
+typedef struct scheduler Scheduler;
 
 /*!
  * @brief Function prototype for running the scheduler until completion.
@@ -35,19 +35,19 @@ typedef struct scheduler scheduler_t;
  *
  * @param scheduler Scheduler to run.
  */
-typedef void (*scheduler_run_t)(scheduler_t *scheduler);
+typedef void (*scheduler_run_t)(Scheduler *scheduler);
 
 /*!
  * @brief Function prototype for preparing the scheduler for step-by-step run mode.
  *
- * This should only be called once per scheduler. Preferrably just before running.
+ * This should only be called once per scheduler. Preferably just before running.
  *
  * @warning This API is used in particular scenarios and is not recommended. Consider
  * using @ref scheduler_run instead.
  *
  * @param scheduler Scheduler to start.
  */
-typedef void (*scheduler_start_t)(scheduler_t *scheduler);
+typedef void (*scheduler_start_t)(Scheduler *scheduler);
 
 /*!
  * @brief Function prototype for step-by-step run mode.
@@ -59,7 +59,7 @@ typedef void (*scheduler_start_t)(scheduler_t *scheduler);
  *
  * @return True if there is more potential work to do, else false.
  */
-typedef bool (*scheduler_run_once_t)(scheduler_t *scheduler);
+typedef bool (*scheduler_run_once_t)(Scheduler *scheduler);
 
 /*!
  * @brief Function pointer implementing the notify the scheduler of an event.
@@ -73,11 +73,11 @@ typedef bool (*scheduler_run_once_t)(scheduler_t *scheduler);
  * @retval RES_OK No error.
  * @retval RES_NO_MEM No space available in the scheduler to queue this event.
  */
-typedef result_t (*scheduler_notify_t)(scheduler_t *scheduler,
-                                       coro_event_source_t const *event);
+typedef Result (*scheduler_notify_t)(Scheduler *scheduler,
+                                     CoroEventSource const *event);
 
 /*!
- * @brief Function pointer implementing the notify from ISR function.
+ * @brief Function pointer implementing to notify the scheduler from an ISR.
  *
  * This is primarily used in ISR contexts, where communication primitives will
  * send their event sources directly to the scheduler, instead of via the coroutine.
@@ -88,10 +88,10 @@ typedef result_t (*scheduler_notify_t)(scheduler_t *scheduler,
  * @retval RES_OK No error.
  * @retval RES_NO_MEM No space available in the scheduler to queue this event.
  */
-typedef result_t (*scheduler_notify_from_isr_t)(scheduler_t *scheduler,
-                                                coro_event_source_t const *event);
+typedef Result (*scheduler_notify_from_isr_t)(Scheduler *scheduler,
+                                              CoroEventSource const *event);
 
-typedef coro_t *(*scheduler_get_current_coroutine_t)(scheduler_t *scheduler);
+typedef Coro *(*scheduler_get_current_coroutine_t)(Scheduler *scheduler);
 
 /*!
  * @brief Scheduler common interface.
@@ -113,19 +113,19 @@ struct scheduler {
  *
  * @param scheduler Scheduler to run.
  */
-void scheduler_run(scheduler_t *scheduler);
+void scheduler_run(Scheduler *scheduler);
 
 /*!
  * @brief Prepares the scheduler for step-by-step run mode.
  *
- * This should only be called once per scheduler. Preferrably just before running.
+ * This should only be called once per scheduler. Preferably just before running.
  *
  * @warning This API is used in particular scenarios and is not recommended. Consider
  * using @ref scheduler_run instead.
  *
  * @param scheduler Scheduler to start.
  */
-void scheduler_start(scheduler_t *scheduler);
+void scheduler_start(Scheduler *scheduler);
 
 /*!
  * @brief Runs a single step (as part of step-by-step run mode)
@@ -137,7 +137,7 @@ void scheduler_start(scheduler_t *scheduler);
  *
  * @return True if there is more potential work to do, else false.
  */
-bool scheduler_run_once(scheduler_t *scheduler);
+bool scheduler_run_once(Scheduler *scheduler);
 
 /*!
  * @brief Notify the scheduler of an event
@@ -153,8 +153,8 @@ bool scheduler_run_once(scheduler_t *scheduler);
  * @retval #RES_OK scheduler has been notified.
  * @retval #RES_NOTIFY_FAILED if the scheduler has not been notified.
  */
-static inline result_t scheduler_notify(scheduler_t *scheduler,
-                                        coro_event_source_t const *event) {
+static inline Result scheduler_notify(Scheduler *scheduler,
+                                      CoroEventSource const *event) {
     return scheduler->notify(scheduler, event);
 }
 
@@ -169,8 +169,8 @@ static inline result_t scheduler_notify(scheduler_t *scheduler,
  * @retval #RES_OK scheduler has been notified.
  * @retval #RES_NOTIFY_FAILED if the scheduler has not been notified.
  */
-static inline result_t scheduler_notify_from_isr(scheduler_t *scheduler,
-                                                 coro_event_source_t const *event) {
+static inline Result scheduler_notify_from_isr(Scheduler *scheduler,
+                                               CoroEventSource const *event) {
     return scheduler->notify_from_isr(scheduler, event);
 }
 
@@ -181,7 +181,7 @@ static inline result_t scheduler_notify_from_isr(scheduler_t *scheduler,
  *
  * @retval pointer to the coroutine, or NULL if the scheduler is not running.
  */
-static inline coro_t *scheduler_get_current_coroutine(scheduler_t *scheduler) {
+static inline Coro *scheduler_get_current_coroutine(Scheduler *scheduler) {
     return scheduler->get_current_coroutine(scheduler);
 }
 

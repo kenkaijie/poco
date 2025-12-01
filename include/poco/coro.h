@@ -20,7 +20,7 @@ extern "C" {
 #include <stdlib.h>
 
 /*!
- * @brief Preset event slot indicies.
+ * @brief Preset event slot indices.
  *
  * A 2 slot system is likely all we need here:
  *
@@ -51,14 +51,14 @@ typedef enum coro_state {
     CORO_STATE_FINISHED = 3,
 } coro_state_t;
 
-typedef struct coro coro_t;
+typedef struct coro Coro;
 
 /*!
  * @brief Function declaration for the coroutine entrypoint.
  *
  * @param context Provided user context when creating the coroutine.
  */
-typedef void (*coro_function_t)(void *context);
+typedef void (*CoroFunction)(void *context);
 
 /*!
  * @brief Represents a coroutine that can be scheduled and executed.
@@ -66,12 +66,13 @@ typedef void (*coro_function_t)(void *context);
 struct coro {
 
     /** Coroutine's main entrypoint function. */
-    coro_function_t entrypoint;
+    CoroFunction entrypoint;
 
     /** Stack Declaration */
-    platform_stack_t *stack;
+    PlatformStackElement *stack;
 
-    /** Stack length, in bytes. Will always be an integer multiple of platform_stack_t.
+    /** Stack length, in bytes. Will always be an integer multiple of
+     * PlatformStackElement.
      */
     size_t stack_size;
 
@@ -81,20 +82,20 @@ struct coro {
     size_t triggered_event_sink_slot;
 
     /** Managed event source, only valid if the coroutine has notified the scheduler. */
-    coro_event_source_t event_source;
+    CoroEventSource event_source;
 
     /** Managed event sinks, only valid if the coroutine is blocked. */
-    coro_event_sink_t event_sinks[EVENT_SINK_SLOT_COUNT];
+    CoroEventSink event_sinks[EVENT_SINK_SLOT_COUNT];
 
     // Ping pong contexts
-    platform_context_t suspend_context;
-    platform_context_t resume_context;
+    PlatformContext suspend_context;
+    PlatformContext resume_context;
 
-    /** The current coroutine state. Schedulers should only has read-access to this. */
+    /** The current coroutine state. Schedulers should only have read-access to this. */
     coro_state_t coro_state;
 
-    /** For a non running coroutine, this is the signal it last yielded with. */
-    coro_signal_t yield_signal;
+    /** For a non-running coroutine, this is the signal it last yielded with. */
+    CoroSignal yield_signal;
 };
 
 /*!
@@ -108,21 +109,22 @@ struct coro {
  * @param function Entrypoint function.
  * @param context User context passed into the entrypoint function.
  * @param stack Pointer to a predefined stack space (must be word aligned).
- * @param stack_size Size of the stack, in platform specific elements.
+ * @param stack_count Number of platform specific elements in the stack.
  *
  * @return pointer to the coroutine, or NULL if parameters are invalid.
  */
-coro_t *coro_create_static(coro_t *coro, coro_function_t function, void *context,
-                           platform_stack_t *stack, size_t stack_size);
+Coro *coro_create_static(Coro *coro, CoroFunction function, void *context,
+                         PlatformStackElement *stack, size_t stack_count);
 
 /*!
  * @brief Destroy a static coroutine.
  *
- * @note This does not free memory, it just deinitialises the underlying members.
+ * @note This does not free memory, it just clears the underlying platform specific
+ * context members.
  *
  * @param coro Coroutine created using coro_create_static.
  */
-void coro_destroy_static(coro_t *coro);
+void coro_destroy_static(Coro *coro);
 
 /*!
  * @brief Creates a coroutine with the specific stack and entrypoint.
@@ -133,11 +135,11 @@ void coro_destroy_static(coro_t *coro);
  *
  * @param function Entrypoint function.
  * @param context User context passed into the entrypoint function.
- * @param stack_size Size of the stack, in platform specific elements.
+ * @param stack_count Number of platform specific elements in the stack.
  *
  * @return pointer to the coroutine, or NULL if a coroutine cannot be created.
  */
-coro_t *coro_create(coro_function_t function, void *context, size_t stack_size);
+Coro *coro_create(CoroFunction function, void *context, size_t stack_count);
 
 /*!
  * @brief Frees a dynamically created coroutine.
@@ -146,7 +148,7 @@ coro_t *coro_create(coro_function_t function, void *context, size_t stack_size);
  *
  * @param coro Coroutine to free.
  */
-void coro_free(coro_t *coro);
+void coro_free(Coro *coro);
 
 /*!
  * @brief Called by the coroutine to yield control back to the scheduler.
@@ -167,9 +169,9 @@ void coro_yield(void);
  * resume until at least the specified time has passed. The scheduler may resume the
  * coroutine later if required.
  *
- * @param delay Minimum duration in milliseconds the coroutine should wait.
+ * @param duration_ms Minimum duration in milliseconds the coroutine should wait.
  */
-void coro_yield_delay(int64_t delay);
+void coro_yield_delay(int64_t duration_ms);
 
 /*!
  * @brief Yield a coroutine with the provided signal source.
@@ -182,7 +184,7 @@ void coro_yield_delay(int64_t delay);
  *
  * @param event Event to yield.
  */
-void coro_yield_with_event(coro_event_source_t const *event);
+void coro_yield_with_event(CoroEventSource const *event);
 
 /*!
  * @brief Yield a coroutine with the provided signal type.
@@ -192,7 +194,7 @@ void coro_yield_with_event(coro_event_source_t const *event);
  *
  * @param signal Signal to yield.
  */
-void coro_yield_with_signal(coro_signal_t signal);
+void coro_yield_with_signal(CoroSignal signal);
 
 /*!
  * @brief Notify a coroutine of an event that may affect it's internal state.
@@ -207,7 +209,7 @@ void coro_yield_with_signal(coro_signal_t signal);
  *
  * @return True if the coroutine's state has changed.
  */
-bool coro_notify(coro_t *coro, coro_event_source_t const *event);
+bool coro_notify(Coro *coro, CoroEventSource const *event);
 
 /*!
  * @brief Resumes the coroutine from the point it last yielded.
@@ -219,14 +221,14 @@ bool coro_notify(coro_t *coro, coro_event_source_t const *event);
  *
  * @return Signal to the scheduler to action.
  */
-coro_signal_t coro_resume(coro_t *coro);
+CoroSignal coro_resume(Coro *coro);
 
 /*!
  * @brief Join and waits for the target coroutine to finish before resuming.
  *
  * @param coro Coroutine to join.
  */
-void coro_join(coro_t *coro);
+void coro_join(Coro *coro);
 
 #ifdef __cplusplus
 }

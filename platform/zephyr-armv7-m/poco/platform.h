@@ -19,9 +19,9 @@ extern "C" {
 #include <zephyr/kernel.h>
 
 /** M4 requires stacks to be 8 byte aligned. */
-typedef uint64_t platform_stack_t;
+typedef uint64_t PlatformStackElement;
 
-#define DEFAULT_STACK_SIZE (256 / sizeof(platform_stack_t))
+#define DEFAULT_STACK_SIZE (256 / sizeof(PlatformStackElement))
 #define MIN_STACK_SIZE (DEFAULT_STACK_SIZE)
 
 typedef struct machine_context {
@@ -41,21 +41,21 @@ typedef struct machine_context {
     uint32_t volatile r13_sp; // 0x34 (R13 Stack Pointer)
     uint32_t volatile r14_lr; // 0x38 (R14 Link Register)
     uint32_t volatile r15_pc; // 0x3C (R15 Program Counter)
-} mcontext_t;
+} MachineContext;
 
 typedef struct stack_descriptor {
     /**< Pointer to a stack, note that stack must be double word aligned. */
     void *ss_sp;
     size_t ss_size; /**< Stack size, in bytes */
 
-} stack_descriptor_t;
+} StackDescriptor;
 
-typedef struct platform_context platform_context_t;
+typedef struct platform_context PlatformContext;
 
 struct platform_context {
-    struct platform_context *uc_link;
-    stack_descriptor_t uc_stack;       // Stack information
-    mcontext_t uc_mcontext; // Machine context
+    PlatformContext *uc_link;
+    StackDescriptor uc_stack;   // Stack information
+    MachineContext uc_mcontext; // Machine context
 };
 
 /*!
@@ -66,7 +66,7 @@ struct platform_context {
  * @param[in] context Context structure to save state in.
  * @return 0 on success, -1 otherwise.
  */
-extern int platform_get_context(platform_context_t *context);
+extern int platform_get_context(PlatformContext *context);
 
 /*!
  * @brief Restore the use context defined in context.
@@ -76,26 +76,26 @@ extern int platform_get_context(platform_context_t *context);
  * @param[in] context Context to restore.
  * @return will not return on success, -1 on failure.
  */
-extern int platform_set_context(const platform_context_t *context);
+extern int platform_set_context(const PlatformContext *context);
 
-extern int platform_swap_context(platform_context_t *current_context,
-                                 const platform_context_t *new_context);
+extern int platform_swap_context(PlatformContext *current_context,
+                                 const PlatformContext *new_context);
 
 /*!
  * @brief Create a new context and set the entry point to the function func.
  *
  * @note This implementation uses a hardcoded 3 arguments.
  */
-void platform_make_context(platform_context_t *context, void (*func)(void *, void *),
+void platform_make_context(PlatformContext *context, void (*func)(void *, void *),
                            void *context1, void *context2);
 
 #define platform_destroy_context(context) // no context to destroy
 
-typedef int64_t platform_ticks_t;
+typedef int64_t PlatformTicks;
 
 #define PLATFORM_TICKS_FOREVER (INT64_MIN)
 
-static inline platform_ticks_t platform_get_monotonic_ticks(void) {
+static inline PlatformTicks platform_get_monotonic_ticks(void) {
     // This case is safe as our platform (NRF) casts it from a uint64 to int64 anyway.
     return (uint64_t)k_uptime_ticks();
 }

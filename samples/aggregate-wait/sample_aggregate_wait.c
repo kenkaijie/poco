@@ -17,7 +17,6 @@
 
 #include "consumer.h"
 #include <poco/coro.h>
-#include <poco/event.h>
 #include <poco/queue.h>
 #include <poco/scheduler.h>
 #include <poco/schedulers/round_robin.h>
@@ -25,58 +24,56 @@
 
 #define STACK_SIZE (DEFAULT_STACK_SIZE)
 
-coro_t producer_1_coro = {0};
-platform_stack_t producer_1_stack[STACK_SIZE] = {0};
+Coro producer_1_coro = {0};
+PlatformStackElement producer_1_stack[STACK_SIZE] = {0};
 
-coro_t producer_2_coro = {0};
-platform_stack_t producer_2_stack[STACK_SIZE] = {0};
+Coro producer_2_coro = {0};
+PlatformStackElement producer_2_stack[STACK_SIZE] = {0};
 
-consumer_t consumer;
+Consumer consumer;
 
 void producer_1_task(void *context) {
 
-    consumer_t *consumer = (consumer_t *)context;
-    message_t message = {
+    Consumer *consumer_context = context;
+    Message message = {
         .a = 12,
         .b = 11,
     };
     printf("Send message, a=%d, b=%d.\n", message.a, message.b);
-    consumer_send_message(consumer, &message);
+    consumer_send_message(consumer_context, &message);
     message.a = 15;
     printf("Send message, a=%d, b=%d.\n", message.a, message.b);
-    consumer_send_message(consumer, &message);
+    consumer_send_message(consumer_context, &message);
     message.a = 16;
     printf("Send message, a=%d, b=%d.\n", message.a, message.b);
-    consumer_send_message(consumer, &message);
-    return;
+    consumer_send_message(consumer_context, &message);
 }
 
 void producer_2_task(void *context) {
-    consumer_t *consumer = (consumer_t *)context;
-    command_t command = {
+    Consumer *consumer_context = context;
+    Command command = {
         .a = 1,
         .b = 2,
         .c = 3,
     };
     printf("Send command, a=%d, b=%d, c=%d.\n", command.a, command.b, command.c);
-    consumer_send_command(consumer, &command);
+    consumer_send_command(consumer_context, &command);
     command.a = 4;
     printf("Send command, a=%d, b=%d, c=%d.\n", command.a, command.b, command.c);
-    consumer_send_command(consumer, &command);
+    consumer_send_command(consumer_context, &command);
     command.a = 5;
     printf("Send command, a=%d, b=%d, c=%d.\n", command.a, command.b, command.c);
-    consumer_send_command(consumer, &command);
+    consumer_send_command(consumer_context, &command);
     command.a = -1;
     printf("Send command, a=%d, b=%d, c=%d.\n", command.a, command.b, command.c);
-    consumer_send_command(consumer, &command);
-    return;
+    consumer_send_command(consumer_context, &command);
 }
 
 int main(void) {
 
-    coro_t *tasks[3] = {0};
+    Coro *tasks[3] = {0};
 
-    result_t init_success = consumer_init(&consumer);
+    Result const init_success = consumer_init(&consumer);
 
     if (init_success != RES_OK) {
         printf("Failed to initialise consumer.");
@@ -89,7 +86,7 @@ int main(void) {
                                   producer_2_stack, STACK_SIZE);
     tasks[2] = &consumer.coro;
 
-    scheduler_t *scheduler =
+    Scheduler *scheduler =
         round_robin_scheduler_create(tasks, sizeof(tasks) / sizeof(tasks[0]));
 
     if (scheduler == NULL) {

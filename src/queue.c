@@ -15,7 +15,7 @@
 /*!
  * @brief Unsafe push, does not perform checking and is for internal use only.
  */
-static inline void _put(queue_t *queue, void const *item) {
+static void _put(Queue *queue, void const *item) {
     memcpy(&queue->item_buffer[queue->write_idx * queue->item_size], item,
            queue->item_size);
     queue->write_idx = (queue->write_idx + 1) % queue->max_items;
@@ -25,21 +25,21 @@ static inline void _put(queue_t *queue, void const *item) {
 /*!
  * @brief Unsafe pop, does not perform checking and is for internal use only.
  */
-static inline void _get(queue_t *queue, void *item) {
+static void _get(Queue *queue, void *item) {
     memcpy(item, &queue->item_buffer[queue->read_idx * queue->item_size],
            queue->item_size);
     queue->read_idx = (queue->read_idx + 1) % queue->max_items;
     queue->count--;
 }
 
-static inline bool _is_full(queue_t *queue) { return queue->count == queue->max_items; }
+static bool _is_full(Queue const *queue) { return queue->count == queue->max_items; }
 
-static inline bool _is_empty(queue_t *queue) { return queue->count == 0; }
+static bool _is_empty(Queue const *queue) { return queue->count == 0; }
 
-static inline size_t _item_count(queue_t *queue) { return queue->count; }
+static size_t _item_count(Queue const *queue) { return queue->count; }
 
-queue_t *queue_create_static(queue_t *queue, size_t num_items, size_t item_size,
-                             uint8_t *item_buffer) {
+Queue *queue_create_static(Queue *queue, size_t const num_items, size_t const item_size,
+                           uint8_t *item_buffer) {
     queue->item_buffer = item_buffer;
     queue->count = 0;
     queue->read_idx = 0;
@@ -49,30 +49,25 @@ queue_t *queue_create_static(queue_t *queue, size_t num_items, size_t item_size,
     return queue;
 }
 
-queue_t *queue_create(size_t num_items, size_t item_size) {
-    queue_t *queue = (queue_t *)malloc(sizeof(queue_t));
+Queue *queue_create(size_t const num_items, size_t const item_size) {
+    Queue *queue = malloc(sizeof(Queue));
     if (queue == NULL) {
         /* No memory. */
         return NULL;
     }
-    uint8_t *item_buffer = (uint8_t *)malloc(num_items * item_size);
+    uint8_t *item_buffer = malloc(num_items * item_size);
     if (item_buffer == NULL) {
         /* No memory. */
         free(queue);
         return NULL;
     }
 
-    queue_t *queue_handle =
-        queue_create_static(queue, num_items, item_size, item_buffer);
-    if (queue_handle == NULL) {
-        queue_free(queue);
-    }
-    return queue_handle;
+    return queue_create_static(queue, num_items, item_size, item_buffer);
 }
 
-void queue_free(queue_t *queue) {
+void queue_free(Queue *queue) {
     if (queue == NULL) {
-        /* Cannot free null pointer, need a non null to free the internal buffer. */
+        /* Cannot free null pointer, need a non-null to free the internal buffer. */
         return;
     }
 
@@ -83,28 +78,28 @@ void queue_free(queue_t *queue) {
     free(queue);
 }
 
-size_t queue_item_count(queue_t *queue) {
+size_t queue_item_count(Queue const *queue) {
     platform_enter_critical_section();
-    size_t item_count = _item_count(queue);
+    size_t const item_count = _item_count(queue);
     platform_exit_critical_section();
     return item_count;
 }
 
-bool queue_is_full(queue_t *queue) {
+bool queue_is_full(Queue const *queue) {
     platform_enter_critical_section();
-    bool is_full = _is_full(queue);
+    bool const is_full = _is_full(queue);
     platform_exit_critical_section();
     return is_full;
 }
 
-bool queue_is_empty(queue_t *queue) {
+bool queue_is_empty(Queue const *queue) {
     platform_enter_critical_section();
-    bool is_empty = _is_empty(queue);
+    bool const is_empty = _is_empty(queue);
     platform_exit_critical_section();
     return is_empty;
 }
 
-result_t queue_raw_put(queue_t *queue, void const *item) {
+Result queue_raw_put(Queue *queue, void const *item) {
     if (queue_is_full(queue)) {
         return RES_QUEUE_FULL;
     }
@@ -113,7 +108,7 @@ result_t queue_raw_put(queue_t *queue, void const *item) {
     return RES_OK;
 }
 
-result_t queue_raw_get(queue_t *queue, void *item) {
+Result queue_raw_get(Queue *queue, void *item) {
     if (queue_is_empty(queue)) {
         return RES_QUEUE_EMPTY;
     }
@@ -123,9 +118,9 @@ result_t queue_raw_get(queue_t *queue, void *item) {
     return RES_OK;
 }
 
-result_t queue_put(queue_t *queue, void const *item, platform_ticks_t timeout) {
+Result queue_put(Queue *queue, void const *item, PlatformTicks const timeout) {
 
-    coro_t *coro = context_get_coro();
+    Coro *coro = context_get_coro();
     bool put_success = false;
 
     coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_QUEUE_NOT_FULL;
@@ -162,8 +157,8 @@ result_t queue_put(queue_t *queue, void const *item, platform_ticks_t timeout) {
     return (put_success) ? RES_OK : RES_TIMEOUT;
 }
 
-result_t queue_get(queue_t *queue, void *item, platform_ticks_t timeout) {
-    coro_t *coro = context_get_coro();
+Result queue_get(Queue *queue, void *item, PlatformTicks const timeout) {
+    Coro *coro = context_get_coro();
     bool get_success = false;
 
     coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_QUEUE_NOT_EMPTY;
@@ -199,9 +194,9 @@ result_t queue_get(queue_t *queue, void *item, platform_ticks_t timeout) {
     return (get_success) ? RES_OK : RES_TIMEOUT;
 }
 
-result_t queue_put_no_wait(queue_t *queue, void const *item) {
-    result_t notify_result = RES_OK;
-    scheduler_t *scheduler = context_get_scheduler();
+Result queue_put_no_wait(Queue *queue, void const *item) {
+    Result notify_result = RES_OK;
+    Scheduler *scheduler = context_get_scheduler();
     bool put_success = false;
 
     platform_enter_critical_section();
@@ -212,8 +207,8 @@ result_t queue_put_no_wait(queue_t *queue, void const *item) {
     platform_exit_critical_section();
 
     if (put_success) {
-        coro_event_source_t const event = {.type = CORO_EVTSRC_QUEUE_PUT,
-                                           .params.subject = queue};
+        CoroEventSource const event = {.type = CORO_EVTSRC_QUEUE_PUT,
+                                       .params.subject = queue};
         notify_result = scheduler_notify(scheduler, &event);
     }
 
@@ -225,9 +220,9 @@ result_t queue_put_no_wait(queue_t *queue, void const *item) {
     return (put_success) ? RES_OK : RES_QUEUE_FULL;
 }
 
-result_t queue_get_no_wait(queue_t *queue, void *item) {
-    result_t notify_result = RES_OK;
-    scheduler_t *scheduler = context_get_scheduler();
+Result queue_get_no_wait(Queue *queue, void *item) {
+    Result notify_result = RES_OK;
+    Scheduler *scheduler = context_get_scheduler();
     bool get_success = false;
 
     platform_enter_critical_section();
@@ -238,8 +233,8 @@ result_t queue_get_no_wait(queue_t *queue, void *item) {
     platform_exit_critical_section();
 
     if (get_success) {
-        coro_event_source_t const event = {.type = CORO_EVTSRC_QUEUE_GET,
-                                           .params.subject = queue};
+        CoroEventSource const event = {.type = CORO_EVTSRC_QUEUE_GET,
+                                       .params.subject = queue};
         notify_result = scheduler_notify(scheduler, &event);
     }
 

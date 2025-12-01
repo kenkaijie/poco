@@ -25,7 +25,7 @@
 #define STACK_SIZE (DEFAULT_STACK_SIZE)
 
 void accessor_1(void *context) {
-    semaphore_t *resource = (semaphore_t *)context;
+    Semaphore *resource = context;
 
     semaphore_acquire(resource, PLATFORM_TICKS_FOREVER);
 
@@ -37,7 +37,7 @@ void accessor_1(void *context) {
 }
 
 void accessor_2(void *context) {
-    semaphore_t *resource = (semaphore_t *)context;
+    Semaphore *resource = context;
 
     semaphore_acquire(resource, PLATFORM_TICKS_FOREVER);
 
@@ -49,7 +49,7 @@ void accessor_2(void *context) {
 }
 
 void accessor_3(void *context) {
-    semaphore_t *resource = (semaphore_t *)context;
+    Semaphore *resource = context;
 
     semaphore_acquire(resource, PLATFORM_TICKS_FOREVER);
 
@@ -62,17 +62,17 @@ void accessor_3(void *context) {
 
 int main(void) {
 
-    semaphore_t *resource = semaphore_create(2);
+    Semaphore *resource = semaphore_create(2);
 
     if (resource == NULL) {
         /* Memory error */
         return -1;
     }
 
-    coro_t *tasks[] = {
-        coro_create(accessor_1, (void *)resource, STACK_SIZE),
-        coro_create(accessor_2, (void *)resource, STACK_SIZE),
-        coro_create(accessor_3, (void *)resource, STACK_SIZE),
+    Coro *tasks[] = {
+        coro_create(accessor_1, resource, STACK_SIZE),
+        coro_create(accessor_2, resource, STACK_SIZE),
+        coro_create(accessor_3, resource, STACK_SIZE),
     };
 
     for (size_t idx = 0; idx < (sizeof(tasks) / sizeof(tasks[0])); ++idx) {
@@ -81,7 +81,7 @@ int main(void) {
             return -1;
     }
 
-    scheduler_t *scheduler =
+    Scheduler *scheduler =
         round_robin_scheduler_create(tasks, sizeof(tasks) / sizeof(tasks[0]));
 
     if (scheduler == NULL) {
