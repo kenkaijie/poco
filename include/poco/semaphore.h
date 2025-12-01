@@ -85,7 +85,7 @@ void semaphore_free(Semaphore *semaphore);
  * @retval #RES_OK If semaphore was acquired
  * @retval #RES_TIMEOUT The maximum timeout duration has been reached.
  */
-Result semaphore_acquire(Semaphore *semaphore, PlatformTicks delay_ticks);
+Result semaphore_acquire(Semaphore *semaphore, PlatformTick delay_ticks);
 
 /*!
  * @brief Acquire the semaphore, does not wait.

@@ -119,7 +119,7 @@ Result queue_raw_get(Queue *queue, void *item) {
     return RES_OK;
 }
 
-Result queue_put(Queue *queue, void const *item, PlatformTicks const timeout) {
+Result queue_put(Queue *queue, void const *item, PlatformTick const timeout) {
 
     Coro *coro = context_get_coro();
     bool put_success = false;
@@ -158,7 +158,7 @@ Result queue_put(Queue *queue, void const *item, PlatformTicks const timeout) {
     return (put_success) ? RES_OK : RES_TIMEOUT;
 }
 
-Result queue_get(Queue *queue, void *item, PlatformTicks const timeout) {
+Result queue_get(Queue *queue, void *item, PlatformTick const timeout) {
     Coro *coro = context_get_coro();
     bool get_success = false;
 

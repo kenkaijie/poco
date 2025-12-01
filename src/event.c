@@ -28,7 +28,7 @@ Event *event_create(Flags const initial) {
 void event_free(Event *event) { free(event); }
 
 Flags event_get(Event *event, Flags const mask, Flags const clear_mask,
-                bool const wait_for_all, PlatformTicks const timeout) {
+                bool const wait_for_all, PlatformTick const timeout) {
 
     Coro *coro = context_get_coro();
 

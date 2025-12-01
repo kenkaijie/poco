@@ -27,7 +27,7 @@ Mutex *mutex_create(void) {
 
 void mutex_free(Mutex *mutex) { free(mutex); }
 
-Result mutex_acquire(Mutex *mutex, PlatformTicks timeout) {
+Result mutex_acquire(Mutex *mutex, PlatformTick timeout) {
     Coro *coro = context_get_coro();
     bool acquire_success = false;
 

@@ -27,7 +27,7 @@ int test_coro_setup(void **state) {
     memset(context, 0, sizeof(TestCoroContext));
 
     context->tasks[0] =
-        coro_create((CoroFunction)test_function, NULL, DEFAULT_STACK_SIZE);
+        coro_create((CoroEntrypoint)test_function, NULL, DEFAULT_STACK_SIZE);
     context->scheduler = round_robin_scheduler_create(context->tasks, MAX_TASK_COUNT);
     *state = context;
     return 0;

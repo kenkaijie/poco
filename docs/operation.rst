@@ -65,7 +65,7 @@ If the coroutine yields with :cpp:enumerator:`coro_signal_type::CORO_SIG_NOTIFY`
 notified event to its list of pending events.
 
 Matching between event sinks and sources is done via the signal type. Most events have
-a 1:1 relationship between the event source and the coresponding event sink.
+a 1:1 relationship between the event source and the corresponding event sink.
 
 A typical sequence is shown below for a coroutine informing the scheduler that it is
 waiting for an event. Here we show coroutine A waiting on the

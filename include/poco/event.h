@@ -53,7 +53,7 @@ void event_free(Event *event);
  * @returns The flags that ended the wait. If flags are all 0, an error has occurred.
  */
 Flags event_get(Event *event, Flags mask, Flags clear_mask, bool wait_for_all,
-                PlatformTicks timeout);
+                PlatformTick timeout);
 
 /*!
  * @brief Sets the event flags.

@@ -123,7 +123,7 @@ static bool run_scheduler_once(RoundRobinScheduler *scheduler) {
         }
     }
 
-    PlatformTicks const current_ticks = platform_get_monotonic_ticks();
+    PlatformTick const current_ticks = platform_get_monotonic_ticks();
 
     // Process a time signal, which is synthesized within the scheduler.
     if (current_ticks != scheduler->previous_ticks) {

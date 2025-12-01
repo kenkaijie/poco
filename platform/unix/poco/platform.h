@@ -38,20 +38,20 @@ typedef ucontext_t PlatformContext;
 #define platform_swap_context(old_context, new_context)                                \
     swapcontext(old_context, new_context)
 
-#define platform_make_context(context, function, coro, user_context)                   \
-    makecontext(context, (void (*)(void))function, 2, coro, user_context)
+#define platform_make_context(context, entrypoint, coro, user_context)                 \
+    makecontext(context, (void (*)(void))entrypoint, 2, coro, user_context)
 
 #define platform_destroy_context(context) // no context to destroy
 
 // Platform Timing
-typedef int64_t PlatformTicks;
+typedef int64_t PlatformTick;
 
 #define PLATFORM_TICKS_FOREVER (INT64_MIN)
 
-static inline PlatformTicks platform_get_monotonic_ticks(void) {
+static inline PlatformTick platform_get_monotonic_ticks(void) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (PlatformTicks)ts.tv_sec * 1000 + (PlatformTicks)ts.tv_nsec / 1000000;
+    return (PlatformTick)ts.tv_sec * 1000 + (PlatformTick)ts.tv_nsec / 1000000;
 }
 
 #define platform_get_ticks_per_ms() (1)

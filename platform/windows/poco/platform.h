@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: MIT
 /*!
  * @file
- * @brief Unix platform specific operations.
+ * @brief Windows platform specific operations.
  *
- * Note as per the platform integration, none of the platform functions are guaranteed
- * to actually be functions.
+ * We use the Fiber API to emulate the same coroutine behaviour.
  */
 
 #pragma once
@@ -53,23 +52,23 @@ int platform_set_context(PlatformContext *context);
 
 int platform_swap_context(PlatformContext *old_context, PlatformContext *new_context);
 
-int platform_make_context(PlatformContext *context, void (*function)(void *, void *),
+int platform_make_context(PlatformContext *context, void (*entrypoint)(void *, void *),
                           void *coro, void *user_context);
 
 int platform_destroy_context(PlatformContext *context);
 
 // Platform Timing
-typedef int64_t PlatformTicks;
+typedef int64_t PlatformTick;
 
 #define PLATFORM_TICKS_FOREVER (INT64_MAX)
 
-static inline PlatformTicks platform_get_monotonic_ticks(void) {
+static inline PlatformTick platform_get_monotonic_ticks(void) {
     LARGE_INTEGER freq, counter;
     // Apparently post Windows XP, these 2 calls can never fail.
     QueryPerformanceFrequency(&freq);
     QueryPerformanceCounter(&counter);
     // Convert to milliseconds
-    return (PlatformTicks)((counter.QuadPart * 1000) / freq.QuadPart);
+    return (counter.QuadPart * 1000) / freq.QuadPart;
 }
 
 #define platform_get_ticks_per_ms() (1)

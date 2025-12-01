@@ -58,7 +58,7 @@ typedef struct coro Coro;
  *
  * @param context Provided user context when creating the coroutine.
  */
-typedef void (*CoroFunction)(void *context);
+typedef void (*CoroEntrypoint)(void *context);
 
 /*!
  * @brief Represents a coroutine that can be scheduled and executed.
@@ -66,7 +66,7 @@ typedef void (*CoroFunction)(void *context);
 struct coro {
 
     /** Coroutine's main entrypoint function. */
-    CoroFunction entrypoint;
+    CoroEntrypoint entrypoint;
 
     /** Stack Declaration */
     PlatformStackElement *stack;
@@ -106,14 +106,14 @@ struct coro {
  *       be 2 less than the declared value.
  *
  * @param coro Coroutine descriptor to initialise.
- * @param function Entrypoint function.
+ * @param entrypoint Entrypoint function.
  * @param context User context passed into the entrypoint function.
  * @param stack Pointer to a predefined stack space (must be word aligned).
  * @param stack_count Number of platform specific elements in the stack.
  *
  * @return pointer to the coroutine, or NULL if parameters are invalid.
  */
-Coro *coro_create_static(Coro *coro, CoroFunction function, void *context,
+Coro *coro_create_static(Coro *coro, CoroEntrypoint entrypoint, void *context,
                          PlatformStackElement *stack, size_t stack_count);
 
 /*!
@@ -133,13 +133,13 @@ void coro_destroy_static(Coro *coro);
  *       stack for watermarks. The consequence is that the actual usable stack size will
  *       be 2 less than the declared value.
  *
- * @param function Entrypoint function.
+ * @param entrypoint Entrypoint function.
  * @param context User context passed into the entrypoint function.
  * @param stack_count Number of platform specific elements in the stack.
  *
  * @return pointer to the coroutine, or NULL if a coroutine cannot be created.
  */
-Coro *coro_create(CoroFunction function, void *context, size_t stack_count);
+Coro *coro_create(CoroEntrypoint entrypoint, void *context, size_t stack_count);
 
 /*!
  * @brief Frees a dynamically created coroutine.

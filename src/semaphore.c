@@ -33,7 +33,7 @@ Semaphore *semaphore_create_static(Semaphore *semaphore, size_t slot_count) {
 
 void semaphore_free(Semaphore *semaphore) { free(semaphore); }
 
-Result semaphore_acquire(Semaphore *semaphore, PlatformTicks const delay_ticks) {
+Result semaphore_acquire(Semaphore *semaphore, PlatformTick const delay_ticks) {
     bool acquired = false;
     Coro *coro = context_get_coro();
 

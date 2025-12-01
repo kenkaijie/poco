@@ -119,7 +119,7 @@ size_t stream_bytes_free(Stream const *stream);
  *      value of data_size indicates the actual number of bytes that was sent.
  */
 Result stream_send(Stream *stream, uint8_t const *data, size_t *data_size,
-                   PlatformTicks timeout);
+                   PlatformTick timeout);
 
 /*!
  * @brief Sends as much data onto the stream as possible without blocking.
@@ -162,7 +162,7 @@ Result stream_send_from_isr(Stream *stream, uint8_t const *data, size_t *data_si
  *      value of buffer_size indicates the actual number of bytes read.
  */
 Result stream_receive(Stream *stream, uint8_t *buffer, size_t *buffer_size,
-                      PlatformTicks timeout);
+                      PlatformTick timeout);
 
 /*!
  * @brief Receive up to a number of bytes from the stream.
@@ -182,7 +182,7 @@ Result stream_receive(Stream *stream, uint8_t *buffer, size_t *buffer_size,
  *      value of buffer_size indicates the actual number of bytes read.
  */
 Result stream_receive_up_to(Stream *stream, uint8_t *buffer, size_t *buffer_size,
-                            PlatformTicks timeout);
+                            PlatformTick timeout);
 
 /*!
  * @brief Receive a number of bytes without blocking.
@@ -219,7 +219,7 @@ Result stream_receive_from_isr(Stream *stream, uint8_t *buffer, size_t *buffer_s
  * @retval #RES_OK if the stream was flushed.
  * @retval #RES_TIMEOUT if the timeout elapsed without the stream being flushed.
  */
-Result stream_flush(Stream *stream, PlatformTicks timeout);
+Result stream_flush(Stream *stream, PlatformTick timeout);
 
 #ifdef __cplusplus
 }

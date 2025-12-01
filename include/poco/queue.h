@@ -16,6 +16,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 /*!
  * @brief Queue specific result codes.
@@ -111,7 +112,7 @@ bool queue_is_empty(Queue const *queue);
  * @retval #RES_OK on success.
  * @retval #RES_TIMEOUT if the maximum time was awaited.
  */
-Result queue_put(Queue *queue, void const *item, PlatformTicks timeout);
+Result queue_put(Queue *queue, void const *item, PlatformTick timeout);
 
 /*!
  * @brief Gets an item from the queue from a coroutine.
@@ -126,7 +127,7 @@ Result queue_put(Queue *queue, void const *item, PlatformTicks timeout);
  * @retval #RES_OK on success.
  * @retval #RES_TIMEOUT if the maximum time was awaited.
  */
-Result queue_get(Queue *queue, void *item, PlatformTicks timeout);
+Result queue_get(Queue *queue, void *item, PlatformTick timeout);
 
 /*!
  * @brief Puts an item without waiting.

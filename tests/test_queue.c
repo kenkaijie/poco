@@ -6,6 +6,7 @@
 #include "cmocka_coro_helper.h"
 #include <poco/poco.h>
 #include <poco/queue.h>
+#include <string.h>
 
 // cmocka requires these dependencies
 #include <setjmp.h>

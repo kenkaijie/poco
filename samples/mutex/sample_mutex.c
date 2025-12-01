@@ -17,7 +17,7 @@
 #define STACK_SIZE (DEFAULT_STACK_SIZE)
 
 void coroutine_a(void *context) {
-    Mutex *mutex = (Mutex *)context;
+    Mutex *mutex = context;
 
     mutex_acquire(mutex, PLATFORM_TICKS_FOREVER);
 
@@ -29,7 +29,7 @@ void coroutine_a(void *context) {
 }
 
 void coroutine_b(void *context) {
-    Mutex *mutex = (Mutex *)context;
+    Mutex *mutex = context;
 
     mutex_acquire(mutex, PLATFORM_TICKS_FOREVER);
 

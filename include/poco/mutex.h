@@ -62,7 +62,7 @@ void mutex_free(Mutex *mutex);
  * @retval #RES_OK Mutex was acquired.
  * @retval #RES_TIMEOUT Timeout occurred.
  */
-Result mutex_acquire(Mutex *mutex, PlatformTicks timeout);
+Result mutex_acquire(Mutex *mutex, PlatformTick timeout);
 
 /*!
  * @brief Acquires a resource exclusively for this coroutine without waiting.

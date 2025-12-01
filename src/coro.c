@@ -86,7 +86,7 @@ static bool update_event_sink(CoroEventSink *sink, CoroEventSource const *event)
     return unblock_task;
 }
 
-Coro *coro_create_static(Coro *coro, CoroFunction const function, void *context,
+Coro *coro_create_static(Coro *coro, CoroEntrypoint const entrypoint, void *context,
                          PlatformStackElement *stack, size_t const stack_count) {
 
     if (stack_count < 3) {
@@ -102,7 +102,7 @@ Coro *coro_create_static(Coro *coro, CoroFunction const function, void *context,
     stack[stack_count - 1] = STACK_END_MAGIC;
 
     coro->coro_state = CORO_STATE_READY;
-    coro->entrypoint = function;
+    coro->entrypoint = entrypoint;
     coro->stack = stack;
     coro->stack_size = stack_count;
     coro->resume_context.uc_stack.ss_sp = (void *)(stack + 1);
@@ -118,7 +118,7 @@ Coro *coro_create_static(Coro *coro, CoroFunction const function, void *context,
     return coro;
 }
 
-Coro *coro_create(CoroFunction const function, void *context,
+Coro *coro_create(CoroEntrypoint const entrypoint, void *context,
                   size_t const stack_count) {
     Coro *coro = malloc(sizeof(Coro));
     if (coro == NULL) {
@@ -135,7 +135,7 @@ Coro *coro_create(CoroFunction const function, void *context,
         return NULL;
     }
 
-    Coro *coro_handle = coro_create_static(coro, function, context, stack, stack_count);
+    Coro *coro_handle = coro_create_static(coro, entrypoint, context, stack, stack_count);
     if (coro_handle == NULL) {
         free(coro);
         free(stack);

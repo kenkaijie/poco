@@ -77,7 +77,7 @@ size_t stream_bytes_free(Stream const *stream) {
 }
 
 Result stream_send(Stream *stream, uint8_t const *data, size_t *data_size,
-                   PlatformTicks const timeout) {
+                   PlatformTick const timeout) {
 
     Coro *coro = context_get_coro();
     size_t bytes_remaining = *data_size;
@@ -193,7 +193,7 @@ Result stream_send_from_isr(Stream *stream, uint8_t const *data, size_t *data_si
 }
 
 Result stream_receive(Stream *stream, uint8_t *buffer, size_t *buffer_size,
-                      PlatformTicks const timeout) {
+                      PlatformTick const timeout) {
 
     Coro *coro = context_get_coro();
     size_t bytes_remaining = *buffer_size;
@@ -244,7 +244,7 @@ Result stream_receive(Stream *stream, uint8_t *buffer, size_t *buffer_size,
 }
 
 Result stream_receive_up_to(Stream *stream, uint8_t *buffer, size_t *buffer_size,
-                            PlatformTicks const timeout) {
+                            PlatformTick const timeout) {
 
     /* This is quite similar to the standard receive, except without a loop. */
     Coro *coro = context_get_coro();
@@ -346,7 +346,7 @@ Result stream_receive_from_isr(Stream *stream, uint8_t *buffer, size_t *buffer_s
     return (bytes_read > 0) ? RES_OK : RES_STREAM_EMPTY;
 }
 
-Result stream_flush(Stream *stream, PlatformTicks const timeout) {
+Result stream_flush(Stream *stream, PlatformTick const timeout) {
     Coro *coro = context_get_coro();
 
     coro->event_sinks[EVENT_SINK_SLOT_PRIMARY].type = CORO_EVTSINK_STREAM_NOT_FULL;

@@ -3,20 +3,20 @@
 /**< Every coro yields back to the main fiber (where the scheduler resides) */
 static LPVOID main_fiber = NULL;
 
-typedef struct _shim {
-    void (*function)(void *, void *);
-    void *context1;
-    void *context2;
-} _shim_t;
+typedef struct shim {
+    void (*entrypoint)(void *, void *);
+    void *coro;
+    void *user_context;
+} Shim;
 
-static void _shim_entry(void *context) {
-    _shim_t *shim = (_shim_t *)context;
-    void (*function)(void *, void *) = shim->function;
-    void *context1 = shim->context1;
-    void *context2 = shim->context2;
+static void shim_entry(void *context) {
+    Shim *shim = context;
+    void (*entrypoint)(void *, void *) = shim->entrypoint;
+    void *coro = shim->coro;
+    void *user_context = shim->user_context;
     free(shim);
 
-    function(context1, context2);
+    entrypoint(coro, user_context);
 }
 
 int platform_get_context(PlatformContext *context) {
@@ -41,20 +41,21 @@ int platform_swap_context(PlatformContext *old_context, PlatformContext *new_con
     return platform_set_context(new_context);
 }
 
-int platform_make_context(PlatformContext *context, void (*function)(void *, void *),
+int platform_make_context(PlatformContext *context, void (*entrypoint)(void *, void *),
                           void *coro, void *user_context) {
-    _shim_t *shim = malloc(sizeof(_shim_t));
+    /* This is freed in the shim entrypoint*/
+    Shim *shim = malloc(sizeof(Shim));
 
     if (shim == NULL) {
         /* bad malloc */
         return 1;
     }
 
-    shim->function = function;
-    shim->context1 = coro;
-    shim->context2 = user_context;
+    shim->entrypoint = entrypoint;
+    shim->coro = coro;
+    shim->user_context = user_context;
 
-    context->fiber = CreateFiber(0, _shim_entry, shim);
+    context->fiber = CreateFiber(0, shim_entry, shim);
 
     return (context->fiber == NULL) ? 1 : 0;
 }

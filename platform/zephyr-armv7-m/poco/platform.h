@@ -76,32 +76,32 @@ extern int platform_get_context(PlatformContext *context);
  * @param[in] context Context to restore.
  * @return will not return on success, -1 on failure.
  */
-extern int platform_set_context(const PlatformContext *context);
+extern int platform_set_context(PlatformContext const *context);
 
 extern int platform_swap_context(PlatformContext *current_context,
-                                 const PlatformContext *new_context);
+                                 PlatformContext const *new_context);
 
 /*!
  * @brief Create a new context and set the entry point to the function func.
  *
  * @note This implementation uses a hardcoded 3 arguments.
  */
-void platform_make_context(PlatformContext *context, void (*func)(void *, void *),
-                           void *context1, void *context2);
+void platform_make_context(PlatformContext *context, void (*entrypoint)(void *, void *),
+                           void *coro, void *user_context);
 
 #define platform_destroy_context(context) // no context to destroy
 
-typedef int64_t PlatformTicks;
+typedef int64_t PlatformTick;
 
 #define PLATFORM_TICKS_FOREVER (INT64_MIN)
 
-static inline PlatformTicks platform_get_monotonic_ticks(void) {
-    // This case is safe as our platform (NRF) casts it from a uint64 to int64 anyway.
+static inline PlatformTick platform_get_monotonic_ticks(void) {
+    // Safe for now, check back in a long time.
     return (uint64_t)k_uptime_ticks();
 }
 
 // FIXME: This is not accurate, as sys tick is not directly convertible to
-//        milliseocnds, we will have a small drift over time with this.
+//        milliseconds, we will have a small drift over time with this.
 #define platform_get_ticks_per_ms() (CONFIG_SYS_CLOCK_TICKS_PER_SEC / 1000)
 
 #define platform_enter_critical_section() int key = irq_lock()

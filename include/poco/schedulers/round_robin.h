@@ -31,7 +31,7 @@ typedef struct round_robin_scheduler {
     size_t next_task_index; /**< index to check next when performing a context switch */
     Queue event_queue;
     CoroEventSource external_events[SCHEDULER_MAX_EXTERNAL_EVENT_COUNT];
-    PlatformTicks previous_ticks;
+    PlatformTick previous_ticks;
 } RoundRobinScheduler;
 
 /*!

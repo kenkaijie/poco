@@ -80,7 +80,7 @@ typedef enum coro_event_sink_type {
 typedef struct coro_event_sink {
     CoroEventSinkType type;
     union {
-        PlatformTicks ticks_remaining;
+        PlatformTick ticks_remaining;
         void *subject;
     } params;
 } CoroEventSink;
@@ -123,7 +123,7 @@ typedef enum coro_event_source_type {
 typedef struct coro_event_source {
     CoroEventSourceType type;
     union {
-        PlatformTicks elapsed_ticks;
+        PlatformTick elapsed_ticks;
         void *subject;
     } params;
 } CoroEventSource;

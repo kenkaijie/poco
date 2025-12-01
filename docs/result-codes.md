@@ -2,6 +2,7 @@
 SPDX-FileCopyrightText: Copyright contributors to the poco project.
 SPDX-License-Identifier: MIT
 -->
+
 # Result Codes
 
 Allows a unified result code separate from the standard codes, (EIO, etc.) which is
@@ -15,5 +16,4 @@ Within the poco library error space, it is split between 0xXXYY, where XX
 denotes the module and YY denotes the error code.
 
 This file defines the numbers assigned to each module. The specific error codes
-will be defined within the module itself (with the exception of the general
-error space).
+will be defined within the module itself (except the general error space).

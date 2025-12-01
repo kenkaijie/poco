@@ -35,7 +35,7 @@ static char const *messages[13] = {
 };
 
 static void producer_task(void *context) {
-    Stream *stream = (Stream *)context;
+    Stream *stream = context;
 
     for (size_t idx = 0; idx < (sizeof(messages) / sizeof(messages[0])); ++idx) {
         char const *message = messages[idx];
@@ -47,15 +47,15 @@ static void producer_task(void *context) {
 }
 
 static void consumer_task(void *context) {
-    Stream *stream = (Stream *)context;
+    Stream *stream = context;
 
-    uint8_t recv_buffer[128] = {0};
+    char recv_buffer[128] = {0};
     // keep last byte for a null terminating character
     size_t buffer_len = sizeof(recv_buffer) - 1;
 
     while (buffer_len > 0) {
         buffer_len = sizeof(recv_buffer) - 1;
-        stream_receive_up_to(stream, recv_buffer, &buffer_len,
+        stream_receive_up_to(stream, (uint8_t *)recv_buffer, &buffer_len,
                              1000 * platform_get_ticks_per_ms());
         recv_buffer[buffer_len] = '\0';
         printf("%s", recv_buffer);
@@ -72,8 +72,8 @@ int main(void) {
     }
 
     Coro *tasks[] = {
-        coro_create(producer_task, (void *)stream, STACK_SIZE),
-        coro_create(consumer_task, (void *)stream, STACK_SIZE),
+        coro_create(producer_task, stream, STACK_SIZE),
+        coro_create(consumer_task, stream, STACK_SIZE),
     };
 
     for (size_t idx = 0; idx < (sizeof(tasks) / sizeof(tasks[0])); ++idx) {
