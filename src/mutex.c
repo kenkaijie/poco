@@ -7,6 +7,7 @@
 
 #include <poco/context.h>
 #include <poco/coro.h>
+#include <poco/coro_raw.h>
 #include <poco/mutex.h>
 
 Mutex *mutex_create_static(Mutex *mutex) {
@@ -15,7 +16,7 @@ Mutex *mutex_create_static(Mutex *mutex) {
 }
 
 Mutex *mutex_create(void) {
-    Mutex *mutex = (Mutex *)malloc(sizeof(Mutex));
+    Mutex *mutex = malloc(sizeof(Mutex));
 
     if (mutex == NULL) {
         /* No memory. */
@@ -27,7 +28,7 @@ Mutex *mutex_create(void) {
 
 void mutex_free(Mutex *mutex) { free(mutex); }
 
-Result mutex_acquire(Mutex *mutex, PlatformTick timeout) {
+Result mutex_acquire(Mutex *mutex, PlatformTick const timeout) {
     Coro *coro = context_get_coro();
     bool acquire_success = false;
 

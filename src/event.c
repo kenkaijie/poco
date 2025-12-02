@@ -7,6 +7,7 @@
 
 #include <poco/context.h>
 #include <poco/coro.h>
+#include <poco/coro_raw.h>
 #include <poco/event.h>
 #include <poco/intracoro.h>
 

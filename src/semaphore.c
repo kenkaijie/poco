@@ -6,6 +6,7 @@
  */
 
 #include <poco/context.h>
+#include <poco/coro_raw.h>
 #include <poco/semaphore.h>
 
 Semaphore *semaphore_create_binary() { return semaphore_create(1); }
