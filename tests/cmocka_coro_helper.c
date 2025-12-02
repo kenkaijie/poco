@@ -1,5 +1,6 @@
 #include <poco/poco.h>
 #include <stdio.h>
+#include <string.h>
 
 // cmocka requires these dependencies
 #include <setjmp.h>

@@ -4,7 +4,7 @@
 Scheduler and Coroutine Operation
 ==================================
 
-poco uses a event broadcasting system to propogate signals between coroutines. The
+poco uses a event broadcasting system to propagate signals between coroutines. The
 scheduler acts as the broker and passes all queued signals it has between coroutine
 execution.
 
@@ -51,7 +51,7 @@ Communication with the Scheduler
 
 When a coroutine yields back control to the scheduler, it returns with a particular
 signal the scheduler should action. These actions are found in
-:cpp:enum:`coro_signal_type`.
+:cpp:enum:`CoroSignal`.
 
 Event Sinks and Sources
 -----------------------
@@ -60,8 +60,8 @@ Internally, coroutines contain a single event source, and up to two event sinks.
 ensures the coroutine can suspend on an event, as well as an optional timeout value (if
 using timeout aware APIs).
 
-If the coroutine yields with :cpp:enumerator:`coro_signal_type::CORO_SIG_NOTIFY` or
-:cpp:enumerator:`coro_signal_type::CORO_SIG_NOTIFY_AND_WAIT`, the scheduler must add the
+If the coroutine yields with :cpp:enumerator:`CoroSignal::CORO_SIG_NOTIFY` or
+:cpp:enumerator:`CoroSignal::CORO_SIG_NOTIFY_AND_WAIT`, the scheduler must add the
 notified event to its list of pending events.
 
 Matching between event sinks and sources is done via the signal type. Most events have
@@ -69,7 +69,7 @@ a 1:1 relationship between the event source and the corresponding event sink.
 
 A typical sequence is shown below for a coroutine informing the scheduler that it is
 waiting for an event. Here we show coroutine A waiting on the
-:cpp:enumerator:`coro_event_sink_type::CORO_EVTSINK_DELAY`.
+:cpp:enumerator:`CoroEventSinkType::CORO_EVTSINK_DELAY`.
 
 .. uml::
     :caption: Example of coroutine suspension and unblock via the event primitive.

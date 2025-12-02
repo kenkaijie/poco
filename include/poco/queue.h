@@ -16,7 +16,6 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 
 /*!
  * @brief Queue specific result codes.
@@ -115,6 +114,30 @@ bool queue_is_empty(Queue const *queue);
 Result queue_put(Queue *queue, void const *item, PlatformTick timeout);
 
 /*!
+ * @brief Puts an item without waiting.
+ *
+ * @param queue Queue to put the item into.
+ * @param item Item to put into the queue.
+ *
+ * @retval #RES_OK Item has been queued.
+ * @retval #RES_QUEUE_FULL Queue is full, no item has been inserted.
+ * @retval #RES_NOTIFY_FAILED if the operation failed to notify the scheduler.
+ */
+Result queue_put_no_wait(Queue *queue, void const *item);
+
+/*!
+ * @brief Puts an item without waiting.
+ *
+ * @param queue Queue to put the item into.
+ * @param item Item to put into the queue.
+ *
+ * @retval #RES_OK Item has been queued.
+ * @retval #RES_QUEUE_FULL Queue is full, no item has been inserted.
+ * @retval #RES_NOTIFY_FAILED if the operation failed to notify the scheduler.
+ */
+Result queue_put_from_isr(Queue *queue, void const *item);
+
+/*!
  * @brief Gets an item from the queue from a coroutine.
  *
  * Items are copied out of the queue. It is up to the caller to allocate the
@@ -128,18 +151,6 @@ Result queue_put(Queue *queue, void const *item, PlatformTick timeout);
  * @retval #RES_TIMEOUT if the maximum time was awaited.
  */
 Result queue_get(Queue *queue, void *item, PlatformTick timeout);
-
-/*!
- * @brief Puts an item without waiting.
- *
- * @param queue Queue to put the item into.
- * @param item Item to put into the queue.
- *
- * @retval #RES_OK Item has been queued.
- * @retval #RES_QUEUE_FULL Queue is full, no item has been inserted.
- * @retval #RES_NOTIFY_FAILED if the operation failed to notify the scheduler.
- */
-Result queue_put_no_wait(Queue *queue, void const *item);
 
 /*!
  * @brief Gets an item without waiting.
