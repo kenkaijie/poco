@@ -35,7 +35,7 @@ typedef struct scheduler Scheduler;
  *
  * @param scheduler Scheduler to run.
  */
-typedef void (*scheduler_run_t)(Scheduler *scheduler);
+typedef void (*SchedulerRun)(Scheduler *scheduler);
 
 /*!
  * @brief Function prototype for preparing the scheduler for step-by-step run mode.
@@ -47,7 +47,7 @@ typedef void (*scheduler_run_t)(Scheduler *scheduler);
  *
  * @param scheduler Scheduler to start.
  */
-typedef void (*scheduler_start_t)(Scheduler *scheduler);
+typedef void (*SchedulerStart)(Scheduler *scheduler);
 
 /*!
  * @brief Function prototype for step-by-step run mode.
@@ -59,7 +59,7 @@ typedef void (*scheduler_start_t)(Scheduler *scheduler);
  *
  * @return True if there is more potential work to do, else false.
  */
-typedef bool (*scheduler_run_once_t)(Scheduler *scheduler);
+typedef bool (*SchedulerRunOnce)(Scheduler *scheduler);
 
 /*!
  * @brief Function pointer implementing the notify the scheduler of an event.
@@ -73,8 +73,7 @@ typedef bool (*scheduler_run_once_t)(Scheduler *scheduler);
  * @retval RES_OK No error.
  * @retval RES_NO_MEM No space available in the scheduler to queue this event.
  */
-typedef Result (*scheduler_notify_t)(Scheduler *scheduler,
-                                     CoroEventSource const *event);
+typedef Result (*SchedulerNotify)(Scheduler *scheduler, CoroEventSource const *event);
 
 /*!
  * @brief Function pointer implementing to notify the scheduler from an ISR.
@@ -88,19 +87,19 @@ typedef Result (*scheduler_notify_t)(Scheduler *scheduler,
  * @retval RES_OK No error.
  * @retval RES_NO_MEM No space available in the scheduler to queue this event.
  */
-typedef Result (*scheduler_notify_from_isr_t)(Scheduler *scheduler,
-                                              CoroEventSource const *event);
+typedef Result (*SchedulerNotifyFromISR)(Scheduler *scheduler,
+                                         CoroEventSource const *event);
 
-typedef Coro *(*scheduler_get_current_coroutine_t)(Scheduler *scheduler);
+typedef Coro *(*SchedulerGetCurrentCoroutine)(Scheduler *scheduler);
 
 /*!
  * @brief Scheduler common interface.
  */
 struct scheduler {
-    scheduler_run_t run;
-    scheduler_notify_t notify;
-    scheduler_notify_from_isr_t notify_from_isr;
-    scheduler_get_current_coroutine_t get_current_coroutine;
+    SchedulerRun run;
+    SchedulerNotify notify;
+    SchedulerNotifyFromISR notify_from_isr;
+    SchedulerGetCurrentCoroutine get_current_coroutine;
 };
 
 /*!

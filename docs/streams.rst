@@ -19,6 +19,9 @@ protocol, such as UART, into a coroutine for handling.
     as opposed to explicitly framed data. If you wish to pass framed data, consider
     using regular queues.
 
+Stream functionality is available in the header ``<poco/stream.h>`` or the global header
+``<poco/poco.h>``.
+
 Writing
 =======
 
@@ -75,3 +78,8 @@ The guarantees are the opposite when the functions are called from the producer.
 
 If called from neither the producer nor the consumer, the value is guaranteed to be
 wrong.
+
+No Wait Variants
+================
+
+The stream API also provides the no wait variants of send and receive.

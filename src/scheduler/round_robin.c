@@ -182,11 +182,11 @@ Scheduler *round_robin_scheduler_create(Coro *const *coro_list,
 Scheduler *round_robin_scheduler_create_static(RoundRobinScheduler *scheduler,
                                                Coro **coro_list,
                                                size_t const num_coros) {
-    scheduler->scheduler.run = (scheduler_run_t)run_scheduling_loop;
-    scheduler->scheduler.notify_from_isr = (scheduler_notify_from_isr_t)notify_from_isr;
-    scheduler->scheduler.notify = (scheduler_notify_t)notify;
+    scheduler->scheduler.run = (SchedulerRun)run_scheduling_loop;
+    scheduler->scheduler.notify_from_isr = (SchedulerNotifyFromISR)notify_from_isr;
+    scheduler->scheduler.notify = (SchedulerNotify)notify;
     scheduler->scheduler.get_current_coroutine =
-        (scheduler_get_current_coroutine_t)get_current_coro;
+        (SchedulerGetCurrentCoroutine)get_current_coro;
     scheduler->tasks = coro_list;
     scheduler->max_tasks_count = num_coros;
     scheduler->all_tasks = get_task_count(coro_list, num_coros);

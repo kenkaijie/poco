@@ -158,6 +158,56 @@ Result queue_put(Queue *queue, void const *item, PlatformTick const timeout) {
     return (put_success) ? RES_OK : RES_TIMEOUT;
 }
 
+Result queue_put_no_wait(Queue *queue, void const *item) {
+    Result notify_result = RES_OK;
+    Scheduler *scheduler = context_get_scheduler();
+    bool put_success = false;
+
+    platform_enter_critical_section();
+    if (!_is_full(queue)) {
+        _put(queue, item);
+        put_success = true;
+    }
+    platform_exit_critical_section();
+
+    if (put_success) {
+        CoroEventSource const event = {.type = CORO_EVTSRC_QUEUE_PUT,
+                                       .params.subject = queue};
+        notify_result = scheduler_notify(scheduler, &event);
+    }
+
+    if (notify_result != RES_OK) {
+        /* Critical failure to notify scheduler. */
+        return RES_NOTIFY_FAILED;
+    }
+
+    return (put_success) ? RES_OK : RES_QUEUE_FULL;
+}
+
+Result queue_put_from_isr(Queue *queue, void const *item) {
+    Result notify_result = RES_OK;
+    Scheduler *scheduler = context_get_scheduler();
+    bool put_success = false;
+
+    if (!_is_full(queue)) {
+        _put(queue, item);
+        put_success = true;
+    }
+
+    if (put_success) {
+        CoroEventSource const event = {.type = CORO_EVTSRC_QUEUE_PUT,
+                                       .params.subject = queue};
+        notify_result = scheduler_notify_from_isr(scheduler, &event);
+    }
+
+    if (notify_result != RES_OK) {
+        /* Critical failure to notify scheduler. */
+        return RES_NOTIFY_FAILED;
+    }
+
+    return (put_success) ? RES_OK : RES_QUEUE_FULL;
+}
+
 Result queue_get(Queue *queue, void *item, PlatformTick const timeout) {
     Coro *coro = context_get_coro();
     bool get_success = false;
@@ -195,32 +245,6 @@ Result queue_get(Queue *queue, void *item, PlatformTick const timeout) {
     return (get_success) ? RES_OK : RES_TIMEOUT;
 }
 
-Result queue_put_no_wait(Queue *queue, void const *item) {
-    Result notify_result = RES_OK;
-    Scheduler *scheduler = context_get_scheduler();
-    bool put_success = false;
-
-    platform_enter_critical_section();
-    if (!_is_full(queue)) {
-        _put(queue, item);
-        put_success = true;
-    }
-    platform_exit_critical_section();
-
-    if (put_success) {
-        CoroEventSource const event = {.type = CORO_EVTSRC_QUEUE_PUT,
-                                       .params.subject = queue};
-        notify_result = scheduler_notify(scheduler, &event);
-    }
-
-    if (notify_result != RES_OK) {
-        /* Critical failure to notify scheduler. */
-        return RES_NOTIFY_FAILED;
-    }
-
-    return (put_success) ? RES_OK : RES_QUEUE_FULL;
-}
-
 Result queue_get_no_wait(Queue *queue, void *item) {
     Result notify_result = RES_OK;
     Scheduler *scheduler = context_get_scheduler();
@@ -237,6 +261,30 @@ Result queue_get_no_wait(Queue *queue, void *item) {
         CoroEventSource const event = {.type = CORO_EVTSRC_QUEUE_GET,
                                        .params.subject = queue};
         notify_result = scheduler_notify(scheduler, &event);
+    }
+
+    if (notify_result != RES_OK) {
+        /* Critical failure to notify scheduler. */
+        return RES_NOTIFY_FAILED;
+    }
+
+    return (get_success) ? RES_OK : RES_QUEUE_EMPTY;
+}
+
+Result queue_get_from_isr(Queue *queue, void *item) {
+    Result notify_result = RES_OK;
+    Scheduler *scheduler = context_get_scheduler();
+    bool get_success = false;
+
+    if (!_is_empty(queue)) {
+        _get(queue, item);
+        get_success = true;
+    }
+
+    if (get_success) {
+        CoroEventSource const event = {.type = CORO_EVTSRC_QUEUE_GET,
+                                       .params.subject = queue};
+        notify_result = scheduler_notify_from_isr(scheduler, &event);
     }
 
     if (notify_result != RES_OK) {

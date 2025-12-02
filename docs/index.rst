@@ -24,6 +24,7 @@ Internals section relating to the operational design.
     general
     result-codes.md
     operation
+    queues
     streams
     Porting Platforms<platform.md>
 
