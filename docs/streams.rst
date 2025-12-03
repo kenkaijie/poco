@@ -25,21 +25,17 @@ Stream functionality is available in the header ``<poco/stream.h>`` or the globa
 Writing
 =======
 
-Writing to a stream from a coroutine is done by using :cpp:func:`stream_send` or
-:cpp:func:`stream_send_no_wait` when you do not need to wait. As with other APIs, the
-no-wait variant is slightly faster than setting a timeout of 0 as it does not yield
-control back to the scheduler.
+Writing to a stream from a coroutine is done by using :cpp:func:`stream_send`. If
+calling send from an ISR, use :cpp:func:`stream_send_from_isr` instead.
 
-If calling send from an ISR, use :cpp:func:`stream_send_from_isr` instead.
-
-Coroutine based producers also have an option to wait until the queue empties using
-:cpp:func:`stream_flush`. This is possible as we only have a single producer.
+Coroutine based producers also have an additional option to wait until the queue empties
+using :cpp:func:`stream_flush`. This is possible as we only have a single producer.
 
 Reading
 =======
 
 Reading to a stream uses the equivalent receiving functions. When in a coroutine,
-use :cpp:func:`stream_receive` or :cpp:func:`stream_receive_no_wait`.
+use :cpp:func:`stream_receive`.
 
 The behaviour for receive is to wait until the timeout, or the given buffer is full. If
 you do not have a need to wait the entire timeout, but are not sure how many bytes you

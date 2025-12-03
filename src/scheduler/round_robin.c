@@ -5,6 +5,7 @@
  * @brief Round-robin scheduler implementation.
  */
 
+#include <poco/coro_raw.h>
 #include <poco/platform.h>
 #include <poco/queue_raw.h>
 #include <poco/schedulers/round_robin.h>

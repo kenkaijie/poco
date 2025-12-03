@@ -10,6 +10,7 @@ target_sources(
             ${CMAKE_CURRENT_SOURCE_DIR}/poco/schedulers/round_robin.h
             ${CMAKE_CURRENT_SOURCE_DIR}/poco/context.h
             ${CMAKE_CURRENT_SOURCE_DIR}/poco/coro.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/poco/coro_raw.h
             ${CMAKE_CURRENT_SOURCE_DIR}/poco/event.h
             ${CMAKE_CURRENT_SOURCE_DIR}/poco/intracoro.h
             ${CMAKE_CURRENT_SOURCE_DIR}/poco/mutex.h

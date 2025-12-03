@@ -7,6 +7,7 @@
 
 #include <poco/context.h>
 #include <poco/coro.h>
+#include <poco/coro_raw.h>
 #include <string.h>
 
 // These are reversed so they appear cute when debugging.
