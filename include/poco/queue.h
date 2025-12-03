@@ -126,7 +126,7 @@ Result queue_put(Queue *queue, void const *item, PlatformTick timeout);
 Result queue_put_no_wait(Queue *queue, void const *item);
 
 /*!
- * @brief Puts an item without waiting.
+ * @brief Puts an item from an ISR.
  *
  * @param queue Queue to put the item into.
  * @param item Item to put into the queue.
@@ -163,6 +163,18 @@ Result queue_get(Queue *queue, void *item, PlatformTick timeout);
  * @retval #RES_NOTIFY_FAILED if the operation failed to notify the scheduler.
  */
 Result queue_get_no_wait(Queue *queue, void *item);
+
+/*!
+ * @brief Gets an item from an ISR.
+ *
+ * @param queue Queue to get the item from.
+ * @param item Item to get from the queue, only valid if result was #RES_OK.
+ *
+ * @retval #RES_OK An item has been taken.
+ * @retval #RES_QUEUE_EMPTY Queue has no items to get.
+ * @retval #RES_NOTIFY_FAILED if the operation failed to notify the scheduler.
+ */
+Result queue_get_from_isr(Queue *queue, void *item);
 
 #ifdef __cplusplus
 }
