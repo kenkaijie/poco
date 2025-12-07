@@ -24,8 +24,18 @@ extern "C" {
 #endif
 
 #include <poco/platform.h>
-#include <poco/scheduler.h>
+#include <poco/result.h>
 #include <stdint.h>
+
+/*!
+ * @brief Mask on all flag bits.
+ */
+#define EVENT_FLAGS_MASK_ALL (UINT32_MAX)
+
+/*!
+ * @brief Mask on no flag bits.
+ */
+#define EVENT_FLAGS_MASK_NONE (0)
 
 typedef uint32_t Flags;
 
@@ -72,8 +82,8 @@ void event_set(Event *event, Flags mask);
  * @param event Event to set.
  * @param mask Mask to set.
  *
- * @param #RES_OK if the event was set.
- * @param #RES_NOTIFY_FAILED if the scheduler could not be notified. This is a critical
+ * @param RES_OK if the event was set.
+ * @param RES_NOTIFY_FAILED if the scheduler could not be notified. This is a critical
  *      error.
  */
 Result event_set_from_isr(Event *event, Flags mask);
