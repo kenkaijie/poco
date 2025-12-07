@@ -43,11 +43,61 @@ typedef struct event {
     Flags flags;
 } Event;
 
+/*!
+ * @brief Initialise an event structure with the initial set of flags.
+ *
+ * @param event Event to initialise.
+ * @param initial Initial flags to use.
+ * @return Pointer to the same event passed in, or NULL if initialisation failed.
+ */
 Event *event_create_static(Event *event, Flags initial);
 
+/*!
+ * @brief Dynamically create an event.
+ *
+ * @param initial Initial flags to assign.
+ * @return Pointer to the created event, or NULL if it failed to create.
+ */
 Event *event_create(Flags initial);
 
+/*!
+ * @brief Frees an event dynamically allocated with event_create.
+ *
+ * @param event Event previously created with event_create.
+ */
 void event_free(Event *event);
+
+/*!
+ * @brief Sets the event flags.
+ *
+ * @param event Event to set.
+ * @param mask Mask to set.
+ */
+void event_set(Event *event, Flags mask);
+
+/*!
+ * @brief Sets the event flags without yielding.
+ *
+ * @param event Event to set.
+ * @param mask Mask to set.
+ *
+ * @retval #RES_OK if the event was set.
+ * @retval #RES_NOTIFY_FAILED if the scheduler could not be notified. This is a critical
+ *      error.
+ */
+Result event_set_no_wait(Event *event, Flags mask);
+
+/*!
+ * @brief Sets the event flags from an ISR.
+ *
+ * @param event Event to set.
+ * @param mask Mask to set.
+ *
+ * @retval #RES_OK if the event was set.
+ * @retval #RES_NOTIFY_FAILED if the scheduler could not be notified. This is a critical
+ *      error.
+ */
+Result event_set_from_isr(Event *event, Flags mask);
 
 /*!
  * @brief Waits on the specific event flags.
@@ -60,33 +110,37 @@ void event_free(Event *event);
  *                     logic.
  * @param timeout Number of ticks to wait before timing out.
  *
- * @returns The flags that ended the wait. If flags are all 0, an error has occurred.
+ * @returns Triggered flags. When a timeout is provided, flags may return zero if the
+ *          finite timeout has elapsed. Otherwise, this function will always return a
+ *          non-zero flag value.
  */
 Flags event_get(Event *event, Flags mask, Flags clear_mask, bool wait_for_all,
                 PlatformTick timeout);
 
 /*!
- * @brief Sets the event flags.
+ * @brief Inspects the event flags without waiting.
  *
- * @param event Event to set.
- * @param mask Mask to set.
+ * Unlike the yielding version, we cannot specify the "OR" or "AND" behaviour, as we do
+ * not block either way.
+ *
+ * @param event Event to inspect.
+ * @param mask Mask to look for any flag bits that are set.
+ * @param clear_mask Mask to apply to clear any bits after inspection. Clear mask is
+ *                   only applied if the return value is non-zero.
+ * @return The bits extracted from the mask. If this is 0, it means no flags were set.
  */
-void event_set(Event *event, Flags mask);
+Flags event_get_no_wait(Event *event, Flags mask, Flags clear_mask);
 
 /*!
- * @brief Sets the event flags from an ISR.
+ * @brief Inspects the event flags from an ISR.
  *
- * The responsiveness of the waking coroutine will depend on the scheduler
- * implementation.
- *
- * @param event Event to set.
- * @param mask Mask to set.
- *
- * @param RES_OK if the event was set.
- * @param RES_NOTIFY_FAILED if the scheduler could not be notified. This is a critical
- *      error.
+ * @param event Event to inspect.
+ * @param mask Mask to look for any flag bits that are set.
+ * @param clear_mask Mask to apply to clear any bits after inspection. Clear mask is
+ *                   only applied if the return value is non-zero.
+ * @return The bits extracted from the mask. If this is 0, it means no flags were set.
  */
-Result event_set_from_isr(Event *event, Flags mask);
+Flags event_get_from_isr(Event *event, Flags mask, Flags clear_mask);
 
 #ifdef __cplusplus
 }
