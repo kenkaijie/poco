@@ -24,10 +24,10 @@ Internals section relating to the operational design.
     general
     result-codes.md
     operation
+    events
     queues
     streams
     Porting Platforms<platform.md>
-
 
 .. toctree::
     :caption: Tutorials

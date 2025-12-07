@@ -48,8 +48,8 @@ void producer_task(void *context) {
 
 void consumer_task(void *context) {
     Event *event = context;
-    Flags const flags =
-        event_get(event, EVT_LONG_PRESS, 0, true, PLATFORM_TICKS_FOREVER);
+    Flags const flags = event_get(event, EVT_LONG_PRESS, EVENT_FLAGS_MASK_ALL, true,
+                                  PLATFORM_TICKS_FOREVER);
     if (flags & EVT_LONG_PRESS) {
         printf("Handling long press\n");
     }
