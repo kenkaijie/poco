@@ -44,7 +44,7 @@ Flags event_get(Event *event, Flags const mask, Flags const clear_mask,
     while (!event_triggered) {
 
         // No need critical section here, flags cannot be cleared outside of this
-        // function once it has been set.
+        // function once it has been set, and we specify single consumer.
         event_triggered = (wait_for_all) ? ((event->flags & mask) == mask)
                                          : ((event->flags & mask) != 0);
 
@@ -69,6 +69,41 @@ Flags event_get(Event *event, Flags const mask, Flags const clear_mask,
     return captured_flags;
 }
 
+Flags event_get_no_wait(Event *event, Flags const mask, Flags const clear_mask) {
+
+    Flags captured_flags = 0;
+    bool event_triggered = false;
+
+    // No need critical section here, flags cannot be cleared outside of this
+    // function once it has been set, and we specify single consumer.
+    event_triggered = (event->flags & mask) != 0;
+
+    if (event_triggered) {
+
+        platform_enter_critical_section();
+        captured_flags = event->flags & mask;
+        event->flags &= ~clear_mask;
+        platform_exit_critical_section();
+    }
+
+    return captured_flags;
+}
+
+Flags event_get_from_isr(Event *event, Flags const mask, Flags const clear_mask) {
+
+    Flags captured_flags = 0;
+    bool event_triggered = false;
+
+    event_triggered = (event->flags & mask) != 0;
+
+    if (event_triggered) {
+        captured_flags = event->flags & mask;
+        event->flags &= ~clear_mask;
+    }
+
+    return captured_flags;
+}
+
 void event_set(Event *event, Flags const mask) {
 
     Coro *coro = context_get_coro();
@@ -82,8 +117,8 @@ void event_set(Event *event, Flags const mask) {
     coro_yield_with_signal(CORO_SIG_NOTIFY);
 }
 
-Result event_set_from_isr(Event *event, Flags const mask) {
-    Result notify_result = RES_OK;
+Result event_set_no_wait(Event *event, Flags const mask) {
+
     Scheduler *scheduler = context_get_scheduler();
 
     event->flags |= mask;
@@ -92,6 +127,18 @@ Result event_set_from_isr(Event *event, Flags const mask) {
         .type = CORO_EVTSRC_EVENT_SET,
         .params.subject = event,
     };
-    notify_result = scheduler_notify_from_isr(scheduler, &event_source);
-    return (notify_result == RES_OK) ? RES_OK : RES_NOTIFY_FAILED;
+    return scheduler_notify(scheduler, &event_source);
+}
+
+Result event_set_from_isr(Event *event, Flags const mask) {
+
+    Scheduler *scheduler = context_get_scheduler();
+
+    event->flags |= mask;
+
+    CoroEventSource const event_source = {
+        .type = CORO_EVTSRC_EVENT_SET,
+        .params.subject = event,
+    };
+    return scheduler_notify_from_isr(scheduler, &event_source);
 }

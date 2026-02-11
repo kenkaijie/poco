@@ -1,5 +1,6 @@
 .. SPDX-FileCopyrightText: Copyright contributors to the poco project.
 .. SPDX-License-Identifier: MIT
+
 ==================================
 Scheduler and Coroutine Operation
 ==================================
@@ -51,7 +52,7 @@ Communication with the Scheduler
 
 When a coroutine yields back control to the scheduler, it returns with a particular
 signal the scheduler should action. These actions are found in
-:cpp:enum:`CoroSignal`.
+:cpp:enum:`coro_signal`.
 
 Event Sinks and Sources
 -----------------------

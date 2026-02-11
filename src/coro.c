@@ -156,9 +156,7 @@ void coro_free(Coro *coro) {
         return;
     }
 
-    if (coro->stack != NULL) {
-        free(coro->stack);
-    }
+    free(coro->stack);
 
     coro_destroy_static(coro);
 
