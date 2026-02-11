@@ -1,5 +1,6 @@
 .. SPDX-FileCopyrightText: Copyright contributors to the poco project.
 .. SPDX-License-Identifier: MIT
+
 ========================
 poco - Pocket Coroutines
 ========================
@@ -27,6 +28,8 @@ Internals section relating to the operational design.
     events
     queues
     streams
+    mutex
+    semaphore
     Porting Platforms<platform.md>
 
 .. toctree::

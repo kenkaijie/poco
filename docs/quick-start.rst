@@ -1,5 +1,6 @@
 .. SPDX-FileCopyrightText: Copyright contributors to the poco project.
 .. SPDX-License-Identifier: MIT
+
 ===========
 Quick Start
 ===========
@@ -54,7 +55,7 @@ control by the developer (with the exception of communication primitives).
 - :cpp:func:`coro_yield_delay` to yield and sleep the task for a period of time.
 
 poco's built-in communication primitives also perform yields, such as when putting items
-in a :cpp:struct:`Queue`.
+in a :cpp:struct:`queue`.
 
 If coroutines need to be sequential, :cpp:func`coro_join` can be used to ensure a
 particular coroutine runs after another.
