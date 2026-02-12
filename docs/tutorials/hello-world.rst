@@ -1,5 +1,6 @@
 .. SPDX-FileCopyrightText: Copyright contributors to the poco project.
 .. SPDX-License-Identifier: MIT
+
 ====================
 hello-world Tutorial
 ====================
@@ -120,7 +121,7 @@ to support a wider variety of schedulers if needed. Once created, we can run usi
 
 .. literalinclude:: ../../samples/hello-world/sample_hello.c
     :language: c
-    :lines: 45-56
+    :lines: 43-51
 
 Running the Program
 ===================

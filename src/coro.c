@@ -81,6 +81,19 @@ static bool update_event_sink(CoroEventSink *sink, CoroEventSource const *event)
             unblock_task = (sink->params.subject == event->params.subject);
         }
         break;
+    case CORO_EVTSRC_CUSTOM:
+        if ((sink->type == CORO_EVTSINK_CUSTOM) &&
+            (sink->params.custom_sink.event_magic ==
+             event->params.custom_source.event_magic)) {
+            if (sink->params.custom_sink.can_unblock != NULL) {
+                unblock_task = sink->params.custom_sink.can_unblock(
+                    &sink->params.custom_sink, &event->params.custom_source);
+            } else {
+                unblock_task = (sink->params.custom_sink.subject ==
+                                event->params.custom_source.subject);
+            }
+        }
+        break;
     default:
         unblock_task = false;
     }

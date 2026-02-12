@@ -3,6 +3,7 @@
 
 add_subdirectory(aggregate-wait)
 add_subdirectory(coro-joining)
+add_subdirectory(custom-primitive)
 add_subdirectory(hello-world)
 add_subdirectory(multiple-coroutines)
 add_subdirectory(mutex)

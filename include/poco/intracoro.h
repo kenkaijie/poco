@@ -11,6 +11,34 @@
 #pragma once
 
 #include <poco/platform.h>
+#include <stdbool.h>
+#include <stdint.h>
+
+/*!
+ * @brief Support for custom event sources.
+ *
+ * Used for user defined custom primitives.
+ */
+typedef struct custom_event_source {
+    uint32_t event_magic;
+    void *subject;
+} CustomEventSource;
+
+/*!
+ * @brief Support for custom event sinks.
+ *
+ * Used for user defined custom primitives.
+ */
+typedef struct custom_event_sink CustomEventSink;
+
+typedef bool (*UnblockFunction)(CustomEventSink const *sink,
+                                CustomEventSource const *source);
+
+struct custom_event_sink {
+    uint32_t event_magic;
+    void *subject;
+    UnblockFunction can_unblock;
+};
 
 /*!
  * @brief Types of signals that can be sent to the scheduler.
@@ -75,6 +103,9 @@ typedef enum coro_event_sink_type {
     /** Coroutine is waiting for the stream to have some bytes. */
     CORO_EVTSINK_STREAM_NOT_EMPTY,
 
+    /** Custom callable event sink */
+    CORO_EVTSINK_CUSTOM,
+
 } CoroEventSinkType;
 
 typedef struct coro_event_sink {
@@ -82,6 +113,7 @@ typedef struct coro_event_sink {
     union {
         PlatformTick ticks_remaining;
         void *subject;
+        CustomEventSink custom_sink;
     } params;
 } CoroEventSink;
 
@@ -118,6 +150,9 @@ typedef enum coro_event_source_type {
     /** Indicates the producer has written some bytes to the stream. */
     CORO_EVTSRC_STREAM_SEND,
 
+    /** Custom callable event sink */
+    CORO_EVTSRC_CUSTOM,
+
 } CoroEventSourceType;
 
 typedef struct coro_event_source {
@@ -125,5 +160,6 @@ typedef struct coro_event_source {
     union {
         PlatformTick elapsed_ticks;
         void *subject;
+        CustomEventSource custom_source;
     } params;
 } CoroEventSource;

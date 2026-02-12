@@ -30,7 +30,12 @@ Internals section relating to the operational design.
     streams
     mutex
     semaphore
-    Porting Platforms<platform.md>
+
+.. toctree::
+    :caption: Extensions
+
+    Custom Platforms<platform.md>
+    Extending poco<extending.md>
 
 .. toctree::
     :caption: Tutorials

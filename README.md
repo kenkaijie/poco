@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 <img src="docs/_static/logo-transparent.svg" alt="poco" style="max-height:160px;margin-left: auto;margin-right: auto;display:block;"/>
 
 [![](https://github.com/kenkaijie/poco/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/kenkaijie/poco/actions/workflows/ubuntu.yml)
+[![](https://github.com/kenkaijie/poco/actions/workflows/windows.yml/badge.svg)](https://github.com/kenkaijie/poco/actions/workflows/windows.yml)
 [![](https://readthedocs.org/projects/poco-coro/badge/?version=latest)](https://poco-coro.readthedocs.io/en/latest/)
 
 This is a small toy project that produces a bare minimum cooperative task framework.
@@ -55,23 +56,16 @@ int main(int argc, char *argv[]) {
 
 ## Features
 
-- Static task creation.
-- Message queue.
-- Self Managed Scheduling (roll your own scheduler)
-- Basic Scheduling (Round Robin)
-- Runnable on POSIX hosts
+- Supports fully static allocations.
+- Comprehensive coroutine aware primitives (mutex, semaphores, events, streams,
+  and queues).
+- Runnable on POSIX hosts for testing.
 
 ## WIP
 
-- Basic Schedulers (Priority, Priority Round Robin)
-- More Thread Primitives? (Events, Mutexes, semaphores)
-- ISR Support (Primitive support for ISR usage, scheduler support for ISR)
+- Basic Schedulers (Priority scheduling)
 - Scheduler guidelines (tickless scheduler?)
-- Dynamic coroutine support (adding coroutines at runtime).
-
-### Extensions
-
-- Building a framework for creating awaitable values? (This could just be using event flags.)
+- Generic unblocking extensions (custom primitives?)
 
 ## Should I Use This?
 
